@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json({ participants });
+      return NextResponse.json({ participants: participants || [] });
     }
 
     // Search by name, email, or phone
@@ -44,11 +44,12 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ participants });
+    return NextResponse.json({ participants: participants || [] });
   } catch (error) {
     console.error("Search error:", error);
+    // Return empty array on error to prevent frontend crashes
     return NextResponse.json(
-      { error: "Search failed" },
+      { participants: [], error: "Search failed" },
       { status: 500 }
     );
   }

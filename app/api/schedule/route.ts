@@ -10,10 +10,11 @@ export async function GET() {
         { time: 'asc' }
       ]
     });
-    return NextResponse.json(schedule);
+    return NextResponse.json(schedule || []);
   } catch (error) {
     console.error("Error fetching schedule:", error);
-    return NextResponse.json({ error: "Failed to fetch schedule" }, { status: 500 });
+    // Return empty array on error to prevent frontend crashes
+    return NextResponse.json([]);
   }
 }
 

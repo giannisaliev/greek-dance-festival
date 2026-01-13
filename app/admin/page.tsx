@@ -70,10 +70,11 @@ export default function AdminPage() {
         : "/api/participants";
       const response = await fetch(url);
       const data = await response.json();
-      setParticipants(data.participants || []);
+      const participantsList = Array.isArray(data.participants) ? data.participants : [];
+      setParticipants(participantsList);
       
-      const total = data.participants.length;
-      const checkedIn = data.participants.filter((p: Participant) => p.checkedIn).length;
+      const total = participantsList.length;
+      const checkedIn = participantsList.filter((p: Participant) => p.checkedIn).length;
       setStats({
         total,
         checkedIn,
@@ -81,6 +82,8 @@ export default function AdminPage() {
       });
     } catch (error) {
       console.error("Error fetching participants:", error);
+      setParticipants([]);
+      setStats({ total: 0, checkedIn: 0, pending: 0 });
     } finally {
       setIsLoading(false);
     }
@@ -91,9 +94,10 @@ export default function AdminPage() {
     try {
       const response = await fetch("/api/schedule");
       const data = await response.json();
-      setScheduleItems(data || []);
+      setScheduleItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching schedule:", error);
+      setScheduleItems([]);
     }
   };
 
