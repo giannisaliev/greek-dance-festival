@@ -40,11 +40,13 @@ const packages = [
   },
   {
     name: "Full Pass",
-    price: "€230",
-    description: "The complete festival experience",
+    price: "€290",
+    description: "The ultimate festival experience",
     features: [
-      "Access to up to 24 classes",
+      "Access to all 24 classes",
       "Unlimited class participation",
+      "Greek Night access included",
+      "Guinness Record participation included",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",

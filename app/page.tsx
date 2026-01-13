@@ -4,7 +4,8 @@ import Navigation from "./components/Navigation";
 
 async function getSchedule() {
   try {
-    const res = await fetch(`http://localhost:3000/api/schedule`, { cache: 'no-store' });
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/schedule`, { cache: 'no-store' });
     if (!res.ok) return [];
     return await res.json();
   } catch (error) {
@@ -69,21 +70,39 @@ export default async function Home() {
               {scheduleByDay.Friday.length > 0 ? (
                 <div className="space-y-4">
                   {scheduleByDay.Friday.map((item: any) => (
-                    <div key={item.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <div className="grid md:grid-cols-5 gap-4">
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Time:</span> {item.time}
+                    <div 
+                      key={item.id} 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        backgroundColor: item.color ? `${item.color}20` : 'rgba(255,255,255,0.05)',
+                        borderColor: item.color || 'rgba(255,255,255,0.1)'
+                      }}
+                    >
+                      {item.hall ? (
+                        <div className="grid md:grid-cols-5 gap-4">
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Time:</span> {item.time}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Hall:</span> {item.hall}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Level:</span> {item.level}
+                          </div>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                      ) : (
+                        <div className="text-center">
+                          <span className="font-bold text-white text-lg">{item.time}</span>
+                          <span className="mx-4 text-white">•</span>
+                          <span className="font-semibold text-white text-lg">{item.danceStyle}</span>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
-                        </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Level:</span> {item.level}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -98,21 +117,39 @@ export default async function Home() {
               {scheduleByDay.Saturday.length > 0 ? (
                 <div className="space-y-4">
                   {scheduleByDay.Saturday.map((item: any) => (
-                    <div key={item.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <div className="grid md:grid-cols-5 gap-4">
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Time:</span> {item.time}
+                    <div 
+                      key={item.id} 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        backgroundColor: item.color ? `${item.color}20` : 'rgba(255,255,255,0.05)',
+                        borderColor: item.color || 'rgba(255,255,255,0.1)'
+                      }}
+                    >
+                      {item.hall ? (
+                        <div className="grid md:grid-cols-5 gap-4">
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Time:</span> {item.time}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Hall:</span> {item.hall}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Level:</span> {item.level}
+                          </div>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                      ) : (
+                        <div className="text-center">
+                          <span className="font-bold text-white text-lg">{item.time}</span>
+                          <span className="mx-4 text-white">•</span>
+                          <span className="font-semibold text-white text-lg">{item.danceStyle}</span>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
-                        </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Level:</span> {item.level}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -127,21 +164,39 @@ export default async function Home() {
               {scheduleByDay.Sunday.length > 0 ? (
                 <div className="space-y-4">
                   {scheduleByDay.Sunday.map((item: any) => (
-                    <div key={item.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <div className="grid md:grid-cols-5 gap-4">
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Time:</span> {item.time}
+                    <div 
+                      key={item.id} 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        backgroundColor: item.color ? `${item.color}20` : 'rgba(255,255,255,0.05)',
+                        borderColor: item.color || 'rgba(255,255,255,0.1)'
+                      }}
+                    >
+                      {item.hall ? (
+                        <div className="grid md:grid-cols-5 gap-4">
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Time:</span> {item.time}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Hall:</span> {item.hall}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
+                          </div>
+                          <div className="text-blue-100">
+                            <span className="font-semibold text-white">Level:</span> {item.level}
+                          </div>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Dance:</span> {item.danceStyle}
+                      ) : (
+                        <div className="text-center">
+                          <span className="font-bold text-white text-lg">{item.time}</span>
+                          <span className="mx-4 text-white">•</span>
+                          <span className="font-semibold text-white text-lg">{item.danceStyle}</span>
                         </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Lecturer:</span> {item.lecturer}
-                        </div>
-                        <div className="text-blue-100">
-                          <span className="font-semibold text-white">Level:</span> {item.level}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>

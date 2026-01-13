@@ -59,12 +59,14 @@ const packages: Package[] = [
   },
   {
     name: "Full Pass",
-    price: "€230",
-    priceValue: 230,
-    description: "The complete festival experience",
+    price: "€290",
+    priceValue: 290,
+    description: "The ultimate festival experience",
     features: [
-      "Access to up to 24 classes",
+      "Access to all 24 classes",
       "Unlimited class participation",
+      "Greek Night access included",
+      "Guinness Record participation included",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",
@@ -95,8 +97,13 @@ export default function RegisterPage() {
   const calculateTotalPrice = () => {
     if (!selectedPackage) return 0;
     let total = selectedPackage.priceValue;
-    if (formData.guinnessRecordAttempt) total += 30;
-    if (formData.greekNight) total += 40;
+    
+    // Full Pass already includes Greek Night and Guinness Record
+    if (selectedPackage.name !== "Full Pass") {
+      if (formData.guinnessRecordAttempt) total += 30;
+      if (formData.greekNight) total += 40;
+    }
+    
     return total;
   };
 
@@ -135,6 +142,10 @@ export default function RegisterPage() {
     setError("");
 
     try {
+      // Full Pass includes Greek Night and Guinness Record
+      const includesGreekNight = selectedPackage.name === "Full Pass" || formData.greekNight;
+      const includesGuinness = selectedPackage.name === "Full Pass" || formData.guinnessRecordAttempt;
+      
       const response = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -143,8 +154,8 @@ export default function RegisterPage() {
         body: JSON.stringify({
           phone: formData.phone,
           packageType: selectedPackage.name,
-          guinnessRecordAttempt: formData.guinnessRecordAttempt,
-          greekNight: formData.greekNight,
+          guinnessRecordAttempt: includesGuinness,
+          greekNight: includesGreekNight,
           totalPrice: calculateTotalPrice(),
         }),
       });
@@ -502,65 +513,66 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Add-ons Section */}
-                  <div className="mb-6">
-                    <label className="block text-white font-semibold mb-4 text-lg">
-                      Optional Add-ons
-                    </label>
-                    <div className="space-y-4">
-                      {/* Guinness Record Attempt */}
-                      <div 
-                        onClick={() => setFormData({ ...formData, guinnessRecordAttempt: !formData.guinnessRecordAttempt })}
-                        className={`cursor-pointer rounded-xl p-4 border-2 transition-all ${
-                          formData.guinnessRecordAttempt 
-                            ? 'bg-blue-500/20 border-blue-400' 
-                            : 'bg-white/5 border-white/20 hover:border-white/40'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center mt-1 flex-shrink-0 ${
+                  {selectedPackage && selectedPackage.name !== "Full Pass" && (
+                    <div className="mb-6">
+                      <label className="block text-white font-semibold mb-4 text-lg">
+                        Optional Add-ons
+                      </label>
+                      <div className="space-y-4">
+                        {/* Guinness Record Attempt */}
+                        <div 
+                          onClick={() => setFormData({ ...formData, guinnessRecordAttempt: !formData.guinnessRecordAttempt })}
+                          className={`cursor-pointer rounded-xl p-4 border-2 transition-all ${
                             formData.guinnessRecordAttempt 
-                              ? 'bg-blue-500 border-blue-500' 
-                              : 'border-white/40'
-                          }`}>
-                            {formData.guinnessRecordAttempt && (
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-white font-semibold">🏆 Guinness Record Attempt</span>
-                              <span className="text-white font-bold">+€30</span>
+                              ? 'bg-blue-500/20 border-blue-400' 
+                              : 'bg-white/5 border-white/20 hover:border-white/40'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center mt-1 flex-shrink-0 ${
+                              formData.guinnessRecordAttempt 
+                                ? 'bg-blue-500 border-blue-500' 
+                                : 'border-white/40'
+                            }`}>
+                              {formData.guinnessRecordAttempt && (
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
                             </div>
-                            <p className="text-blue-100 text-sm">
-                              Be part of history! Join our attempt to break the world record for the largest Greek dance performance
-                            </p>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-white font-semibold">🏆 Guinness Record Attempt</span>
+                                <span className="text-white font-bold">+€30</span>
+                              </div>
+                              <p className="text-blue-100 text-sm">
+                                Be part of history! Join our attempt to break the world record for the largest Greek dance performance
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Greek Night */}
-                      <div 
-                        onClick={() => setFormData({ ...formData, greekNight: !formData.greekNight })}
-                        className={`cursor-pointer rounded-xl p-4 border-2 transition-all ${
-                          formData.greekNight 
-                            ? 'bg-blue-500/20 border-blue-400' 
-                            : 'bg-white/5 border-white/20 hover:border-white/40'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center mt-1 flex-shrink-0 ${
+                        {/* Greek Night */}
+                        <div 
+                          onClick={() => setFormData({ ...formData, greekNight: !formData.greekNight })}
+                          className={`cursor-pointer rounded-xl p-4 border-2 transition-all ${
                             formData.greekNight 
-                              ? 'bg-blue-500 border-blue-500' 
-                              : 'border-white/40'
-                          }`}>
-                            {formData.greekNight && (
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
+                              ? 'bg-blue-500/20 border-blue-400' 
+                              : 'bg-white/5 border-white/20 hover:border-white/40'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center mt-1 flex-shrink-0 ${
+                              formData.greekNight 
+                                ? 'bg-blue-500 border-blue-500' 
+                                : 'border-white/40'
+                            }`}>
+                              {formData.greekNight && (
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-white font-semibold">🍷 Greek Night</span>
@@ -574,6 +586,19 @@ export default function RegisterPage() {
                       </div>
                     </div>
                   </div>
+                  )}
+                  
+                  {/* Full Pass Notice */}
+                  {selectedPackage && selectedPackage.name === "Full Pass" && (
+                    <div className="mb-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl p-6 border-2 border-green-400/50">
+                      <div className="text-center">
+                        <p className="text-white font-bold text-lg mb-2">🎉 All-Inclusive Package! 🎉</p>
+                        <p className="text-blue-100 text-sm">
+                          Your Full Pass already includes Greek Night access and Guinness Record participation at no extra cost!
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Selected Package Summary */}
                   <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-6 mb-8 border border-white/20">
