@@ -36,7 +36,7 @@ const packages = [
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: true
+    popular: false
   },
   {
     name: "Full Pass",
@@ -45,14 +45,14 @@ const packages = [
     features: [
       "Access to all 24 classes",
       "Unlimited class participation",
-      "🍷 Greek Night access included 🎉",
-      "🏆 Guinness Record participation included ⭐",
+      "🍷 Greek Night",
+      "🏆 Guinness Record",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: false
+    popular: true
   }
 ];
 
@@ -107,10 +107,10 @@ export default function PricingPage() {
                   return (
                     <li 
                       key={index} 
-                      className={`flex items-start ${isSpecial ? 'text-white font-bold bg-gradient-to-r from-yellow-400/20 to-orange-400/20 p-2 rounded-lg border border-yellow-400/50' : 'text-blue-100'}`}
+                      className={`flex items-start ${isSpecial ? 'text-white font-bold bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 p-3 rounded-lg border-2 border-yellow-400/60 animate-pulse shadow-lg' : 'text-blue-100'}`}
                     >
                       <span className="text-green-400 mr-2 mt-1">✓</span>
-                      <span>{feature}</span>
+                      <span className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300' : ''}>{feature}</span>
                     </li>
                   );
                 })}

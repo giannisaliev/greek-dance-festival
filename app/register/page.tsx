@@ -54,7 +54,7 @@ const packages: Package[] = [
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: true,
+    popular: false,
     icon: "⭐"
   },
   {
@@ -65,14 +65,14 @@ const packages: Package[] = [
     features: [
       "Access to all 24 classes",
       "Unlimited class participation",
-      "🍷 Greek Night access included 🎉",
-      "🏆 Guinness Record participation included ⭐",
+      "🍷 Greek Night",
+      "🏆 Guinness Record",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: false,
+    popular: true,
     icon: "👑"
   }
 ];
@@ -425,10 +425,10 @@ export default function RegisterPage() {
                       return (
                         <li 
                           key={idx} 
-                          className={`flex items-start text-sm ${isSpecial ? 'text-yellow-300 font-bold' : 'text-blue-100'}`}
+                          className={`flex items-start text-sm ${isSpecial ? 'font-bold animate-pulse' : 'text-blue-100'}`}
                         >
                           <span className="text-green-400 mr-2">✓</span>
-                          <span>{feature}</span>
+                          <span className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300' : ''}>{feature}</span>
                         </li>
                       );
                     })}
@@ -731,10 +731,10 @@ export default function RegisterPage() {
                     return (
                       <li 
                         key={idx} 
-                        className={`flex items-center text-sm ${isSpecial ? 'text-yellow-300 font-bold col-span-2 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 p-2 rounded-lg border border-yellow-400/30' : 'text-blue-100'}`}
+                        className={`flex items-center text-sm ${isSpecial ? 'font-bold col-span-2 bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-pink-400/20 p-3 rounded-lg border-2 border-yellow-400/50 animate-pulse shadow-lg' : 'text-blue-100'}`}
                       >
                         <span className="text-green-400 mr-2">✓</span>
-                        <span>{feature}</span>
+                        <span className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300' : ''}>{feature}</span>
                       </li>
                     );
                   })}
