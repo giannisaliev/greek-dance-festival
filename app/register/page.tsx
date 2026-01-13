@@ -65,8 +65,8 @@ const packages: Package[] = [
     features: [
       "Access to all 24 classes",
       "Unlimited class participation",
-      "Greek Night access included",
-      "Guinness Record participation included",
+      "🍷 Greek Night access included 🎉",
+      "🏆 Guinness Record participation included ⭐",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",
@@ -420,12 +420,18 @@ export default function RegisterPage() {
                   <div className="text-4xl font-bold text-white mb-4">{pkg.price}</div>
                   
                   <ul className="space-y-2">
-                    {pkg.features.slice(0, 4).map((feature, idx) => (
-                      <li key={idx} className="flex items-start text-blue-100 text-sm">
-                        <span className="text-green-400 mr-2">✓</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
+                    {pkg.features.slice(0, 4).map((feature, idx) => {
+                      const isSpecial = feature.includes('🍷') || feature.includes('🏆');
+                      return (
+                        <li 
+                          key={idx} 
+                          className={`flex items-start text-sm ${isSpecial ? 'text-yellow-300 font-bold' : 'text-blue-100'}`}
+                        >
+                          <span className="text-green-400 mr-2">✓</span>
+                          <span>{feature}</span>
+                        </li>
+                      );
+                    })}
                     {pkg.features.length > 4 && (
                       <li className="text-blue-200 text-sm">+{pkg.features.length - 4} more benefits</li>
                     )}
@@ -720,12 +726,18 @@ export default function RegisterPage() {
               <div className="bg-white/5 rounded-xl p-6 mb-8 border border-white/10">
                 <h3 className="text-white font-semibold mb-4">What&apos;s Included:</h3>
                 <ul className="grid grid-cols-2 gap-3">
-                  {selectedPackage?.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-blue-100 text-sm">
-                      <span className="text-green-400 mr-2">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {selectedPackage?.features.map((feature, idx) => {
+                    const isSpecial = feature.includes('🍷') || feature.includes('🏆');
+                    return (
+                      <li 
+                        key={idx} 
+                        className={`flex items-center text-sm ${isSpecial ? 'text-yellow-300 font-bold col-span-2 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 p-2 rounded-lg border border-yellow-400/30' : 'text-blue-100'}`}
+                      >
+                        <span className="text-green-400 mr-2">✓</span>
+                        <span>{feature}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
               

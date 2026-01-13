@@ -45,8 +45,8 @@ const packages = [
     features: [
       "Access to all 24 classes",
       "Unlimited class participation",
-      "Greek Night access included",
-      "Guinness Record participation included",
+      "🍷 Greek Night access included 🎉",
+      "🏆 Guinness Record participation included ⭐",
       "Festival program",
       "Premium merchandise",
       "Priority class selection",
@@ -102,12 +102,18 @@ export default function PricingPage() {
               </div>
 
               <ul className="space-y-3 mb-8">
-                {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start text-blue-100">
-                    <span className="text-green-400 mr-2 mt-1">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
+                {pkg.features.map((feature, index) => {
+                  const isSpecial = feature.includes('🍷') || feature.includes('🏆');
+                  return (
+                    <li 
+                      key={index} 
+                      className={`flex items-start ${isSpecial ? 'text-white font-bold bg-gradient-to-r from-yellow-400/20 to-orange-400/20 p-2 rounded-lg border border-yellow-400/50' : 'text-blue-100'}`}
+                    >
+                      <span className="text-green-400 mr-2 mt-1">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  );
+                })}
               </ul>
 
               <Link

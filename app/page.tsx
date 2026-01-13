@@ -1,20 +1,31 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navigation from "./components/Navigation";
 
-async function getSchedule() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/schedule`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch (error) {
-    return [];
-  }
-}
+export default function Home() {
+  const [scheduleItems, setScheduleItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default async function Home() {
-  const scheduleItems = await getSchedule();
+  useEffect(() => {
+    async function fetchSchedule() {
+      try {
+        const res = await fetch('/api/schedule', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setScheduleItems(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching schedule:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchSchedule();
+  }, []);
   
   // Group schedule by day
   const scheduleByDay = {
@@ -63,6 +74,12 @@ export default async function Home() {
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-white mb-8 text-center">Festival Schedule</h3>
           
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-blue-100">Loading schedule...</p>
+            </div>
+          ) : (
           <div className="space-y-8">
             {/* Friday Schedule */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
@@ -205,6 +222,7 @@ export default async function Home() {
               )}
             </div>
           </div>
+          )}
         </div>
 
         {/* Festival Information */}
