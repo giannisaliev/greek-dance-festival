@@ -83,6 +83,8 @@ model Schedule {
   lecturer   String   // Lecturer/Instructor name
   danceStyle String   // e.g., "Syrtos", "Kalamatianos"
   level      String   // e.g., "Beginner", "Intermediate", "Advanced"
+  hall       String?  // "Hall 1", "Hall 2", "Hall 3", or null for special events
+  color      String?  // Hex color code for display
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

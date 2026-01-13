@@ -25,6 +25,8 @@ interface ScheduleItem {
   lecturer: string;
   danceStyle: string;
   level: string;
+  hall?: string | null;
+  color?: string | null;
 }
 
 export default function AdminPage() {
@@ -51,6 +53,8 @@ export default function AdminPage() {
     lecturer: "",
     danceStyle: "",
     level: "Beginner",
+    hall: "Hall 1",
+    color: "#FF6B6B",
   });
 
   // Settings state
@@ -221,6 +225,8 @@ export default function AdminPage() {
           lecturer: "",
           danceStyle: "",
           level: "Beginner",
+          hall: "Hall 1",
+          color: "#FF6B6B",
         });
       }
     } catch (error) {
@@ -237,6 +243,8 @@ export default function AdminPage() {
       lecturer: item.lecturer,
       danceStyle: item.danceStyle,
       level: item.level,
+      hall: item.hall || "Hall 1",
+      color: item.color || "#FF6B6B",
     });
     setShowScheduleForm(true);
   };
@@ -426,6 +434,8 @@ export default function AdminPage() {
                       lecturer: "",
                       danceStyle: "",
                       level: "Beginner",
+                      hall: "Hall 1",
+                      color: "#FF6B6B",
                     });
                   }}
                   className="px-6 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
@@ -514,6 +524,28 @@ export default function AdminPage() {
                         <option value="All Levels">All Levels</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-white font-semibold mb-2">Hall (Optional)</label>
+                      <select
+                        value={scheduleForm.hall}
+                        onChange={(e) => setScheduleForm({ ...scheduleForm, hall: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+                      >
+                        <option value="">None (for special events)</option>
+                        <option value="Hall 1">Hall 1</option>
+                        <option value="Hall 2">Hall 2</option>
+                        <option value="Hall 3">Hall 3</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-white font-semibold mb-2">Color</label>
+                      <input
+                        type="color"
+                        value={scheduleForm.color}
+                        onChange={(e) => setScheduleForm({ ...scheduleForm, color: e.target.value })}
+                        className="w-full h-12 rounded-lg bg-white/10 border border-white/20 cursor-pointer"
+                      />
+                    </div>
                   </div>
                   <div className="mt-6">
                     <button
@@ -548,13 +580,23 @@ export default function AdminPage() {
                           {dayItems.map((item) => (
                             <div
                               key={item.id}
-                              className="bg-white/5 rounded-lg p-4 border border-white/10 flex justify-between items-center"
+                              className="rounded-lg p-4 border-2 flex justify-between items-center"
+                              style={{
+                                backgroundColor: item.color ? `${item.color}15` : 'rgba(255,255,255,0.05)',
+                                borderColor: item.color || 'rgba(255,255,255,0.1)'
+                              }}
                             >
-                              <div className="grid grid-cols-4 gap-4 flex-1">
+                              <div className="grid grid-cols-5 gap-4 flex-1">
                                 <div>
                                   <div className="text-sm text-blue-200">Time</div>
                                   <div className="text-white font-semibold">{item.time}</div>
                                 </div>
+                                {item.hall && (
+                                  <div>
+                                    <div className="text-sm text-blue-200">Hall</div>
+                                    <div className="text-white font-semibold">{item.hall}</div>
+                                  </div>
+                                )}
                                 <div>
                                   <div className="text-sm text-blue-200">Dance Style</div>
                                   <div className="text-white font-semibold">{item.danceStyle}</div>

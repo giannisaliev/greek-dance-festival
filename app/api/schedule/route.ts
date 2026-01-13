@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { day, date, time, lecturer, danceStyle, level } = body;
+    const { day, date, time, lecturer, danceStyle, level, hall, color } = body;
 
     if (!day || !date || !time || !lecturer || !danceStyle || !level) {
       return NextResponse.json(
@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
         lecturer,
         danceStyle,
         level,
+        hall: hall || null,
+        color: color || null,
       },
     });
 
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, day, date, time, lecturer, danceStyle, level } = body;
+    const { id, day, date, time, lecturer, danceStyle, level, hall, color } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Schedule ID is required" }, { status: 400 });
@@ -68,6 +70,8 @@ export async function PUT(request: NextRequest) {
         lecturer,
         danceStyle,
         level,
+        hall: hall || null,
+        color: color || null,
       },
     });
 
