@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
     const participants = await prisma.participant.findMany({
       where: {
         OR: [
-          { user: { firstName: { contains: query } } },
-          { user: { lastName: { contains: query } } },
-          { user: { email: { contains: query } } },
+          { user: { firstName: { contains: query, mode: 'insensitive' } } },
+          { user: { lastName: { contains: query, mode: 'insensitive' } } },
+          { user: { email: { contains: query, mode: 'insensitive' } } },
           { phone: { contains: query } },
         ],
       },
