@@ -13,6 +13,7 @@ export default function Navigation() {
     { href: "/pricing", label: "Pricing" },
     { href: "/information", label: "Information" },
     { href: "/register", label: "Register" },
+    { href: "/login", label: "Login" },
   ];
 
   return (

@@ -18,9 +18,17 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       setError("");
-      await signIn("google", { callbackUrl: "/dashboard" });
+      const result = await signIn("google", { 
+        callbackUrl: "/admin",
+        redirect: true 
+      });
+      
+      if (result?.error) {
+        setError("Google sign-in failed. Please ensure Google OAuth is configured correctly.");
+      }
     } catch (error) {
-      setError("Failed to sign in with Google");
+      console.error("Google sign-in error:", error);
+      setError("Failed to sign in with Google. Please try again or contact support.");
     }
   };
 
