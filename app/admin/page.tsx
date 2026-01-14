@@ -223,15 +223,6 @@ export default function AdminPage() {
       setUsersLoading(false);
     }
   };
-      });
-      setSettingsSaved(true);
-      setTimeout(() => setSettingsSaved(false), 3000);
-    } catch (error) {
-      console.error("Error toggling registration:", error);
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchParticipants();
