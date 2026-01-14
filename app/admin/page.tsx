@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "../components/Navigation";
 
@@ -30,7 +32,33 @@ interface ScheduleItem {
 }
 
 export default function AdminPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"participants" | "schedule" | "settings">("participants");
+  
+  // Check authentication and admin status
+  useEffect(() => {
+    if (status === "loading") return;
+    
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+    
+    if (!(session.user as any)?.isAdmin) {
+      router.push("/");
+      return;
+    }
+  }, [session, status, router]);
+
+  // Show loading while checking auth
+  if (status === "loading" || !session || !(session.user as any)?.isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
   
   // Participants state
   const [participants, setParticipants] = useState<Participant[]>([]);

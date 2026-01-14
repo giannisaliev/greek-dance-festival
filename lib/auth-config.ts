@@ -12,6 +12,7 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       profile(profile) {
+        const isAdmin = profile.email === "giannisaliev@gmail.com";
         return {
           id: profile.sub,
           email: profile.email,
@@ -19,6 +20,7 @@ export const authOptions: NextAuthOptions = {
           lastName: profile.family_name || "",
           image: profile.picture,
           emailVerified: profile.email_verified ? new Date() : null,
+          isAdmin: isAdmin,
         };
       },
     }),
@@ -56,6 +58,7 @@ export const authOptions: NextAuthOptions = {
           firstName: user.firstName,
           lastName: user.lastName,
           image: user.image,
+          isAdmin: user.isAdmin || false,
         };
       },
     }),
@@ -67,6 +70,7 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.firstName = (user as any).firstName;
         token.lastName = (user as any).lastName;
+        token.isAdmin = (user as any).isAdmin;
       }
       return token;
     },
@@ -75,6 +79,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).firstName = token.firstName;
         (session.user as any).lastName = token.lastName;
+        (session.user as any).isAdmin = token.isAdmin;
       }
       return session;
     },
