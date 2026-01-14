@@ -1,6 +1,11 @@
+'use client';
+
+import { useState } from 'react';
 import Navigation from "../components/Navigation";
 
 export default function InformationPage() {
+  const [activeTab, setActiveTab] = useState<'guinness' | 'workshop'>('guinness');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
@@ -10,14 +15,37 @@ export default function InformationPage() {
           <h1 className="text-5xl font-bold text-white mb-4">
             Festival Information
           </h1>
-          <p className="text-xl text-blue-100">
-            Everything you need to know about locations and timings
-          </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        {/* Mobile Tabs */}
+        <div className="lg:hidden mb-8 flex gap-4 justify-center">
+          <button
+            onClick={() => setActiveTab('guinness')}
+            className={`flex-1 max-w-xs py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${
+              activeTab === 'guinness'
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-xl scale-105'
+                : 'bg-white/10 text-white border-2 border-white/20 hover:border-white/40'
+            }`}
+          >
+            🏆 Guinness Record
+          </button>
+          <button
+            onClick={() => setActiveTab('workshop')}
+            className={`flex-1 max-w-xs py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${
+              activeTab === 'workshop'
+                ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow-xl scale-105'
+                : 'bg-white/10 text-white border-2 border-white/20 hover:border-white/40'
+            }`}
+          >
+            🎭 Workshops
+          </button>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Guinness Record Location */}
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/20">
+          <div className={`bg-white/10 backdrop-blur-md rounded-3xl p-8 border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/20 flex flex-col ${
+            activeTab === 'guinness' ? 'block' : 'hidden lg:flex'
+          }`}>
             <div className="mb-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full animate-pulse shadow-lg">
@@ -50,7 +78,7 @@ export default function InformationPage() {
             {/* Google Maps Embed */}
             <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 hover:border-yellow-400/50 transition-colors duration-300">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3027.8665389565893!2d22.9396!3d40.6344!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a838f41428e0ed%3A0x9bae715b8d574a9!2sAristotelous%20Square!5e0!3m2!1sen!2sgr!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d825.4823985025275!2d22.940773521181264!3d40.6324654401109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a8390885a99cbd%3A0xe39e3d18ec8160ab!2sAristotle%20Square!5e0!3m2!1sen!2sgr!4v1768406943270!5m2!1sen!2sgr"
                 width="100%"
                 height="400"
                 style={{ border: 0 }}
@@ -72,7 +100,9 @@ export default function InformationPage() {
           </div>
 
           {/* Workshop Location */}
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-2xl hover:shadow-blue-500/20">
+          <div className={`bg-white/10 backdrop-blur-md rounded-3xl p-8 border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-2xl hover:shadow-blue-500/20 flex flex-col ${
+            activeTab === 'workshop' ? 'block' : 'hidden lg:flex'
+          }`}>
             <div className="mb-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-gradient-to-r from-blue-400 to-purple-500 p-4 rounded-full animate-bounce shadow-lg">
@@ -88,6 +118,9 @@ export default function InformationPage() {
                 <div className="text-center">
                   <p className="text-white font-bold text-xl mb-1">Friday - Sunday</p>
                   <p className="text-blue-200 font-semibold text-lg">June 12-14, 2026</p>
+                  <a href="/#schedule" className="inline-block mt-2 text-yellow-300 hover:text-yellow-200 font-semibold underline transition-colors duration-200">
+                    View Full Schedule →
+                  </a>
                 </div>
               </div>
               <div className="bg-white/5 rounded-xl p-4 mb-4">
@@ -105,7 +138,7 @@ export default function InformationPage() {
             {/* Google Maps Embed */}
             <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 hover:border-blue-400/50 transition-colors duration-300">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3027.526!2d22.9445!3d40.6398!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a838f9e422f5e7%3A0x8b9e3c0e8d9e3c0e!2sYMCA%20Thessaloniki!5e0!3m2!1sen!2sgr!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d565.6499229414236!2d22.95216373764882!3d40.62661132017817!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a839026870857f%3A0x7ac841aaf16c594d!2sYMCA%20-%20Young%20Men&#39;s%20Christian%20Association!5e0!3m2!1sen!2sgr!4v1768407001042!5m2!1sen!2sgr"
                 width="100%"
                 height="400"
                 style={{ border: 0 }}
