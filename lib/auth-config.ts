@@ -11,18 +11,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      profile(profile) {
-        const isAdmin = profile.email === "giannisaliev@gmail.com";
-        return {
-          id: profile.sub,
-          email: profile.email,
-          firstName: profile.given_name || "",
-          lastName: profile.family_name || "",
-          image: profile.picture,
-          emailVerified: profile.email_verified ? new Date() : null,
-          isAdmin: isAdmin,
-        };
-      },
     }),
     CredentialsProvider({
       name: "credentials",
@@ -64,13 +52,35 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Set admin status for specific email on Google sign in
+      if (account?.provider === "google" && user.email === "giannisaliev@gmail.com") {
+        try {
+          await prisma.user.update({
+            where: { email: user.email },
+            data: { isAdmin: true },
+          });
+        } catch (error) {
+          console.error("Error setting admin status:", error);
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.firstName = (user as any).firstName;
         token.lastName = (user as any).lastName;
-        token.isAdmin = (user as any).isAdmin;
+        
+        // Fetch fresh user data to get isAdmin status
+        if (token.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { isAdmin: true },
+          });
+          token.isAdmin = dbUser?.isAdmin || false;
+        }
       }
       return token;
     },
