@@ -90,7 +90,7 @@ export default function InformationPage() {
             </div>
             
             <a
-              href="https://www.google.com/maps/place/Aristotelous+Square,+Thessaloniki,+Greece"
+              href="https://www.google.com/maps/place/Aristotle+Square/@40.6324654,22.940773521181264,20z"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-center py-4 rounded-full font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
@@ -150,7 +150,7 @@ export default function InformationPage() {
             </div>
             
             <a
-              href="https://www.google.com/maps/place/YMCA+Thessaloniki"
+              href="https://www.google.com/maps/place/YMCA+-+Young+Men's+Christian+Association/@40.62661132017817,22.95216373764882,20z"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 block w-full bg-gradient-to-r from-blue-400 to-purple-500 text-white text-center py-4 rounded-full font-bold text-lg hover:from-blue-500 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
