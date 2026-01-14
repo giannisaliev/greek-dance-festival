@@ -18,12 +18,16 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       setError("");
+      // Don't specify redirect:true to handle the result
       const result = await signIn("google", { 
         callbackUrl: "/admin",
-        redirect: true 
+        redirect: false
       });
       
-      if (result?.error) {
+      // If sign in successful, manually redirect
+      if (result?.ok) {
+        window.location.href = "/admin";
+      } else if (result?.error) {
         setError("Google sign-in failed. Please ensure Google OAuth is configured correctly.");
       }
     } catch (error) {

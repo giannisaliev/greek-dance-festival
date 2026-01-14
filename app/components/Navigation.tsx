@@ -3,18 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   const menuItems = [
     { href: "/", label: "Home" },
     { href: "/pricing", label: "Pricing" },
     { href: "/information", label: "Information" },
     { href: "/register", label: "Register" },
-    { href: "/login", label: "Login" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <>
@@ -26,7 +32,7 @@ export default function Navigation() {
             </Link>
             
             {/* Desktop Menu */}
-            <div className="hidden md:flex gap-6">
+            <div className="hidden md:flex gap-6 items-center">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
@@ -38,6 +44,48 @@ export default function Navigation() {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* User Menu or Login */}
+              {session ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors bg-white/10 px-4 py-2 rounded-lg"
+                  >
+                    <span>{session.user?.email?.split('@')[0]}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
+                      {(session.user as any)?.isAdmin && (
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          🛡️ Admin Panel
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors"
+                      >
+                        🚪 Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-white hover:text-blue-200 transition-colors bg-white/10 px-4 py-2 rounded-lg"
+                >
+                  Login
+                </Link>
+              )}
             </div>
 
             {/* Hamburger Button */}
@@ -145,6 +193,47 @@ export default function Navigation() {
               </Link>
             ))}
           </div>
+
+          {/* User Menu for Mobile */}
+          {session && (
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <div className="space-y-3">
+                <div className="text-white/70 text-sm mb-3">
+                  Signed in as: <span className="text-white font-semibold">{session.user?.email}</span>
+                </div>
+                {(session.user as any)?.isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="block bg-yellow-500/20 border-2 border-yellow-400/50 rounded-xl p-4 text-white hover:bg-yellow-500/30 transition-all"
+                  >
+                    🛡️ Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleSignOut();
+                  }}
+                  className="block w-full bg-red-500/20 border-2 border-red-400/50 rounded-xl p-4 text-white hover:bg-red-500/30 transition-all text-left"
+                >
+                  🚪 Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!session && (
+            <div className="mt-8">
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="block bg-white/10 border-2 border-white/30 rounded-xl p-4 text-white hover:bg-white/20 transition-all text-center"
+              >
+                Login
+              </Link>
+            </div>
+          )}
 
           {/* Decorative Elements */}
           <div className="absolute bottom-8 left-8 right-8">
