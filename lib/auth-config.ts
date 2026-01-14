@@ -66,7 +66,8 @@ export const authOptions: NextAuthOptions = {
             where: { email: user.email },
           });
 
-          const isAdmin = user.email === "giannisaliev@gmail.com";
+          // Set admin status for specific emails
+          const isAdmin = user.email === "giannisaliev@gmail.com" || user.email === "themis.prodance@gmail.com";
 
           if (existingUser) {
             // Update existing user

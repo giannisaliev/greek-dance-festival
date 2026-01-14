@@ -31,10 +31,21 @@ interface ScheduleItem {
   color?: string | null;
 }
 
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isAdmin: boolean;
+  emailVerified: string | null;
+  createdAt: string;
+  image: string | null;
+}
+
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"participants" | "schedule" | "settings">("participants");
+  const [activeTab, setActiveTab] = useState<"participants" | "schedule" | "settings" | "users">("participants");
   
   // Check authentication and admin status
   useEffect(() => {
@@ -92,6 +103,11 @@ export default function AdminPage() {
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  // Users state
+  const [users, setUsers] = useState<User[]>([]);
+  const [usersSearchQuery, setUsersSearchQuery] = useState("");
+  const [usersLoading, setUsersLoading] = useState(false);
 
   // Fetch participants
   const fetchParticipants = async (query = "") => {
@@ -182,6 +198,31 @@ export default function AdminPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newSettings),
+      });
+    } catch (error) {
+      console.error("Error toggling registration:", error);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  // Fetch users
+  const fetchUsers = async (query = "") => {
+    setUsersLoading(true);
+    try {
+      const url = query
+        ? `/api/users?q=${encodeURIComponent(query)}`
+        : "/api/users";
+      const response = await fetch(url);
+      const data = await response.json();
+      setUsers(Array.isArray(data.users) ? data.users : []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
       });
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 3000);
@@ -332,6 +373,19 @@ export default function AdminPage() {
               }`}
             >
               Settings
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("users");
+                fetchUsers();
+              }}
+              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                activeTab === "users"
+                  ? "bg-white text-blue-900"
+                  : "bg-white/20 text-white hover:bg-white/30"
+              }`}
+            >
+              Users
             </button>
           </div>
 
@@ -771,6 +825,141 @@ export default function AdminPage() {
                       <div className="text-red-400 font-bold text-lg mb-1">Close Registration</div>
                       <div className="text-red-200 text-sm">Stop accepting new registrations</div>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Users Tab */}
+          {activeTab === "users" && (
+            <>
+              <div className="space-y-6">
+                {/* Search */}
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Search users by name or email..."
+                    value={usersSearchQuery}
+                    onChange={(e) => setUsersSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        fetchUsers(usersSearchQuery);
+                      }
+                    }}
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200"
+                  />
+                  <button
+                    onClick={() => fetchUsers(usersSearchQuery)}
+                    disabled={usersLoading}
+                    className="px-6 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                  >
+                    {usersLoading ? "Searching..." : "Search"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUsersSearchQuery("");
+                      fetchUsers("");
+                    }}
+                    className="px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                {/* Users Table */}
+                <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-white/10">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Name</th>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Email</th>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Status</th>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Verified</th>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Joined</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/10">
+                        {usersLoading ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-blue-100">
+                              Loading users...
+                            </td>
+                          </tr>
+                        ) : users.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-blue-100">
+                              No users found
+                            </td>
+                          </tr>
+                        ) : (
+                          users.map((user) => (
+                            <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  {user.image && (
+                                    <img
+                                      src={user.image}
+                                      alt={user.firstName}
+                                      className="w-10 h-10 rounded-full"
+                                    />
+                                  )}
+                                  <div>
+                                    <div className="text-white font-semibold">
+                                      {user.firstName} {user.lastName}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-blue-100">{user.email}</td>
+                              <td className="px-6 py-4">
+                                {user.isAdmin ? (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">
+                                    🛡️ Admin
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/50">
+                                    User
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {user.emailVerified ? (
+                                  <span className="text-green-400">✓ Verified</span>
+                                ) : (
+                                  <span className="text-gray-400">Not verified</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-blue-100">
+                                {new Date(user.createdAt).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <div className="text-3xl font-bold text-white mb-2">{users.length}</div>
+                    <div className="text-blue-100">Total Users</div>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <div className="text-3xl font-bold text-yellow-400 mb-2">
+                      {users.filter(u => u.isAdmin).length}
+                    </div>
+                    <div className="text-blue-100">Admins</div>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <div className="text-3xl font-bold text-green-400 mb-2">
+                      {users.filter(u => u.emailVerified).length}
+                    </div>
+                    <div className="text-blue-100">Verified Users</div>
                   </div>
                 </div>
               </div>
