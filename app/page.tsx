@@ -171,8 +171,8 @@ export default function Home() {
               // Sort times chronologically (e.g., "09:00 - 10:00" before "10:00 - 11:00")
               const allTimeSlots = Array.from(new Set(dayItems.map((item: any) => item.time))).sort((a, b) => {
                 // Extract the start time from formats like "09:00 - 10:00" or "09:00"
-                const timeA = a.split(/[-–]/)[0].trim().replace(':', '');
-                const timeB = b.split(/[-–]/)[0].trim().replace(':', '');
+                const timeA = a.split(/[\-–—]/)[0].trim().replace(':', '');
+                const timeB = b.split(/[\-–—]/)[0].trim().replace(':', '');
                 return parseInt(timeA) - parseInt(timeB);
               });
               
