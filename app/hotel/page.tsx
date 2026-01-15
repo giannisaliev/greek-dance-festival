@@ -166,17 +166,24 @@ export default function HotelPage() {
                     <h3 className="text-lg font-bold text-white mb-3">
                       📍 Location
                     </h3>
-                    <div className="w-full h-64 rounded-lg overflow-hidden mb-4">
-                      <iframe
-                        src={hotel.location}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      ></iframe>
-                    </div>
+                    {hotel.location && hotel.location.includes('google.com/maps/embed') ? (
+                      <div className="w-full h-64 rounded-lg overflow-hidden mb-4">
+                        <iframe
+                          src={hotel.location}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                      </div>
+                    ) : (
+                      <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-4">
+                        <p className="text-red-100 text-sm mb-2">⚠️ Invalid Google Maps embed URL</p>
+                        <p className="text-blue-200 text-xs">The admin needs to update this with a proper Google Maps embed link.</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -270,20 +277,12 @@ export default function HotelPage() {
                 <h3 className="text-lg font-bold text-white mb-2 text-center">
                   Ready to Book?
                 </h3>
-                <div className="flex flex-col gap-2">
-                  <a
-                    href="mailto:hotel@greekdancefestival.gr"
-                    className="bg-white text-blue-900 px-4 py-2 rounded-full font-semibold hover:bg-blue-50 transition-colors text-center text-sm"
-                  >
-                    ✉️ hotel@greekdancefestival.gr
-                  </a>
-                  <a
-                    href="mailto:info@greekdancefestival.gr"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors text-center text-sm"
-                  >
-                    📧 info@greekdancefestival.gr
-                  </a>
-                </div>
+                <a
+                  href="mailto:hotel@greekdancefestival.gr"
+                  className="block bg-white text-blue-900 px-4 py-2 rounded-full font-semibold hover:bg-blue-50 transition-colors text-center text-sm"
+                >
+                  ✉️ hotel@greekdancefestival.gr
+                </a>
               </div>
             </div>
           ))}
