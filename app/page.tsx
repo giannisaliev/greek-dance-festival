@@ -402,26 +402,6 @@ export default function Home() {
               );
             })}
           </div>
-                                    <tr>
-                                      <td colSpan={2} className="px-6 py-8 text-center text-blue-100">
-                                        No classes scheduled for this hall
-                                      </td>
-                                    </tr>
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-blue-100 text-center">Schedule coming soon...</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
           )}
         </div>
 
