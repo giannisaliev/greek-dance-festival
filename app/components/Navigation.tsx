@@ -135,7 +135,7 @@ export default function Navigation() {
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 shadow-2xl z-50 transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 shadow-2xl z-50 transform transition-transform duration-300 ease-out md:hidden ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -167,20 +167,20 @@ export default function Navigation() {
                 }}
               >
                 {/* Animated gradient border */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400 via-blue-200 to-white animate-gradientRotate opacity-75 blur-sm"></div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 animate-gradientRotate opacity-75 blur-sm"></div>
                 
-                <div className="relative bg-gradient-to-br from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 backdrop-blur-md border border-white/30 hover:border-white/50 rounded-xl px-6 py-5 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl">
+                <div className="relative bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/15 backdrop-blur-md border border-white/40 hover:border-white/60 rounded-xl px-6 py-5 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl">
                   {/* Continuous shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer rounded-xl"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer rounded-xl"></div>
                   
                   {/* Animated orbs */}
-                  <div className="absolute top-2 right-4 w-3 h-3 bg-blue-300 rounded-full animate-pulse opacity-60"></div>
-                  <div className="absolute bottom-2 left-4 w-2 h-2 bg-white rounded-full animate-ping opacity-40"></div>
+                  <div className="absolute top-2 right-4 w-3 h-3 bg-yellow-300 rounded-full animate-pulse opacity-70"></div>
+                  <div className="absolute bottom-2 left-4 w-2 h-2 bg-pink-300 rounded-full animate-ping opacity-50"></div>
                   
                   <div className="relative flex items-center justify-between">
                     <span className={`text-xl font-bold tracking-wide ${
-                      pathname === item.href ? "text-blue-200 animate-pulse" : "text-white"
-                    } group-hover:text-white transition-all duration-300 transform group-hover:scale-110`}>
+                      pathname === item.href ? "text-yellow-200 animate-pulse" : "text-white"
+                    } group-hover:text-yellow-100 transition-all duration-300 transform group-hover:scale-110`}>
                       {item.label}
                     </span>
                     <div className="relative">
@@ -198,7 +198,7 @@ export default function Navigation() {
                   </div>
                   
                   {/* Animated bottom line */}
-                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-400 via-blue-200 to-white animate-expandContract rounded-full"></div>
+                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 animate-expandContract rounded-full"></div>
                 </div>
               </Link>
             ))}
@@ -206,16 +206,16 @@ export default function Navigation() {
 
           {/* User Menu for Mobile */}
           {!isLoading && isAuthenticated && (
-            <div className="mt-8 pt-6 border-t border-white/20">
+            <div className="mt-8 pt-6 border-t border-white/30">
               <div className="space-y-3">
-                <div className="text-white/70 text-sm mb-3">
-                  Signed in as: <span className="text-white font-semibold">{session.user?.email}</span>
+                <div className="text-white/90 text-sm mb-3">
+                  Signed in as: <span className="text-yellow-200 font-semibold">{session.user?.email}</span>
                 </div>
                 {(session.user as any)?.isAdmin && (
                   <Link
                     href="/admin"
                     onClick={() => setIsOpen(false)}
-                    className="block bg-yellow-500/20 border-2 border-yellow-400/50 rounded-xl p-4 text-white hover:bg-yellow-500/30 transition-all"
+                    className="block bg-yellow-400/25 border-2 border-yellow-300/60 rounded-xl p-4 text-white hover:bg-yellow-400/35 transition-all font-semibold"
                   >
                     🛡️ Admin Panel
                   </Link>
@@ -225,7 +225,7 @@ export default function Navigation() {
                     setIsOpen(false);
                     handleSignOut();
                   }}
-                  className="block w-full bg-red-500/20 border-2 border-red-400/50 rounded-xl p-4 text-white hover:bg-red-500/30 transition-all text-left"
+                  className="block w-full bg-red-400/25 border-2 border-red-300/60 rounded-xl p-4 text-white hover:bg-red-400/35 transition-all text-left font-semibold"
                 >
                   🚪 Sign Out
                 </button>
@@ -238,7 +238,7 @@ export default function Navigation() {
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
-                className="block bg-white/10 border-2 border-white/30 rounded-xl p-4 text-white hover:bg-white/20 transition-all text-center"
+                className="block bg-white/20 border-2 border-white/40 rounded-xl p-4 text-white hover:bg-white/30 transition-all text-center font-semibold"
               >
                 Login
               </Link>
@@ -247,8 +247,8 @@ export default function Navigation() {
 
           {/* Decorative Elements */}
           <div className="absolute bottom-8 left-8 right-8">
-            <div className="border-t border-white/20 pt-6">
-              <p className="text-blue-200 text-sm text-center">
+            <div className="border-t border-white/30 pt-6">
+              <p className="text-yellow-100 text-sm text-center font-semibold">
                 Greek Dance Festival 2026
               </p>
             </div>

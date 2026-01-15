@@ -661,49 +661,94 @@ export default function AdminPage() {
                           {dayItems.map((item) => (
                             <div
                               key={item.id}
-                              className="rounded-lg p-4 border-2 flex justify-between items-center"
+                              className="rounded-lg p-4 border-2"
                               style={{
                                 backgroundColor: item.color ? `${item.color}15` : 'rgba(255,255,255,0.05)',
                                 borderColor: item.color || 'rgba(255,255,255,0.1)'
                               }}
                             >
-                              <div className="grid grid-cols-5 gap-4 flex-1">
-                                <div>
-                                  <div className="text-sm text-blue-200">Time</div>
-                                  <div className="text-white font-semibold">{item.time}</div>
-                                </div>
-                                {item.hall && (
+                              {/* Desktop View */}
+                              <div className="hidden md:flex justify-between items-center">
+                                <div className="grid grid-cols-5 gap-4 flex-1">
                                   <div>
-                                    <div className="text-sm text-blue-200">Hall</div>
-                                    <div className="text-white font-semibold">{item.hall}</div>
+                                    <div className="text-sm text-blue-200">Time</div>
+                                    <div className="text-white font-semibold">{item.time}</div>
                                   </div>
-                                )}
-                                <div>
-                                  <div className="text-sm text-blue-200">Dance Style</div>
-                                  <div className="text-white font-semibold">{item.danceStyle}</div>
+                                  {item.hall && (
+                                    <div>
+                                      <div className="text-sm text-blue-200">Hall</div>
+                                      <div className="text-white font-semibold">{item.hall}</div>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="text-sm text-blue-200">Dance Style</div>
+                                    <div className="text-white font-semibold">{item.danceStyle}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-sm text-blue-200">Lecturer</div>
+                                    <div className="text-white font-semibold">{item.lecturer}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-sm text-blue-200">Level</div>
+                                    <div className="text-white font-semibold">{item.level}</div>
+                                  </div>
                                 </div>
-                                <div>
-                                  <div className="text-sm text-blue-200">Lecturer</div>
-                                  <div className="text-white font-semibold">{item.lecturer}</div>
-                                </div>
-                                <div>
-                                  <div className="text-sm text-blue-200">Level</div>
-                                  <div className="text-white font-semibold">{item.level}</div>
+                                <div className="flex gap-2 ml-4">
+                                  <button
+                                    onClick={() => handleEditSchedule(item)}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSchedule(item.id)}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
                               </div>
-                              <div className="flex gap-2 ml-4">
-                                <button
-                                  onClick={() => handleEditSchedule(item)}
-                                  className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSchedule(item.id)}
-                                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
-                                >
-                                  Delete
-                                </button>
+                              
+                              {/* Mobile View */}
+                              <div className="md:hidden space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <div className="text-xs text-blue-200 mb-1">Time</div>
+                                    <div className="text-white font-semibold text-sm">{item.time}</div>
+                                  </div>
+                                  {item.hall && (
+                                    <div>
+                                      <div className="text-xs text-blue-200 mb-1">Hall</div>
+                                      <div className="text-white font-semibold text-sm">{item.hall}</div>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="text-xs text-blue-200 mb-1">Dance Style</div>
+                                    <div className="text-white font-semibold text-sm">{item.danceStyle}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-xs text-blue-200 mb-1">Lecturer</div>
+                                    <div className="text-white font-semibold text-sm">{item.lecturer}</div>
+                                  </div>
+                                  <div className="col-span-2">
+                                    <div className="text-xs text-blue-200 mb-1">Level</div>
+                                    <div className="text-white font-semibold text-sm">{item.level}</div>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2 pt-2 border-t border-white/10">
+                                  <button
+                                    onClick={() => handleEditSchedule(item)}
+                                    className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors text-sm"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSchedule(item.id)}
+                                    className="flex-1 px-3 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -835,7 +880,7 @@ export default function AdminPage() {
             <>
               <div className="space-y-6">
                 {/* Search */}
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   <input
                     type="text"
                     placeholder="Search users by name or email..."
@@ -847,12 +892,12 @@ export default function AdminPage() {
                         fetchUsers(usersSearchQuery);
                       }
                     }}
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200"
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 text-sm sm:text-base"
                   />
                   <button
                     onClick={() => fetchUsers(usersSearchQuery)}
                     disabled={usersLoading}
-                    className="px-6 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    className="px-4 sm:px-6 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50 text-sm sm:text-base"
                   >
                     {usersLoading ? "Searching..." : "Search"}
                   </button>
@@ -861,15 +906,16 @@ export default function AdminPage() {
                       setUsersSearchQuery("");
                       fetchUsers("");
                     }}
-                    className="px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                    className="px-4 sm:px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm sm:text-base"
                   >
                     Clear
                   </button>
                 </div>
 
-                {/* Users Table */}
+                {/* Users Table/Cards */}
                 <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
-                  <div className="overflow-x-auto">
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-white/10">
                         <tr>
@@ -939,6 +985,67 @@ export default function AdminPage() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                  
+                  {/* Mobile Card View */}
+                  <div className="md:hidden divide-y divide-white/10">
+                    {usersLoading ? (
+                      <div className="px-4 py-12 text-center text-blue-100">
+                        Loading users...
+                      </div>
+                    ) : users.length === 0 ? (
+                      <div className="px-4 py-12 text-center text-blue-100">
+                        No users found
+                      </div>
+                    ) : (
+                      users.map((user) => (
+                        <div key={user.id} className="p-4 hover:bg-white/5 transition-colors">
+                          <div className="flex items-start gap-3 mb-3">
+                            {user.image && (
+                              <img
+                                src={user.image}
+                                alt={user.firstName}
+                                className="w-12 h-12 rounded-full"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <div className="text-white font-semibold text-lg">
+                                {user.firstName} {user.lastName}
+                              </div>
+                              <div className="text-blue-100 text-sm break-all">{user.email}</div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 mt-3">
+                            <div>
+                              <div className="text-xs text-blue-200 mb-1">Status</div>
+                              {user.isAdmin ? (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">
+                                  🛡️ Admin
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/50">
+                                  User
+                                </span>
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-xs text-blue-200 mb-1">Verified</div>
+                              {user.emailVerified ? (
+                                <span className="text-green-400 text-sm">✓ Verified</span>
+                              ) : (
+                                <span className="text-gray-400 text-sm">Not verified</span>
+                              )}
+                            </div>
+                            <div className="col-span-2">
+                              <div className="text-xs text-blue-200 mb-1">Joined</div>
+                              <div className="text-blue-100 text-sm">
+                                {new Date(user.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
