@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -104,7 +105,7 @@ model Hotel {
   stars       Int      // 1-5 star rating
   location    String   // Google Maps embed URL
   description String?
-  images      String[] // Array of image paths (locally hosted)
+  images      String[] // Array of image paths
   prices      Json     // JSON object for different room types and prices
   amenities   String[] // Array of amenities
   order       Int      @default(0) // For sorting hotels

@@ -36,7 +36,12 @@ export async function POST(request: Request) {
     }
 
     for (const file of files) {
-      if (!file || file.size === 0) continue;
+      if (!file || file.size === 0) {
+        console.log("Skipping empty file");
+        continue;
+      }
+
+      console.log("Processing file:", file.name, "Size:", file.size);
 
       try {
         // Convert file to buffer
@@ -51,12 +56,14 @@ export async function POST(request: Request) {
         // Save file
         const filepath = join(uploadsDir, filename);
         await writeFile(filepath, buffer);
+        console.log("File saved successfully:", filepath);
 
         // Return the public URL path
         const publicPath = `/uploads/hotels/${filename}`;
         uploadedUrls.push(publicPath);
       } catch (fileError) {
         console.error("Error uploading individual file:", fileError);
+        // Continue processing other files
       }
     }
 
