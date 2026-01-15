@@ -20,6 +20,7 @@ export default function HotelPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Record<string, string>>({});
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHotels();
@@ -51,6 +52,15 @@ export default function HotelPage() {
 
   const setHotelTab = (hotelId: string, tab: string) => {
     setActiveTab((prev) => ({ ...prev, [hotelId]: tab }));
+  };
+
+  const getAvailableTabs = (hotel: Hotel) => {
+    const tabs = ["info", "gallery"];
+    if (hotel.amenities && hotel.amenities.length > 0) {
+      tabs.push("amenities");
+    }
+    tabs.push("prices");
+    return tabs;
   };
 
   if (loading) {
@@ -130,7 +140,7 @@ export default function HotelPage() {
 
               {/* Tabs */}
               <div className="flex border-b border-white/20 bg-white/5">
-                {["info", "gallery", "amenities", "prices"].map((tab) => (
+                {getAvailableTabs(hotel).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setHotelTab(hotel.id, tab)}
@@ -178,6 +188,7 @@ export default function HotelPage() {
                         {hotel.images.map((image, idx) => (
                           <div
                             key={idx}
+                            onClick={() => setSelectedImage(image)}
                             className="relative h-32 rounded-lg overflow-hidden group cursor-pointer"
                           >
                             <img
@@ -185,6 +196,9 @@ export default function HotelPage() {
                               alt={`${hotel.name} - Image ${idx + 1}`}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                             />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                              <span className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity">🔍</span>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -274,6 +288,29 @@ export default function HotelPage() {
             </div>
           ))}
         </div>
+
+        {/* Image Modal */}
+        {selectedImage && (
+          <div
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div className="relative max-w-6xl max-h-full">
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute -top-12 right-0 text-white text-4xl hover:text-gray-300"
+              >
+                ✕
+              </button>
+              <img
+                src={selectedImage}
+                alt="Hotel image"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Info Banner */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center">

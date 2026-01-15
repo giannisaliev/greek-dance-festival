@@ -422,11 +422,18 @@ export default function AdminHotelsPage() {
                     setFormData({ ...formData, location: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                  placeholder="Paste Google Maps embed URL here"
+                  placeholder="https://www.google.com/maps/embed?pb=..."
                 />
-                <p className="text-blue-200 text-sm mt-2">
-                  💡 Go to Google Maps → Share → Embed a map → Copy the src URL from the iframe
-                </p>
+                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mt-2">
+                  <p className="text-yellow-100 text-sm font-semibold mb-1">⚠️ Important: Use Embed URL, not regular Google Maps link!</p>
+                  <p className="text-blue-200 text-sm">
+                    1. Go to <a href="https://www.google.com/maps" target="_blank" className="underline">Google Maps</a><br/>
+                    2. Search for the hotel location<br/>
+                    3. Click <strong>Share</strong> → <strong>Embed a map</strong><br/>
+                    4. Copy the <strong>src</strong> URL from the iframe code<br/>
+                    5. Should start with: https://www.google.com/maps/embed?pb=...
+                  </p>
+                </div>
               </div>
 
               <div>
