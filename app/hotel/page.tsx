@@ -81,11 +81,17 @@ export default function HotelPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white mb-4">
-              Festival Hotels
+              🏨 Festival Hotels
             </h1>
-            <p className="text-xl text-blue-100 mb-8">
-              No hotels available at the moment. Check back soon!
-            </p>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20 max-w-2xl mx-auto">
+              <div className="text-6xl mb-6">🏨</div>
+              <p className="text-2xl text-white font-semibold mb-4">
+                Hotel information will be here soon!
+              </p>
+              <p className="text-blue-100">
+                We're working on bringing you the best accommodation options for the festival. Check back soon for updates!
+              </p>
+            </div>
           </div>
         </div>
       </div>

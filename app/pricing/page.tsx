@@ -8,6 +8,7 @@ const packages = [
     description: "Join the world record attempt",
     features: [
       "🏆 Guinness Record Attempt",
+      "Festival merchandise",
       "Certificate of participation",
       "Be part of history!"
     ],
@@ -45,7 +46,6 @@ const packages = [
     features: [
       "Access to 4 classes",
       "Festival program",
-      "Festival merchandise",
       "Certificate of participation"
     ],
     popular: false,
@@ -58,7 +58,6 @@ const packages = [
     features: [
       "Access to 8 classes",
       "Festival program",
-      "Festival merchandise",
       "Priority class selection",
       "Certificate of participation"
     ],
@@ -90,50 +89,50 @@ export default function PricingPage() {
       <Navigation />
 
       {/* Pricing Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-3">
             Festival Packages
           </h1>
-          <p className="text-xl text-blue-100">
+          <p className="text-lg text-blue-100">
             Choose the package that best fits your festival experience
           </p>
         </div>
 
         {/* Standalone Events */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">
             🎉 Standalone Events
           </h2>
-          <p className="text-blue-100 text-center mb-8">
+          <p className="text-blue-100 text-center mb-6 text-sm">
             Join just one event or combine them with any class package
           </p>
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
             {packages.filter(pkg => pkg.category === "standalone").map((pkg) => (
               <div
                 key={pkg.name}
-                className="bg-gradient-to-br from-yellow-400/20 via-orange-400/20 to-pink-400/20 backdrop-blur-md rounded-2xl p-8 border-2 border-yellow-400/50 shadow-xl hover:scale-105 transition-transform"
+                className="bg-gradient-to-br from-yellow-400/20 via-orange-400/20 to-pink-400/20 backdrop-blur-md rounded-xl p-5 border-2 border-yellow-400/50 shadow-xl hover:scale-105 transition-transform"
               >
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-bold text-white mb-1">
                     {pkg.name}
                   </h3>
-                  <p className="text-blue-100 text-sm mb-4">
+                  <p className="text-blue-100 text-xs mb-3">
                     {pkg.description}
                   </p>
-                  <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 mb-2">
+                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 mb-1">
                     {pkg.price}
                   </div>
-                  <p className="text-blue-100 text-sm">per person</p>
+                  <p className="text-blue-100 text-xs">per person</p>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-2 mb-4">
                   {pkg.features.map((feature, index) => (
                     <li 
                       key={index} 
-                      className="flex items-start text-white"
+                      className="flex items-start text-white text-sm"
                     >
-                      <span className="text-green-400 mr-2 mt-1">✓</span>
+                      <span className="text-green-400 mr-2">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -141,7 +140,7 @@ export default function PricingPage() {
 
                 <Link
                   href={`/register?package=${encodeURIComponent(pkg.name)}`}
-                  className="block w-full text-center py-3 rounded-full font-semibold transition-colors bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 hover:from-yellow-300 hover:to-orange-300"
+                  className="block w-full text-center py-2 rounded-full font-semibold transition-colors bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 hover:from-yellow-300 hover:to-orange-300 text-sm"
                 >
                   Select {pkg.name}
                 </Link>
@@ -151,51 +150,51 @@ export default function PricingPage() {
         </div>
 
         {/* Class Packages */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">
             💃 Class Packages
           </h2>
-          <p className="text-blue-100 text-center mb-8">
+          <p className="text-blue-100 text-center mb-6 text-sm">
             Access to dance classes throughout the festival
           </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {packages.filter(pkg => pkg.category === "classes").map((pkg) => (
               <div
                 key={pkg.name}
-                className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 border-2 ${
+                className={`bg-white/10 backdrop-blur-md rounded-xl p-5 border-2 ${
                   pkg.popular
                     ? "border-yellow-400 relative"
                     : "border-white/20"
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-blue-900 px-4 py-1 rounded-full font-bold text-sm">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-blue-900 px-3 py-0.5 rounded-full font-bold text-xs">
                     MOST POPULAR
                   </div>
                 )}
                 
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-bold text-white mb-1">
                     {pkg.name}
                   </h3>
-                  <p className="text-blue-100 text-sm mb-4">
+                  <p className="text-blue-100 text-xs mb-3">
                     {pkg.description}
                   </p>
-                  <div className="text-5xl font-bold text-white mb-2">
+                  <div className="text-4xl font-bold text-white mb-1">
                     {pkg.price}
                   </div>
-                <p className="text-blue-100 text-sm">per person</p>
+                <p className="text-blue-100 text-xs">per person</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2 mb-4">
                 {pkg.features.map((feature, index) => {
                   const isSpecial = feature.includes('🍷') || feature.includes('🏆');
                   return (
                     <li 
                       key={index} 
-                      className={`flex items-start ${isSpecial ? 'text-white font-bold bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 p-3 rounded-lg border-2 border-yellow-400/60 animate-pulse shadow-lg' : 'text-blue-100'}`}
+                      className={`flex items-start text-sm ${isSpecial ? 'text-white font-bold bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 p-2 rounded-lg border border-yellow-400/60' : 'text-blue-100'}`}
                     >
-                      <span className="text-green-400 mr-2 mt-1">✓</span>
+                      <span className="text-green-400 mr-2">✓</span>
                       <span className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300' : ''}>{feature}</span>
                     </li>
                   );
@@ -204,7 +203,7 @@ export default function PricingPage() {
 
               <Link
                 href={`/register?package=${encodeURIComponent(pkg.name)}`}
-                className={`block w-full text-center py-3 rounded-full font-semibold transition-colors ${
+                className={`block w-full text-center py-2 rounded-full font-semibold transition-colors text-sm ${
                   pkg.popular
                     ? "bg-yellow-400 text-blue-900 hover:bg-yellow-300"
                     : "bg-white text-blue-900 hover:bg-blue-50"

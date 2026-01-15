@@ -218,7 +218,7 @@ export default function RegisterPage() {
 
               <div className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-2xl p-8 border border-white/30 mb-8">
                 <p className="text-center text-white font-bold text-2xl md:text-3xl">
-                  {closedMessage}
+                  Registration opens on February 1st, 2026
                 </p>
               </div>
 
