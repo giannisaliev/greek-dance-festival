@@ -32,8 +32,9 @@ export default function Navigation() {
       <nav className="bg-white/10 backdrop-blur-md border-b border-white/20 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="text-2xl font-bold text-white hover:text-blue-200 transition-colors">
-              Greek Dance Festival
+            <Link href="/" className="flex items-center gap-3 text-2xl font-bold text-white hover:text-blue-200 transition-colors">
+              <img src="/GUINESS.png" alt="Greek Dance Festival Logo" className="h-10 w-10 object-contain" />
+              <span>Greek Dance Festival</span>
             </Link>
             
             {/* Desktop Menu */}

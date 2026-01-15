@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Greek Dance Festival",
   description: "Register for the Greek Dance Festival 2026",
+  icons: {
+    icon: "/GUINESS.png",
+    shortcut: "/GUINESS.png",
+    apple: "/GUINESS.png",
+  },
 };
 
 export default function RootLayout({
