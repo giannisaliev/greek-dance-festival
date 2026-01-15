@@ -3,6 +3,30 @@ import Navigation from "../components/Navigation";
 
 const packages = [
   {
+    name: "Guinness Record Only",
+    price: "€30",
+    description: "Join the world record attempt",
+    features: [
+      "🏆 Guinness Record Attempt",
+      "Certificate of participation",
+      "Be part of history!"
+    ],
+    popular: false,
+    category: "standalone"
+  },
+  {
+    name: "Greek Night Only",
+    price: "€40",
+    description: "Authentic Greek evening experience",
+    features: [
+      "🍷 Greek Night",
+      "Traditional food and drinks",
+      "Unforgettable experience"
+    ],
+    popular: false,
+    category: "standalone"
+  },
+  {
     name: "Starter Pass",
     price: "€70",
     description: "Get a taste of the festival",
@@ -11,7 +35,8 @@ const packages = [
       "Festival program",
       "Certificate of participation"
     ],
-    popular: false
+    popular: false,
+    category: "classes"
   },
   {
     name: "Explorer Pass",
@@ -23,7 +48,8 @@ const packages = [
       "Festival merchandise",
       "Certificate of participation"
     ],
-    popular: false
+    popular: false,
+    category: "classes"
   },
   {
     name: "Enthusiast Pass",
@@ -36,7 +62,8 @@ const packages = [
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: false
+    popular: false,
+    category: "classes"
   },
   {
     name: "Full Pass",
@@ -52,7 +79,8 @@ const packages = [
       "Priority class selection",
       "Certificate of participation"
     ],
-    popular: true
+    popular: true,
+    category: "classes"
   }
 ];
 
@@ -72,32 +100,90 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {packages.map((pkg) => (
-            <div
-              key={pkg.name}
-              className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 border-2 ${
-                pkg.popular
-                  ? "border-yellow-400 relative"
-                  : "border-white/20"
-              }`}
-            >
-              {pkg.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-blue-900 px-4 py-1 rounded-full font-bold text-sm">
-                  MOST POPULAR
+        {/* Standalone Events */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-white mb-6 text-center">
+            🎉 Standalone Events
+          </h2>
+          <p className="text-blue-100 text-center mb-8">
+            Join just one event or combine them with any class package
+          </p>
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {packages.filter(pkg => pkg.category === "standalone").map((pkg) => (
+              <div
+                key={pkg.name}
+                className="bg-gradient-to-br from-yellow-400/20 via-orange-400/20 to-pink-400/20 backdrop-blur-md rounded-2xl p-8 border-2 border-yellow-400/50 shadow-xl hover:scale-105 transition-transform"
+              >
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {pkg.name}
+                  </h3>
+                  <p className="text-blue-100 text-sm mb-4">
+                    {pkg.description}
+                  </p>
+                  <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 mb-2">
+                    {pkg.price}
+                  </div>
+                  <p className="text-blue-100 text-sm">per person</p>
                 </div>
-              )}
-              
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {pkg.name}
-                </h3>
-                <p className="text-blue-100 text-sm mb-4">
-                  {pkg.description}
-                </p>
-                <div className="text-5xl font-bold text-white mb-2">
-                  {pkg.price}
-                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {pkg.features.map((feature, index) => (
+                    <li 
+                      key={index} 
+                      className="flex items-start text-white"
+                    >
+                      <span className="text-green-400 mr-2 mt-1">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={`/register?package=${encodeURIComponent(pkg.name)}`}
+                  className="block w-full text-center py-3 rounded-full font-semibold transition-colors bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 hover:from-yellow-300 hover:to-orange-300"
+                >
+                  Select {pkg.name}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Class Packages */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-white mb-6 text-center">
+            💃 Class Packages
+          </h2>
+          <p className="text-blue-100 text-center mb-8">
+            Access to dance classes throughout the festival
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {packages.filter(pkg => pkg.category === "classes").map((pkg) => (
+              <div
+                key={pkg.name}
+                className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 border-2 ${
+                  pkg.popular
+                    ? "border-yellow-400 relative"
+                    : "border-white/20"
+                }`}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-blue-900 px-4 py-1 rounded-full font-bold text-sm">
+                    MOST POPULAR
+                  </div>
+                )}
+                
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {pkg.name}
+                  </h3>
+                  <p className="text-blue-100 text-sm mb-4">
+                    {pkg.description}
+                  </p>
+                  <div className="text-5xl font-bold text-white mb-2">
+                    {pkg.price}
+                  </div>
                 <p className="text-blue-100 text-sm">per person</p>
               </div>
 
@@ -129,14 +215,15 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
+        </div>
 
         {/* Optional Add-ons Section */}
-        <div className="mt-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-md rounded-2xl p-8 border-2 border-blue-400/50">
+        <div className="mt-8 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-md rounded-2xl p-8 border-2 border-blue-400/50">
           <h3 className="text-2xl font-bold text-white mb-4 text-center">
-            🎉 Optional Add-ons
+            💡 Add Events to Your Class Package
           </h3>
           <p className="text-blue-100 text-center mb-8">
-            Enhance your festival experience with these exclusive additions
+            Already chose a class package? You can add these events during registration!
           </p>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
@@ -157,7 +244,7 @@ export default function PricingPage() {
             </div>
           </div>
           <p className="text-center text-blue-100 text-sm mt-6">
-            💡 Add-ons can be selected during registration
+            💡 These can be added to any class package during registration
           </p>
         </div>
 
