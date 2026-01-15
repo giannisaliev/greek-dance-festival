@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { put } from "@vercel/blob";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
 
@@ -27,14 +26,6 @@ export async function POST(request: Request) {
 
     const uploadedUrls: string[] = [];
 
-    // Ensure uploads directory exists
-    const uploadsDir = join(process.cwd(), "public", "uploads", "hotels");
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      console.log("Directory creation skipped or already exists");
-    }
-
     for (const file of files) {
       if (!file || file.size === 0) {
         console.log("Skipping empty file");
@@ -44,23 +35,18 @@ export async function POST(request: Request) {
       console.log("Processing file:", file.name, "Size:", file.size);
 
       try {
-        // Convert file to buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
         // Create unique filename
         const timestamp = Date.now();
         const random = Math.floor(Math.random() * 1000);
-        const filename = `${timestamp}-${random}-${file.name.replace(/\s+/g, "-")}`;
+        const filename = `hotels/${timestamp}-${random}-${file.name.replace(/\s+/g, "-")}`;
         
-        // Save file
-        const filepath = join(uploadsDir, filename);
-        await writeFile(filepath, buffer);
-        console.log("File saved successfully:", filepath);
+        // Upload to Vercel Blob
+        const blob = await put(filename, file, {
+          access: 'public',
+        });
 
-        // Return the public URL path
-        const publicPath = `/uploads/hotels/${filename}`;
-        uploadedUrls.push(publicPath);
+        console.log("File uploaded successfully:", blob.url);
+        uploadedUrls.push(blob.url);
       } catch (fileError) {
         console.error("Error uploading individual file:", fileError);
         // Continue processing other files
