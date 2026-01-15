@@ -16,43 +16,62 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const files = formData.getAll("files") as File[];
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return NextResponse.json(
-        { error: "No file provided" },
+        { error: "No files provided" },
         { status: 400 }
       );
     }
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const uploadedUrls: string[] = [];
 
-    // Create unique filename
-    const timestamp = Date.now();
-    const filename = `${timestamp}-${file.name.replace(/\s+/g, "-")}`;
-    
     // Ensure uploads directory exists
     const uploadsDir = join(process.cwd(), "public", "uploads", "hotels");
     try {
       await mkdir(uploadsDir, { recursive: true });
     } catch (error) {
-      // Directory might already exist, ignore error
+      console.log("Directory creation skipped or already exists");
     }
 
-    // Save file
-    const filepath = join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
+    for (const file of files) {
+      if (!file || file.size === 0) continue;
 
-    // Return the public URL path
-    const publicPath = `/uploads/hotels/${filename}`;
+      try {
+        // Convert file to buffer
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-    return NextResponse.json({ url: publicPath }, { status: 200 });
+        // Create unique filename
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 1000);
+        const filename = `${timestamp}-${random}-${file.name.replace(/\s+/g, "-")}`;
+        
+        // Save file
+        const filepath = join(uploadsDir, filename);
+        await writeFile(filepath, buffer);
+
+        // Return the public URL path
+        const publicPath = `/uploads/hotels/${filename}`;
+        uploadedUrls.push(publicPath);
+      } catch (fileError) {
+        console.error("Error uploading individual file:", fileError);
+      }
+    }
+
+    if (uploadedUrls.length === 0) {
+      return NextResponse.json(
+        { error: "Failed to upload any files" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ urls: uploadedUrls }, { status: 200 });
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error uploading files:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: `Failed to upload files: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }

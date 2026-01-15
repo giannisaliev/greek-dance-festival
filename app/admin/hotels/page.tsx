@@ -164,7 +164,7 @@ export default function AdminHotelsPage() {
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("files", file);
 
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -173,14 +173,44 @@ export default function AdminHotelsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        return data.url;
+        return data.urls?.[0] || data.url;
       } else {
-        throw new Error("Upload failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Failed to upload file");
+      alert(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleMultipleFilesUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append("files", file);
+      });
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.urls || [];
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      alert(`Failed to upload files: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return [];
     } finally {
       setUploading(false);
     }
@@ -197,16 +227,18 @@ export default function AdminHotelsPage() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = await handleFileUpload(file);
-      if (url) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const urls = await handleMultipleFilesUpload(files);
+      if (urls.length > 0) {
         setFormData({
           ...formData,
-          images: [...formData.images, url],
+          images: [...formData.images, ...urls],
         });
       }
     }
+    // Reset the input
+    e.target.value = '';
   };
 
   const addImage = () => {
@@ -436,11 +468,15 @@ export default function AdminHotelsPage() {
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageUpload}
                     disabled={uploading}
                     className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-white hover:file:bg-green-600"
                   />
-                  {uploading && <p className="text-blue-200 text-sm mt-2">Uploading image...</p>}
+                  <p className="text-blue-200 text-sm mt-2">
+                    💡 You can select multiple images at once
+                  </p>
+                  {uploading && <p className="text-yellow-200 text-sm mt-2 animate-pulse">Uploading images...</p>}
                 </div>
                 <div className="space-y-2">
                   {formData.images.map((img, idx) => (
