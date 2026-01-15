@@ -330,22 +330,22 @@ export default function AdminPage() {
       <Navigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-8 border border-white/20">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white">Admin Dashboard</h2>
             <Link
               href="/admin/hotels"
-              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg"
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto text-center"
             >
               🏨 Manage Hotels
             </Link>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mb-8">
+          <div className="flex gap-2 sm:gap-4 mb-8 overflow-x-auto pb-2">
             <button
               onClick={() => setActiveTab("participants")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "participants"
                   ? "bg-white text-blue-900"
                   : "bg-white/20 text-white hover:bg-white/30"
@@ -355,17 +355,17 @@ export default function AdminPage() {
             </button>
             <button
               onClick={() => setActiveTab("schedule")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "schedule"
                   ? "bg-white text-blue-900"
                   : "bg-white/20 text-white hover:bg-white/30"
               }`}
             >
-              Schedule Management
+              Schedule
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "settings"
                   ? "bg-white text-blue-900"
                   : "bg-white/20 text-white hover:bg-white/30"
@@ -378,7 +378,7 @@ export default function AdminPage() {
                 setActiveTab("users");
                 fetchUsers();
               }}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
                 activeTab === "users"
                   ? "bg-white text-blue-900"
                   : "bg-white/20 text-white hover:bg-white/30"
@@ -392,34 +392,34 @@ export default function AdminPage() {
           {activeTab === "participants" && (
             <>
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <div className="text-3xl font-bold text-white mb-2">{stats.total}</div>
-                  <div className="text-blue-100">Total Participants</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+                <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                  <div className="text-2xl sm:text-3xl font-bold text-white mb-2">{stats.total}</div>
+                  <div className="text-blue-100 text-sm sm:text-base">Total Participants</div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <div className="text-3xl font-bold text-green-400 mb-2">{stats.checkedIn}</div>
-                  <div className="text-blue-100">Checked In</div>
+                <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">{stats.checkedIn}</div>
+                  <div className="text-blue-100 text-sm sm:text-base">Checked In</div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <div className="text-3xl font-bold text-yellow-400 mb-2">{stats.pending}</div>
-                  <div className="text-blue-100">Pending Check-in</div>
+                <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-2">{stats.pending}</div>
+                  <div className="text-blue-100 text-sm sm:text-base">Pending Check-in</div>
                 </div>
               </div>
 
               {/* Search */}
               <form onSubmit={handleSearch} className="mb-8">
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by name, email, or phone..."
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
                   />
                   <button
                     type="submit"
-                    className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                    className="px-6 sm:px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm sm:text-base"
                   >
                     Search
                   </button>
@@ -429,7 +429,7 @@ export default function AdminPage() {
                       setSearchQuery("");
                       fetchParticipants();
                     }}
-                    className="px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                    className="px-6 sm:px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm sm:text-base"
                   >
                     Clear
                   </button>
@@ -527,11 +527,11 @@ export default function AdminPage() {
 
               {/* Schedule Form */}
               {showScheduleForm && (
-                <form onSubmit={handleScheduleSubmit} className="bg-white/5 rounded-xl p-6 mb-8 border border-white/10">
-                  <h3 className="text-2xl font-bold text-white mb-6">
+                <form onSubmit={handleScheduleSubmit} className="bg-white/5 rounded-xl p-4 sm:p-6 mb-8 border border-white/10">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                     {editingSchedule ? "Edit Schedule Item" : "Add New Schedule Item"}
                   </h3>
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-white font-semibold mb-2">Day</label>
                       <select
@@ -943,22 +943,22 @@ export default function AdminPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                    <div className="text-3xl font-bold text-white mb-2">{users.length}</div>
-                    <div className="text-blue-100">Total Users</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                    <div className="text-2xl sm:text-3xl font-bold text-white mb-2">{users.length}</div>
+                    <div className="text-blue-100 text-sm sm:text-base">Total Users</div>
                   </div>
-                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                    <div className="text-3xl font-bold text-yellow-400 mb-2">
+                  <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                    <div className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-2">
                       {users.filter(u => u.isAdmin).length}
                     </div>
-                    <div className="text-blue-100">Admins</div>
+                    <div className="text-blue-100 text-sm sm:text-base">Admins</div>
                   </div>
-                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                    <div className="text-3xl font-bold text-green-400 mb-2">
+                  <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                    <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
                       {users.filter(u => u.emailVerified).length}
                     </div>
-                    <div className="text-blue-100">Verified Users</div>
+                    <div className="text-blue-100 text-sm sm:text-base">Verified Users</div>
                   </div>
                 </div>
               </div>

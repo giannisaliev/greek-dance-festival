@@ -243,7 +243,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="mt-12 pt-8 border-t border-white/20">
-                <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="grid md:grid-cols-2 gap-6 text-center">
                   <div>
                     <div className="text-3xl mb-2">📅</div>
                     <p className="text-white font-semibold mb-1">Festival Dates</p>
@@ -253,11 +253,6 @@ export default function RegisterPage() {
                     <div className="text-3xl mb-2">🎭</div>
                     <p className="text-white font-semibold mb-1">Dance Workshops</p>
                     <p className="text-blue-100 text-sm">All skill levels welcome</p>
-                  </div>
-                  <div>
-                    <div className="text-3xl mb-2">🎵</div>
-                    <p className="text-white font-semibold mb-1">Live Music</p>
-                    <p className="text-blue-100 text-sm">Traditional Greek bands</p>
                   </div>
                 </div>
               </div>

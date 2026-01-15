@@ -96,30 +96,30 @@ export default function Home() {
             <p className="text-white text-lg mb-6">
               Join us on <span className="font-bold">June 14, 2026 at 12:00 PM</span> (Athens time)
             </p>
-            <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-2xl mx-auto">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
+                <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.days}
                 </div>
-                <div className="text-blue-100 text-sm md:text-base">Days</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Days</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
+                <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.hours}
                 </div>
-                <div className="text-blue-100 text-sm md:text-base">Hours</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Hours</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
+                <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.minutes}
                 </div>
-                <div className="text-blue-100 text-sm md:text-base">Minutes</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Minutes</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
+                <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.seconds}
                 </div>
-                <div className="text-blue-100 text-sm md:text-base">Seconds</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Seconds</div>
               </div>
             </div>
             <p className="text-blue-100 mt-6 text-sm">
@@ -298,8 +298,8 @@ export default function Home() {
                 <span>Traditional Greek dance performances</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-2">🎵</span>
-                <span>Live music from renowned Greek musicians</span>
+                <span className="text-2xl mr-2">✨</span>
+                <span>Unforgettable experience</span>
               </li>
               <li className="flex items-start">
                 <span className="text-2xl mr-2">👥</span>
