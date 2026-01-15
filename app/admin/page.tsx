@@ -331,7 +331,15 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-          <h2 className="text-4xl font-bold text-white mb-8">Admin Dashboard</h2>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
+            <Link
+              href="/admin/hotels"
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg"
+            >
+              🏨 Manage Hotels
+            </Link>
+          </div>
 
           {/* Tabs */}
           <div className="flex gap-4 mb-8">

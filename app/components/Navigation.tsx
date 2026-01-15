@@ -15,6 +15,7 @@ export default function Navigation() {
     { href: "/", label: "Home" },
     { href: "/pricing", label: "Pricing" },
     { href: "/information", label: "Information" },
+    { href: "/hotel", label: "Hotel" },
     { href: "/register", label: "Register" },
   ];
 

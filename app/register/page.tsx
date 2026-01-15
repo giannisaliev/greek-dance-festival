@@ -585,7 +585,7 @@ export default function RegisterPage() {
                               <span className="text-white font-bold">+€40</span>
                             </div>
                             <p className="text-blue-100 text-sm">
-                              Enjoy an authentic Greek evening with traditional food, drinks, live music, and dancing under the stars
+                              Enjoy an authentic Greek evening with traditional food and drinks
                             </p>
                           </div>
                         </div>

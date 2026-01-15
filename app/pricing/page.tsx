@@ -144,7 +144,7 @@ export default function PricingPage() {
               <h4 className="font-bold text-white text-xl mb-2 text-center">Guinness Record Attempt</h4>
               <p className="text-green-400 font-bold text-2xl mb-3 text-center">+€30</p>
               <p className="text-blue-100 text-sm text-center">
-                Be part of history! Join our attempt to break the world record for the largest Greek dance performance. Certificate included!
+                Be part of history! Join our attempt to break the world record for the largest Greek dance performance Zeimpekiko. Certificate included!
               </p>
             </div>
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
@@ -152,7 +152,7 @@ export default function PricingPage() {
               <h4 className="font-bold text-white text-xl mb-2 text-center">Greek Night</h4>
               <p className="text-green-400 font-bold text-2xl mb-3 text-center">+€40</p>
               <p className="text-blue-100 text-sm text-center">
-                Enjoy an authentic Greek evening with traditional food, drinks, live music, and dancing under the stars. Unforgettable!
+                Enjoy an authentic Greek evening with traditional food and drinks. Unforgettable!
               </p>
             </div>
           </div>
@@ -168,20 +168,12 @@ export default function PricingPage() {
           </h3>
           <div className="grid md:grid-cols-2 gap-8 text-blue-100">
             <div>
-              <h4 className="font-bold text-white mb-2">Group Discounts</h4>
-              <p>Groups of 10 or more receive a 15% discount on all packages. Contact us for group registration.</p>
-            </div>
-            <div>
               <h4 className="font-bold text-white mb-2">Cancellation Policy</h4>
               <p>Full refund available up to 30 days before the event. 50% refund up to 14 days before.</p>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-2">What&apos;s Included</h4>
-              <p>All packages include access to performances, workshops, and cultural activities throughout the festival.</p>
-            </div>
-            <div>
               <h4 className="font-bold text-white mb-2">Need Help?</h4>
-              <p>Contact us at info@greekdancefestival.com or call +30 210 123 4567 for assistance.</p>
+              <p>Contact us at info@greekdancefestival.gr or call +30 6974 793912 for assistance.</p>
             </div>
           </div>
         </div>

@@ -96,3 +96,17 @@ model Settings {
   registrationMessage  String   @default("Registration opens on March 1st, 2026")
   updatedAt            DateTime @updatedAt
 }
+
+model Hotel {
+  id          String   @id @default(cuid())
+  name        String
+  stars       Int      // 1-5 star rating
+  location    String
+  description String?
+  images      String[] // Array of image URLs
+  prices      Json     // JSON object for different room types and prices
+  amenities   String[] // Array of amenities
+  order       Int      @default(0) // For sorting hotels
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
