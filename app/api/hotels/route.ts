@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, stars, location, description, images, prices, amenities, order } = body;
+    const { name, logo, stars, location, description, images, prices, amenities, order } = body;
 
     // Validate required fields
     if (!name || !stars || !location) {
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     const hotel = await prisma.hotel.create({
       data: {
         name,
+        logo: logo || null,
         stars: parseInt(stars),
         location,
         description: description || "",
@@ -155,7 +156,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, stars, location, description, images, prices, amenities, order } = body;
+    const { id, name, logo, stars, location, description, images, prices, amenities, order } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -168,6 +169,7 @@ export async function PUT(request: Request) {
       where: { id },
       data: {
         ...(name && { name }),
+        ...(logo !== undefined && { logo }),
         ...(stars && { stars: parseInt(stars) }),
         ...(location && { location }),
         ...(description !== undefined && { description }),

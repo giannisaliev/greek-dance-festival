@@ -100,10 +100,11 @@ model Settings {
 model Hotel {
   id          String   @id @default(cuid())
   name        String
+  logo        String?  // Path to hotel logo image
   stars       Int      // 1-5 star rating
-  location    String
+  location    String   // Google Maps embed URL
   description String?
-  images      String[] // Array of image URLs
+  images      String[] // Array of image paths (locally hosted)
   prices      Json     // JSON object for different room types and prices
   amenities   String[] // Array of amenities
   order       Int      @default(0) // For sorting hotels

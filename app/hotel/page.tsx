@@ -7,6 +7,7 @@ import Image from "next/image";
 interface Hotel {
   id: string;
   name: string;
+  logo?: string;
   stars: number;
   location: string;
   description?: string;
@@ -107,18 +108,24 @@ export default function HotelPage() {
           <div className="bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden border-2 border-white/20 shadow-2xl">
             {/* Hotel Header */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-4xl font-bold text-white mb-2">
-                    {hotels[selectedHotel].name}
-                  </h2>
-                  <div className="flex items-center gap-4 text-white">
-                    <span className="text-2xl">
-                      {renderStars(hotels[selectedHotel].stars)}
-                    </span>
-                    <span className="text-lg">
-                      📍 {hotels[selectedHotel].location}
-                    </span>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  {hotels[selectedHotel].logo && (
+                    <img
+                      src={hotels[selectedHotel].logo}
+                      alt={`${hotels[selectedHotel].name} logo`}
+                      className="w-20 h-20 object-contain bg-white/10 rounded-lg p-2"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-4xl font-bold text-white mb-2">
+                      {hotels[selectedHotel].name}
+                    </h2>
+                    <div className="flex items-center gap-4 text-white">
+                      <span className="text-2xl">
+                        {renderStars(hotels[selectedHotel].stars)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -128,6 +135,26 @@ export default function HotelPage() {
                 </p>
               )}
             </div>
+
+            {/* Google Maps */}
+            {hotels[selectedHotel].location && (
+              <div className="p-8 bg-white/5">
+                <h3 className="text-2xl font-bold text-white mb-6">
+                  📍 Location
+                </h3>
+                <div className="w-full h-96 rounded-xl overflow-hidden">
+                  <iframe
+                    src={hotels[selectedHotel].location}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+              </div>
+            )}
 
             {/* Hotel Images Gallery */}
             {hotels[selectedHotel].images.length > 0 && (

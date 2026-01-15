@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 interface Hotel {
   id: string;
   name: string;
+  logo?: string;
   stars: number;
   location: string;
   description?: string;
@@ -24,10 +25,12 @@ export default function AdminHotelsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     name: "",
+    logo: "",
     stars: 5,
     location: "",
     description: "",
@@ -70,6 +73,7 @@ export default function AdminHotelsPage() {
   const resetForm = () => {
     setFormData({
       name: "",
+      logo: "",
       stars: 5,
       location: "",
       description: "",
@@ -90,6 +94,7 @@ export default function AdminHotelsPage() {
     setEditingHotel(hotel);
     setFormData({
       name: hotel.name,
+      logo: hotel.logo || "",
       stars: hotel.stars,
       location: hotel.location,
       description: hotel.description || "",
@@ -152,6 +157,55 @@ export default function AdminHotelsPage() {
     } catch (error) {
       console.error("Error deleting hotel:", error);
       alert("Failed to delete hotel");
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.url;
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Failed to upload file");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = await handleFileUpload(file);
+      if (url) {
+        setFormData({ ...formData, logo: url });
+      }
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = await handleFileUpload(file);
+      if (url) {
+        setFormData({
+          ...formData,
+          images: [...formData.images, url],
+        });
+      }
     }
   };
 
@@ -259,6 +313,32 @@ export default function AdminHotelsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Hotel Logo */}
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Hotel Logo
+                </label>
+                <div className="flex items-center gap-4">
+                  {formData.logo && (
+                    <img
+                      src={formData.logo}
+                      alt="Hotel logo"
+                      className="w-20 h-20 object-contain rounded bg-white/10 p-2"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      disabled={uploading}
+                      className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                    />
+                    {uploading && <p className="text-blue-200 text-sm mt-2">Uploading...</p>}
+                  </div>
+                </div>
+              </div>
+
               {/* Basic Info */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -300,7 +380,7 @@ export default function AdminHotelsPage() {
 
               <div>
                 <label className="block text-white font-semibold mb-2">
-                  Location *
+                  Location (Google Maps Embed URL) *
                 </label>
                 <input
                   type="text"
@@ -310,8 +390,11 @@ export default function AdminHotelsPage() {
                     setFormData({ ...formData, location: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                  placeholder="e.g., Athens City Center, 2km from venue"
+                  placeholder="Paste Google Maps embed URL here"
                 />
+                <p className="text-blue-200 text-sm mt-2">
+                  💡 Go to Google Maps → Share → Embed a map → Copy the src URL from the iframe
+                </p>
               </div>
 
               <div>
@@ -347,24 +430,17 @@ export default function AdminHotelsPage() {
               {/* Images */}
               <div>
                 <label className="block text-white font-semibold mb-2">
-                  Room Images (URLs)
+                  Room Images
                 </label>
-                <div className="flex gap-2 mb-3">
+                <div className="mb-4">
                   <input
-                    type="url"
-                    value={imageInput}
-                    onChange={(e) => setImageInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addImage())}
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                    placeholder="https://example.com/image.jpg"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-white hover:file:bg-green-600"
                   />
-                  <button
-                    type="button"
-                    onClick={addImage}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-                  >
-                    Add
-                  </button>
+                  {uploading && <p className="text-blue-200 text-sm mt-2">Uploading image...</p>}
                 </div>
                 <div className="space-y-2">
                   {formData.images.map((img, idx) => (
