@@ -399,14 +399,30 @@ export default function AdminTeachersPage() {
                     )}
                   </div>
                   {formData.image && (
-                    <div className="mt-4 relative w-32 h-32 rounded-lg overflow-hidden">
-                      <Image
-                        src={formData.image}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
+                    <div className="mt-4 flex items-center gap-4">
+                      <div className="relative w-32 h-32 rounded-lg overflow-hidden">
+                        <Image
+                          src={formData.image}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      {editingTeacher && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageToCrop(formData.image);
+                            setShowCropModal(true);
+                            setCrop({ x: 0, y: 0 });
+                            setZoom(1);
+                          }}
+                          className="px-4 py-2 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition-colors text-sm"
+                        >
+                          Edit Image Position
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -530,8 +546,8 @@ export default function AdminTeachersPage() {
                   min={-50}
                   max={50}
                   step={1}
-                  value={crop.y}
-                  onChange={(e) => setCrop({ ...crop, y: Number(e.target.value) })}
+                  value={-crop.y}
+                  onChange={(e) => setCrop({ ...crop, y: -Number(e.target.value) })}
                   className="w-full"
                 />
               </div>
