@@ -15,11 +15,20 @@ export async function GET() {
           id: "settings",
           registrationOpen: false,
           registrationMessage: "Registration opens on March 1st, 2026",
+          showTbaTeachers: false,
+          tbaTeachersCount: 3,
         },
       });
     }
 
-    return NextResponse.json(settings);
+    // Ensure all fields exist (for backwards compatibility)
+    const response = {
+      ...settings,
+      showTbaTeachers: (settings as any).showTbaTeachers ?? false,
+      tbaTeachersCount: (settings as any).tbaTeachersCount ?? 3,
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching settings:", error);
     return NextResponse.json(
