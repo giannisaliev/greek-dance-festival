@@ -33,18 +33,22 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { registrationOpen, registrationMessage } = body;
+    const { registrationOpen, registrationMessage, showTbaTeachers, tbaTeachersCount } = body;
 
     const settings = await prisma.settings.upsert({
       where: { id: "settings" },
       update: {
         registrationOpen: registrationOpen ?? undefined,
         registrationMessage: registrationMessage ?? undefined,
+        showTbaTeachers: showTbaTeachers ?? undefined,
+        tbaTeachersCount: tbaTeachersCount ?? undefined,
       },
       create: {
         id: "settings",
         registrationOpen: registrationOpen ?? false,
         registrationMessage: registrationMessage ?? "Registration opens on March 1st, 2026",
+        showTbaTeachers: showTbaTeachers ?? false,
+        tbaTeachersCount: tbaTeachersCount ?? 3,
       },
     });
 

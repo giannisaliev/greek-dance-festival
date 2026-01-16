@@ -100,6 +100,8 @@ export default function AdminPage() {
   const [settings, setSettings] = useState({
     registrationOpen: false,
     registrationMessage: "Registration opens on March 1st, 2026",
+    showTbaTeachers: false,
+    tbaTeachersCount: 3,
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -157,6 +159,8 @@ export default function AdminPage() {
       setSettings({
         registrationOpen: data.registrationOpen || false,
         registrationMessage: data.registrationMessage || "Registration opens on March 1st, 2026",
+        showTbaTeachers: data.showTbaTeachers || false,
+        tbaTeachersCount: data.tbaTeachersCount || 3,
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -876,6 +880,62 @@ export default function AdminPage() {
                     >
                       <div className="text-red-400 font-bold text-lg mb-1">Close Registration</div>
                       <div className="text-red-200 text-sm">Stop accepting new registrations</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* TBA Teachers Settings */}
+                <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-4">TBA Teacher Cards</h3>
+                  <p className="text-blue-100 mb-6">
+                    Show placeholder cards for teachers that will be announced soon
+                  </p>
+                  
+                  <div className="space-y-6">
+                    {/* Toggle TBA Teachers */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-white font-semibold">Show TBA Cards</div>
+                        <div className="text-blue-200 text-sm">Display placeholder cards on the Teachers page</div>
+                      </div>
+                      <button
+                        onClick={() => setSettings({ ...settings, showTbaTeachers: !settings.showTbaTeachers })}
+                        className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                          settings.showTbaTeachers ? 'bg-green-500' : 'bg-white/20'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                            settings.showTbaTeachers ? 'translate-x-7' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Number of TBA Cards */}
+                    {settings.showTbaTeachers && (
+                      <div>
+                        <label className="block text-white font-semibold mb-2">Number of TBA Cards</label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="range"
+                            min={1}
+                            max={10}
+                            value={settings.tbaTeachersCount}
+                            onChange={(e) => setSettings({ ...settings, tbaTeachersCount: Number(e.target.value) })}
+                            className="flex-1"
+                          />
+                          <span className="text-white font-bold text-xl min-w-[40px] text-center">{settings.tbaTeachersCount}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={saveSettings}
+                      disabled={settingsLoading}
+                      className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    >
+                      {settingsLoading ? 'Saving...' : 'Save TBA Settings'}
                     </button>
                   </div>
                 </div>

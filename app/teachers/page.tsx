@@ -16,6 +16,11 @@ interface Teacher {
   facebook?: string;
 }
 
+interface Settings {
+  showTbaTeachers: boolean;
+  tbaTeachersCount: number;
+}
+
 // Function to get flag emoji from country code
 const getFlagEmoji = (countryCode: string) => {
   const codePoints = countryCode
@@ -33,23 +38,36 @@ const getFlagUrl = (countryCode: string) => {
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings>({ showTbaTeachers: false, tbaTeachersCount: 3 });
 
   useEffect(() => {
-    async function fetchTeachers() {
+    async function fetchData() {
       try {
-        const res = await fetch('/api/teachers');
-        if (res.ok) {
-          const data = await res.json();
+        const [teachersRes, settingsRes] = await Promise.all([
+          fetch('/api/teachers'),
+          fetch('/api/settings')
+        ]);
+        
+        if (teachersRes.ok) {
+          const data = await teachersRes.json();
           setTeachers(data || []);
         }
+        
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          setSettings({
+            showTbaTeachers: settingsData.showTbaTeachers ?? false,
+            tbaTeachersCount: settingsData.tbaTeachersCount ?? 3
+          });
+        }
       } catch (error) {
-        console.error('Error fetching teachers:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setIsLoading(false);
       }
     }
     
-    fetchTeachers();
+    fetchData();
   }, []);
 
   return (
@@ -60,7 +78,7 @@ export default function TeachersPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Our Teachers
+            Teachers
           </h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto">
             Meet the exceptional instructors who will guide you through the beautiful world of Greek dance
@@ -178,6 +196,51 @@ export default function TeachersPage() {
 
                   {/* Decorative bottom line */}
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                </div>
+              </div>
+            ))}
+            
+            {/* TBA Teacher Cards */}
+            {settings.showTbaTeachers && Array.from({ length: settings.tbaTeachersCount }).map((_, index) => (
+              <div
+                key={`tba-${index}`}
+                className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl border border-white/20 transition-all duration-500"
+              >
+                {/* TBA Badge */}
+                <div className="absolute top-4 right-4 z-50">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full px-4 py-1.5 shadow-xl">
+                    <span className="text-white font-bold text-sm">TBA</span>
+                  </div>
+                </div>
+
+                {/* Placeholder Image */}
+                <div className="relative h-80 overflow-hidden rounded-t-2xl bg-gradient-to-br from-blue-800/50 to-purple-800/50 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-8xl mb-4 opacity-50">👤</div>
+                  </div>
+                  
+                  {/* Name overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                    <h3 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
+                      To Be Announced
+                    </h3>
+                    <div className="flex items-center gap-2 text-blue-200">
+                      <span className="font-semibold">Coming Soon</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Placeholder Content */}
+                <div className="relative p-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl opacity-50">💃</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-blue-200 mb-1">Teaching Style</h4>
+                      <p className="text-blue-100/70 leading-relaxed italic">
+                        More amazing instructors coming soon...
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

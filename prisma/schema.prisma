@@ -96,6 +96,8 @@ model Settings {
   id                   String   @id @default("settings")
   registrationOpen     Boolean  @default(false)
   registrationMessage  String   @default("Registration opens on March 1st, 2026")
+  showTbaTeachers      Boolean  @default(false)
+  tbaTeachersCount     Int      @default(3)
   updatedAt            DateTime @updatedAt
 }
 
