@@ -25,6 +25,11 @@ const getFlagEmoji = (countryCode: string) => {
   return String.fromCodePoint(...codePoints);
 };
 
+// Function to get flag image URL from country code
+const getFlagUrl = (countryCode: string) => {
+  return `https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`;
+};
+
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,8 +92,12 @@ export default function TeachersPage() {
               >
                 {/* Country Flag Badge - positioned outside overflow container */}
                 <div className="absolute top-4 right-4 z-50">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-xl border border-white/50">
-                    <span className="text-3xl">{getFlagEmoji(teacher.countryCode)}</span>
+                  <div className="bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-xl border border-white/50">
+                    <img 
+                      src={getFlagUrl(teacher.countryCode)} 
+                      alt={teacher.country}
+                      className="w-8 h-6 object-cover rounded-sm"
+                    />
                   </div>
                 </div>
 
@@ -113,7 +122,11 @@ export default function TeachersPage() {
                       {teacher.name}
                     </h3>
                     <div className="flex items-center gap-2 text-blue-100">
-                      <span className="text-lg">{getFlagEmoji(teacher.countryCode)}</span>
+                      <img 
+                        src={getFlagUrl(teacher.countryCode)} 
+                        alt={teacher.country}
+                        className="w-6 h-4 object-cover rounded-sm"
+                      />
                       <span className="font-semibold">{teacher.country}</span>
                     </div>
                   </div>
