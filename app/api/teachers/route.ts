@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, image, teachingStyle, country, countryCode } = body;
+    const { name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook } = body;
 
     if (!name || !image || !teachingStyle || !country || !countryCode) {
       return NextResponse.json(
@@ -51,6 +51,9 @@ export async function POST(request: Request) {
         teachingStyle,
         country,
         countryCode,
+        imagePadding: imagePadding || 0,
+        instagram: instagram || null,
+        facebook: facebook || null,
       },
     });
 
@@ -77,7 +80,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, image, teachingStyle, country, countryCode } = body;
+    const { id, name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -94,6 +97,9 @@ export async function PUT(request: Request) {
         teachingStyle,
         country,
         countryCode,
+        imagePadding: imagePadding !== undefined ? imagePadding : 0,
+        instagram: instagram || null,
+        facebook: facebook || null,
       },
     });
 
