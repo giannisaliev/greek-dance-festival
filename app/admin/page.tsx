@@ -333,12 +333,20 @@ export default function AdminPage() {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-8 border border-white/20">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <h2 className="text-2xl sm:text-4xl font-bold text-white">Admin Dashboard</h2>
-            <Link
-              href="/admin/hotels"
-              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto text-center"
-            >
-              🏨 Manage Hotels
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <Link
+                href="/admin/hotels"
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                🏨 Manage Hotels
+              </Link>
+              <Link
+                href="/admin/teachers"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                👨‍🏫 Manage Teachers
+              </Link>
+            </div>
           </div>
 
           {/* Tabs */}

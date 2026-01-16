@@ -99,6 +99,17 @@ model Settings {
   updatedAt            DateTime @updatedAt
 }
 
+model Teacher {
+  id            String   @id @default(cuid())
+  name          String
+  image         String   // URL to teacher image (Vercel Blob)
+  teachingStyle String
+  country       String   // Country name
+  countryCode   String   // ISO 3166-1 alpha-2 country code for flag
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Hotel {
   id          String   @id @default(cuid())
   name        String
