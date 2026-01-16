@@ -87,14 +87,14 @@ export default function TeachersPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 {/* Country Flag Badge */}
-                <div className="absolute top-4 right-4 z-10">
+                <div className="absolute top-4 right-4 z-30">
                   <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
                     <span className="text-3xl">{getFlagEmoji(teacher.countryCode)}</span>
                   </div>
                 </div>
 
                 {/* Teacher Image */}
-                <div className="relative h-80 overflow-hidden" style={{ paddingTop: `${teacher.imagePadding || 0}px` }}>
+                <div className="relative h-80 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                   <Image
                     src={teacher.image}
@@ -102,6 +102,7 @@ export default function TeachersPage() {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     unoptimized
+                    style={{ objectPosition: `center ${teacher.imagePadding || 0}px` }}
                   />
                   
                   {/* Name overlay on image */}

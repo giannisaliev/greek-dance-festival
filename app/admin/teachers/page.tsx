@@ -488,15 +488,16 @@ export default function AdminTeachersPage() {
                   key={teacher.id}
                   className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all"
                 >
-                  <div className="relative h-64" style={{ paddingTop: `${teacher.imagePadding || 0}px` }}>
+                  <div className="relative h-64">
                     <Image
                       src={teacher.image}
                       alt={teacher.name}
                       fill
                       className="object-cover"
                       unoptimized
+                      style={{ objectPosition: `center ${teacher.imagePadding || 0}px` }}
                     />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                    <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
                       <span className="text-2xl">{getFlagEmoji(teacher.countryCode)}</span>
                     </div>
                   </div>
