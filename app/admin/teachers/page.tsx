@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "../../components/Navigation";
 import Image from "next/image";
+import Cropper from "react-easy-crop";
+import type { Point, Area } from "react-easy-crop";
 
 interface Teacher {
   id: string;
@@ -69,6 +71,13 @@ export default function AdminTeachersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   
+  // Image cropping states
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  
   const [formData, setFormData] = useState({
     name: "",
     image: "",
@@ -110,27 +119,80 @@ export default function AdminTeachersPage() {
     fetchTeachers();
   }, []);
 
-  // Handle image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
+    const image = document.createElement('img');
+    image.src = imageSrc;
+    await new Promise((resolve) => {
+      image.onload = resolve;
+    });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas context not available');
+
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+      }, 'image/jpeg', 0.95);
+    });
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+      setShowCropModal(true);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropSave = async () => {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
     setUploadingImage(true);
     try {
-      const formData = new FormData();
-      formData.append("files", file);
+      const croppedBlob = await createCroppedImage(imageToCrop, croppedAreaPixels);
+      
+      const formDataUpload = new FormData();
+      formDataUpload.append("files", croppedBlob, "teacher-photo.jpg");
 
       const response = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        body: formDataUpload,
       });
 
       const data = await response.json();
       if (data.urls && data.urls.length > 0) {
         setFormData((prev) => ({ ...prev, image: data.urls[0] }));
       }
+      setShowCropModal(false);
+      setImageToCrop(null);
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Upload error:", error);
       alert("Failed to upload image");
     } finally {
       setUploadingImage(false);
@@ -329,7 +391,7 @@ export default function AdminTeachersPage() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleImageUpload}
+                      onChange={handleImageSelect}
                       className="block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-blue-900 hover:file:bg-blue-50 file:cursor-pointer"
                     />
                     {uploadingImage && (
@@ -428,6 +490,60 @@ export default function AdminTeachersPage() {
           )}
         </div>
       </div>
+
+      {/* Image Crop Modal */}
+      {showCropModal && imageToCrop && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-blue-900 to-blue-700 rounded-2xl p-6 max-w-2xl w-full border border-white/20">
+            <h3 className="text-2xl font-bold text-white mb-4">Position Your Image</h3>
+            
+            <div className="relative w-full h-96 bg-black/30 rounded-lg overflow-hidden">
+              <Cropper
+                image={imageToCrop}
+                crop={crop}
+                zoom={zoom}
+                aspect={3 / 4}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-white font-semibold mb-2">Zoom</label>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            <div className="mt-6 flex gap-4">
+              <button
+                onClick={() => {
+                  setShowCropModal(false);
+                  setImageToCrop(null);
+                }}
+                disabled={uploadingImage}
+                className="flex-1 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCropSave}
+                disabled={uploadingImage}
+                className="flex-1 px-6 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+              >
+                {uploadingImage ? "Uploading..." : "Save & Upload"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
