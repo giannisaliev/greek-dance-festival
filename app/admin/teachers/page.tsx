@@ -343,6 +343,7 @@ export default function AdminTeachersPage() {
                         alt="Preview"
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     </div>
                   )}
@@ -391,6 +392,7 @@ export default function AdminTeachersPage() {
                       alt={teacher.name}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
                       <span className="text-2xl">{getFlagEmoji(teacher.countryCode)}</span>

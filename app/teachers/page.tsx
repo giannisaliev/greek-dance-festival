@@ -100,6 +100,7 @@ export default function TeachersPage() {
                     alt={teacher.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    unoptimized
                   />
                   
                   {/* Name overlay on image */}
