@@ -509,17 +509,54 @@ export default function AdminTeachersPage() {
               />
             </div>
 
-            <div className="mt-6">
-              <label className="block text-white font-semibold mb-2">Zoom</label>
-              <input
-                type="range"
-                min={1}
-                max={3}
-                step={0.1}
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full"
-              />
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white font-semibold mb-2">Zoom</label>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-white font-semibold mb-2">Vertical Position</label>
+                <input
+                  type="range"
+                  min={-50}
+                  max={50}
+                  step={1}
+                  value={crop.y}
+                  onChange={(e) => setCrop({ ...crop, y: Number(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">Horizontal Position</label>
+                <input
+                  type="range"
+                  min={-50}
+                  max={50}
+                  step={1}
+                  value={crop.x}
+                  onChange={(e) => setCrop({ ...crop, x: Number(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex items-end gap-2">
+                <button
+                  onClick={() => setCrop({ x: 0, y: 0 })}
+                  className="px-4 py-2 bg-white/20 text-white rounded-lg text-sm font-semibold hover:bg-white/30 transition-colors"
+                >
+                  Reset Position
+                </button>
+              </div>
             </div>
 
             <div className="mt-6 flex gap-4">
