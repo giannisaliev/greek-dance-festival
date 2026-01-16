@@ -107,6 +107,8 @@ model Teacher {
   country       String   // Country name
   countryCode   String   // ISO 3166-1 alpha-2 country code for flag
   imagePadding  Int      @default(0) // Top padding for image display (0-100)
+  instagram     String?  // Instagram handle or URL (optional)
+  facebook      String?  // Facebook profile URL (optional)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
