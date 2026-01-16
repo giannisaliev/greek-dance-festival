@@ -16,6 +16,7 @@ interface Teacher {
   teachingStyle: string;
   country: string;
   countryCode: string;
+  imagePadding: number;
 }
 
 // Popular countries with their codes
@@ -84,6 +85,7 @@ export default function AdminTeachersPage() {
     teachingStyle: "",
     country: "",
     countryCode: "",
+    imagePadding: 0,
   });
 
   // Check authentication
@@ -125,9 +127,11 @@ export default function AdminTeachersPage() {
 
   const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
     const image = document.createElement('img');
+    image.crossOrigin = 'anonymous';
     image.src = imageSrc;
-    await new Promise((resolve) => {
+    await new Promise((resolve, reject) => {
       image.onload = resolve;
+      image.onerror = reject;
     });
 
     const canvas = document.createElement('canvas');
@@ -241,6 +245,7 @@ export default function AdminTeachersPage() {
           teachingStyle: "",
           country: "",
           countryCode: "",
+          imagePadding: 0,
         });
       } else {
         alert("Failed to save teacher");
@@ -262,6 +267,7 @@ export default function AdminTeachersPage() {
       teachingStyle: teacher.teachingStyle,
       country: teacher.country,
       countryCode: teacher.countryCode,
+      imagePadding: teacher.imagePadding || 0,
     });
     setShowForm(true);
   };
@@ -320,6 +326,7 @@ export default function AdminTeachersPage() {
                     teachingStyle: "",
                     country: "",
                     countryCode: "",
+                    imagePadding: 0,
                   });
                 }}
                 className="bg-white text-blue-900 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all"
@@ -426,6 +433,23 @@ export default function AdminTeachersPage() {
                     </div>
                   )}
                 </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-white font-semibold mb-2">Image Top Padding (for card display)</label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={formData.imagePadding}
+                      onChange={(e) => setFormData({ ...formData, imagePadding: Number(e.target.value) })}
+                      className="flex-1"
+                    />
+                    <span className="text-white font-semibold min-w-[60px]">{formData.imagePadding}px</span>
+                  </div>
+                  <p className="text-blue-200 text-sm mt-1">Adjust how low the image appears in the teacher card</p>
+                </div>
               </div>
 
               <div className="mt-6 flex gap-4">
@@ -464,7 +488,7 @@ export default function AdminTeachersPage() {
                   key={teacher.id}
                   className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all"
                 >
-                  <div className="relative h-64">
+                  <div className="relative h-64" style={{ paddingTop: `${teacher.imagePadding || 0}px` }}>
                     <Image
                       src={teacher.image}
                       alt={teacher.name}

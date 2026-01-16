@@ -11,6 +11,7 @@ interface Teacher {
   teachingStyle: string;
   country: string;
   countryCode: string;
+  imagePadding: number;
 }
 
 // Function to get flag emoji from country code
@@ -93,7 +94,7 @@ export default function TeachersPage() {
                 </div>
 
                 {/* Teacher Image */}
-                <div className="relative h-80 overflow-hidden">
+                <div className="relative h-80 overflow-hidden" style={{ paddingTop: `${teacher.imagePadding || 0}px` }}>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                   <Image
                     src={teacher.image}
