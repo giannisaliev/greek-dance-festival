@@ -83,20 +83,20 @@ export default function TeachersPage() {
             {teachers.map((teacher) => (
               <div
                 key={teacher.id}
-                className="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
+                className="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
               >
+                {/* Country Flag Badge - positioned outside overflow container */}
+                <div className="absolute top-4 right-4 z-50">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-xl border border-white/50">
+                    <span className="text-3xl">{getFlagEmoji(teacher.countryCode)}</span>
+                  </div>
+                </div>
+
                 {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
                 
                 {/* Teacher Image */}
-                <div className="relative h-80 overflow-hidden">
-                  {/* Country Flag Badge */}
-                  <div className="absolute top-4 right-4 z-30">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                      <span className="text-3xl">{getFlagEmoji(teacher.countryCode)}</span>
-                    </div>
-                  </div>
-                  
+                <div className="relative h-80 overflow-hidden rounded-t-2xl">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                   <Image
                     src={teacher.image}
