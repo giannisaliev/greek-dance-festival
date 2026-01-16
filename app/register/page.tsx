@@ -435,6 +435,20 @@ export default function RegisterPage() {
               ))}
             </div>
             
+            {/* Zeimpekiko Choreography Notice for Step 1 */}
+            <div className="max-w-3xl mx-auto mt-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 border-2 border-purple-400/50">
+              <div className="flex items-start gap-3">
+                <div className="text-3xl flex-shrink-0">🎬</div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-2">Zeimpekiko Choreography Video</h3>
+                  <p className="text-blue-100 text-sm leading-relaxed">
+                    The Zeimpekiko choreography video will be sent to your email in April. 
+                    <span className="font-semibold text-white"> You must be registered for the Guinness Record to receive the video.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex justify-center mt-10">
               <button
                 onClick={() => setStep(2)}
