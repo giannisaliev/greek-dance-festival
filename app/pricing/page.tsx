@@ -53,7 +53,7 @@ const packages = [
   },
   {
     name: "Enthusiast Pass",
-    price: "€200",
+    price: "€160",
     description: "For serious dance enthusiasts",
     features: [
       "Access to 8 classes",
@@ -66,7 +66,7 @@ const packages = [
   },
   {
     name: "Full Pass",
-    price: "€290",
+    price: "€260",
     description: "The ultimate festival experience",
     features: [
       "Access to all 24 classes",
