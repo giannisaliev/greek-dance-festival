@@ -4,52 +4,44 @@ import { prisma } from "@/lib/prisma";
 // GET settings (public)
 export async function GET() {
   try {
-    let settings = await prisma.settings.findUnique({
-      where: { id: "settings" },
-    });
+    // Use raw query to handle missing columns gracefully
+    const settings: any = await prisma.$queryRaw`
+      SELECT * FROM "Settings" WHERE id = 'settings' LIMIT 1
+    `;
 
-    // Create default settings if they don't exist
-    if (!settings) {
+    if (!settings || settings.length === 0) {
+      // Create default settings
       try {
-        settings = await prisma.settings.create({
-          data: {
-            id: "settings",
-            registrationOpen: false,
-            registrationMessage: "Registration opens on March 1st, 2026",
-            showTbaTeachers: false,
-            tbaTeachersCount: 3,
-          },
-        });
-      } catch (createError: any) {
-        // If new fields don't exist in schema yet, create without them
-        if (createError.message?.includes('Unknown field')) {
-          settings = await prisma.settings.create({
-            data: {
-              id: "settings",
-              registrationOpen: false,
-              registrationMessage: "Registration opens on March 1st, 2026",
-            },
-          });
-        } else {
-          throw createError;
-        }
+        await prisma.$executeRaw`
+          INSERT INTO "Settings" (id, "registrationOpen", "registrationMessage", "updatedAt")
+          VALUES ('settings', false, 'Registration opens on March 1st, 2026', NOW())
+        `;
+      } catch (e) {
+        // Settings might already exist, ignore error
       }
+
+      return NextResponse.json({
+        id: "settings",
+        registrationOpen: false,
+        registrationMessage: "Registration opens on March 1st, 2026",
+        showTbaTeachers: false,
+        tbaTeachersCount: 3,
+      });
     }
 
-    // Ensure all fields exist (for backwards compatibility)
-    const response = {
-      id: settings.id,
-      registrationOpen: settings.registrationOpen,
-      registrationMessage: settings.registrationMessage,
-      showTbaTeachers: (settings as any).showTbaTeachers ?? false,
-      tbaTeachersCount: (settings as any).tbaTeachersCount ?? 3,
-      updatedAt: settings.updatedAt,
-    };
-
-    return NextResponse.json(response);
+    const setting = settings[0];
+    
+    return NextResponse.json({
+      id: setting.id,
+      registrationOpen: setting.registrationOpen || false,
+      registrationMessage: setting.registrationMessage || "Registration opens on March 1st, 2026",
+      showTbaTeachers: setting.showTbaTeachers ?? false,
+      tbaTeachersCount: setting.tbaTeachersCount ?? 3,
+      updatedAt: setting.updatedAt,
+    });
   } catch (error: any) {
     console.error("Error fetching settings:", error);
-    // Return default values if there's an error
+    // Return default values on any error
     return NextResponse.json({
       id: "settings",
       registrationOpen: false,
@@ -60,56 +52,64 @@ export async function GET() {
   }
 }
 
+// Helper to check if TBA columns exist
+async function checkTbaColumnsExist(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`
+      SELECT "showTbaTeachers", "tbaTeachersCount" FROM "Settings" LIMIT 1
+    `;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // PUT update settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { registrationOpen, registrationMessage, showTbaTeachers, tbaTeachersCount } = body;
 
-    // Try to update with all fields
-    try {
-      const settings = await prisma.settings.upsert({
-        where: { id: "settings" },
-        update: {
-          registrationOpen: registrationOpen ?? undefined,
-          registrationMessage: registrationMessage ?? undefined,
-          showTbaTeachers: showTbaTeachers ?? undefined,
-          tbaTeachersCount: tbaTeachersCount ?? undefined,
-        },
-        create: {
-          id: "settings",
-          registrationOpen: registrationOpen ?? false,
-          registrationMessage: registrationMessage ?? "Registration opens on March 1st, 2026",
-          showTbaTeachers: showTbaTeachers ?? false,
-          tbaTeachersCount: tbaTeachersCount ?? 3,
-        },
-      });
+    // Check if TBA columns exist
+    const hasNewColumns = await checkTbaColumnsExist();
 
-      return NextResponse.json(settings);
-    } catch (updateError: any) {
-      // If new fields don't exist, update without them
-      if (updateError.message?.includes('Unknown field')) {
-        const settings = await prisma.settings.upsert({
-          where: { id: "settings" },
-          update: {
-            registrationOpen: registrationOpen ?? undefined,
-            registrationMessage: registrationMessage ?? undefined,
-          },
-          create: {
-            id: "settings",
-            registrationOpen: registrationOpen ?? false,
-            registrationMessage: registrationMessage ?? "Registration opens on March 1st, 2026",
-          },
-        });
-
-        return NextResponse.json({
-          ...settings,
-          showTbaTeachers: showTbaTeachers ?? false,
-          tbaTeachersCount: tbaTeachersCount ?? 3,
-        });
-      }
-      throw updateError;
+    if (hasNewColumns) {
+      // Update with all fields
+      await prisma.$executeRaw`
+        UPDATE "Settings" 
+        SET "registrationOpen" = ${registrationOpen ?? false},
+            "registrationMessage" = ${registrationMessage ?? "Registration opens on March 1st, 2026"},
+            "showTbaTeachers" = ${showTbaTeachers ?? false},
+            "tbaTeachersCount" = ${tbaTeachersCount ?? 3},
+            "updatedAt" = NOW()
+        WHERE id = 'settings'
+      `;
+    } else {
+      // Update only basic fields
+      await prisma.$executeRaw`
+        UPDATE "Settings" 
+        SET "registrationOpen" = ${registrationOpen ?? false},
+            "registrationMessage" = ${registrationMessage ?? "Registration opens on March 1st, 2026"},
+            "updatedAt" = NOW()
+        WHERE id = 'settings'
+      `;
     }
+
+    // Return the updated settings
+    const settings: any = await prisma.$queryRaw`
+      SELECT * FROM "Settings" WHERE id = 'settings' LIMIT 1
+    `;
+
+    const setting = settings[0];
+    
+    return NextResponse.json({
+      id: setting.id,
+      registrationOpen: setting.registrationOpen || false,
+      registrationMessage: setting.registrationMessage || "Registration opens on March 1st, 2026",
+      showTbaTeachers: setting.showTbaTeachers ?? showTbaTeachers ?? false,
+      tbaTeachersCount: setting.tbaTeachersCount ?? tbaTeachersCount ?? 3,
+      updatedAt: setting.updatedAt,
+    });
   } catch (error: any) {
     console.error("Error updating settings:", error);
     return NextResponse.json(
