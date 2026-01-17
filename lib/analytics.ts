@@ -3,6 +3,23 @@
 import { useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 
+// Convert path to friendly page name
+function getPageName(path: string): string {
+  const pathMap: Record<string, string> = {
+    "/": "Home",
+    "/pricing": "Pricing",
+    "/register": "Registration",
+    "/information": "Information",
+    "/login": "Login",
+    "/signup": "Sign Up",
+    "/dashboard": "Dashboard",
+    "/admin": "Admin Panel",
+    "/admin/analytics": "Admin Analytics",
+  };
+  
+  return pathMap[path] || path;
+}
+
 // Generate a unique session ID for tracking
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -50,19 +67,22 @@ export function useAnalytics() {
   // Track page view with time spent on previous page
   useEffect(() => {
     const page = pathname || "/";
+    const pageName = getPageName(page);
+    const previousPageName = getPageName(currentPage.current);
     
     // Track time spent on previous page
     if (currentPage.current !== page) {
       const timeSpent = Date.now() - pageStartTime.current;
-      trackEvent("page_leave", `leave_${currentPage.current}`, currentPage.current, {
+      trackEvent("page_leave", `${previousPageName}`, currentPage.current, {
         timeSpentMs: timeSpent,
         timeSpentSeconds: Math.round(timeSpent / 1000),
         nextPage: page,
+        nextPageName: pageName,
       });
     }
 
     // Track entering new page
-    trackEvent("page_view", `view_${page}`, page, {
+    trackEvent("page_view", `${pageName}`, page, {
       fullUrl: typeof window !== "undefined" ? window.location.href : "",
       referrer: typeof document !== "undefined" ? document.referrer : "",
       screenWidth: typeof window !== "undefined" ? window.screen.width : 0,
@@ -78,7 +98,8 @@ export function useAnalytics() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       const timeSpent = Date.now() - pageStartTime.current;
-      trackEvent("page_leave", `leave_${currentPage.current}`, currentPage.current, {
+      const pageName = getPageName(currentPage.current);
+      trackEvent("page_leave", `${pageName}`, currentPage.current, {
         timeSpentMs: timeSpent,
         timeSpentSeconds: Math.round(timeSpent / 1000),
         reason: "window_close",

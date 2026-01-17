@@ -40,24 +40,79 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         timestamp: new Date().toISOString(),
       };
 
+      // Generate descriptive event name
+      const getDescriptiveName = (element: HTMLElement): string => {
+        // Priority 1: aria-label (most descriptive)
+        const ariaLabel = element.getAttribute("aria-label");
+        if (ariaLabel) return ariaLabel;
+        
+        // Priority 2: title attribute
+        const title = element.getAttribute("title");
+        if (title) return title;
+        
+        // Priority 3: data-analytics-name or data-name
+        const dataName = element.getAttribute("data-analytics-name") || element.getAttribute("data-name");
+        if (dataName) return dataName;
+        
+        // Priority 4: For links, combine text with href context
+        if (link) {
+          const text = element.textContent?.trim() || "";
+          const href = link.getAttribute("href") || "";
+          
+          // Special cases for social media links
+          if (href.includes("instagram.com")) return `Instagram - ${text}`;
+          if (href.includes("facebook.com")) return `Facebook - ${text}`;
+          if (href.includes("twitter.com") || href.includes("x.com")) return `Twitter - ${text}`;
+          if (href.includes("youtube.com")) return `YouTube - ${text}`;
+          if (href.includes("linkedin.com")) return `LinkedIn - ${text}`;
+          
+          // For internal links, show destination
+          if (href.startsWith("/")) {
+            return text ? `${text} (→ ${href})` : `Navigate to ${href}`;
+          }
+          
+          return text || `Link to ${href}`;
+        }
+        
+        // Priority 5: Button text with parent context
+        if (button) {
+          let text = element.textContent?.trim() || "";
+          
+          // Look for context in parent elements
+          let parent = element.parentElement;
+          let depth = 0;
+          while (parent && depth < 3) {
+            const parentText = parent.getAttribute("data-section") || parent.getAttribute("data-context");
+            if (parentText) {
+              return `${text} (${parentText})`;
+            }
+            parent = parent.parentElement;
+            depth++;
+          }
+          
+          return text || "Button";
+        }
+        
+        // Priority 6: Element text content
+        return element.textContent?.trim().substring(0, 50) || "Element";
+      };
+
+      const descriptiveName = getDescriptiveName(clickedElement);
+
       if (link) {
         const href = link.getAttribute("href");
-        const text = link.textContent?.trim() || "Unknown Link";
         analytics.trackNavigation(href || "unknown", { 
-          linkText: text,
+          linkText: descriptiveName,
           ...elementDetails,
           clickType: "link",
         });
       } else if (button) {
-        const text = button.textContent?.trim() || "Unknown Button";
-        analytics.trackClick(text, { 
+        analytics.trackClick(descriptiveName, { 
           ...elementDetails,
           clickType: "button",
         });
       } else {
-        // Track other clickable elements
-        const text = clickedElement.textContent?.trim().substring(0, 50) || "Unknown Element";
-        analytics.trackClick(text, {
+        analytics.trackClick(descriptiveName, {
           ...elementDetails,
           clickType: "element",
         });
