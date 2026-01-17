@@ -350,6 +350,12 @@ export default function AdminPage() {
               >
                 👨‍🏫 Manage Teachers
               </Link>
+              <Link
+                href="/admin/attractions"
+                className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-green-600 hover:to-teal-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                🏛️ Manage Attractions
+              </Link>
             </div>
           </div>
 

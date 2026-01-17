@@ -129,3 +129,14 @@ model Hotel {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Attraction {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       String   // Image URL
+  badge       String   // Short info text (e.g., "15 min walk from waterfront")
+  order       Int      @default(0) // For sorting attractions
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
