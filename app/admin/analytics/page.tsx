@@ -12,6 +12,7 @@ interface Statistics {
   eventsByType: Record<string, number>;
   topPages: { page: string; count: number }[];
   topEvents: { event: string; count: number }[];
+  pageTimeStats?: { page: string; avgTimeSeconds: number; totalTimeSeconds: number; visits: number }[];
   eventsOverTime: { time: string; count: number }[];
 }
 
@@ -35,6 +36,8 @@ export default function AnalyticsPage() {
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [migrationMessage, setMigrationMessage] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<RecentEvent | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -273,6 +276,42 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
+            {/* Page Time Statistics */}
+            {statistics.pageTimeStats && statistics.pageTimeStats.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20">
+                <h2 className="text-2xl font-bold text-white mb-4">⏱️ Time Spent on Pages</h2>
+                <div className="space-y-3">
+                  {statistics.pageTimeStats.map((stat, idx) => (
+                    <div key={idx} className="bg-white/5 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-white font-bold">#{idx + 1}</span>
+                          <span className="text-blue-100 font-mono text-sm">{stat.page}</span>
+                        </div>
+                        <span className="text-green-400 font-bold text-lg">{stat.avgTimeSeconds}s avg</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-blue-200">Total Time:</span>
+                          <span className="text-white font-semibold ml-2">
+                            {Math.floor(stat.totalTimeSeconds / 60)}m {stat.totalTimeSeconds % 60}s
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-blue-200">Visits:</span>
+                          <span className="text-white font-semibold ml-2">{stat.visits}</span>
+                        </div>
+                        <div>
+                          <span className="text-blue-200">Avg Time:</span>
+                          <span className="text-white font-semibold ml-2">{stat.avgTimeSeconds}s</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Events Over Time */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20">
               <h2 className="text-2xl font-bold text-white mb-4">📈 Activity Over Time</h2>
@@ -299,32 +338,64 @@ export default function AnalyticsPage() {
 
             {/* Recent Events Table */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h2 className="text-2xl font-bold text-white mb-4">🕐 Recent Events</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">🕐 Detailed Activity Log</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-white/20">
                       <th className="text-left text-white font-semibold py-3 px-2">Time</th>
                       <th className="text-left text-white font-semibold py-3 px-2">Type</th>
-                      <th className="text-left text-white font-semibold py-3 px-2">Event</th>
+                      <th className="text-left text-white font-semibold py-3 px-2">Event Details</th>
                       <th className="text-left text-white font-semibold py-3 px-2">Page</th>
                       <th className="text-left text-white font-semibold py-3 px-2">User</th>
+                      <th className="text-left text-white font-semibold py-3 px-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentEvents.map((event) => (
                       <tr key={event.id} className="border-b border-white/10 hover:bg-white/5">
-                        <td className="py-3 px-2 text-blue-100 text-sm">
+                        <td className="py-3 px-2 text-blue-100 text-sm whitespace-nowrap">
                           {new Date(event.createdAt).toLocaleString()}
                         </td>
                         <td className="py-3 px-2">
-                          <span className="bg-blue-500/30 text-blue-100 px-2 py-1 rounded text-xs">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            event.eventType === 'click' ? 'bg-green-500/30 text-green-100' :
+                            event.eventType === 'page_view' ? 'bg-blue-500/30 text-blue-100' :
+                            event.eventType === 'page_leave' ? 'bg-purple-500/30 text-purple-100' :
+                            event.eventType === 'navigation' ? 'bg-yellow-500/30 text-yellow-100' :
+                            'bg-gray-500/30 text-gray-100'
+                          }`}>
                             {event.eventType}
                           </span>
                         </td>
-                        <td className="py-3 px-2 text-white text-sm">{event.eventName}</td>
+                        <td className="py-3 px-2 text-white text-sm max-w-xs">
+                          <div className="truncate font-semibold">{event.eventName}</div>
+                          {event.metadata && (
+                            <div className="text-blue-200 text-xs mt-1">
+                              {event.metadata.text && <div>Text: {event.metadata.text}</div>}
+                              {event.metadata.linkText && <div>Link: {event.metadata.linkText}</div>}
+                              {event.metadata.href && <div>Href: {event.metadata.href}</div>}
+                              {event.metadata.timeSpentSeconds && (
+                                <div className="text-green-300 font-semibold">
+                                  ⏱️ Time: {event.metadata.timeSpentSeconds}s
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
                         <td className="py-3 px-2 text-blue-100 text-sm font-mono">{event.pagePath}</td>
                         <td className="py-3 px-2 text-blue-100 text-sm">{event.user}</td>
+                        <td className="py-3 px-2">
+                          <button
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setShowDetailsModal(true);
+                            }}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold"
+                          >
+                            View Details
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -332,6 +403,76 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Details Modal */}
+        {showDetailsModal && selectedEvent && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowDetailsModal(false)}>
+            <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-white/20" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-3xl font-bold text-white mb-2">Event Details</h3>
+                  <p className="text-blue-100">{new Date(selectedEvent.createdAt).toLocaleString()}</p>
+                </div>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold"
+                >
+                  ✕ Close
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Basic Info */}
+                <div className="bg-white/10 rounded-xl p-4">
+                  <h4 className="text-white font-bold mb-3 text-lg">Basic Information</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-blue-200">Event Type:</span>
+                      <span className="text-white font-semibold ml-2">{selectedEvent.eventType}</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-200">Event Name:</span>
+                      <span className="text-white font-semibold ml-2">{selectedEvent.eventName}</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-200">Page:</span>
+                      <span className="text-white font-semibold ml-2">{selectedEvent.pagePath}</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-200">User:</span>
+                      <span className="text-white font-semibold ml-2">{selectedEvent.user}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metadata */}
+                {selectedEvent.metadata && (
+                  <div className="bg-white/10 rounded-xl p-4">
+                    <h4 className="text-white font-bold mb-3 text-lg">Detailed Metadata</h4>
+                    <div className="space-y-2">
+                      {Object.entries(selectedEvent.metadata).map(([key, value]) => (
+                        <div key={key} className="flex items-start gap-3 text-sm">
+                          <span className="text-blue-300 font-semibold min-w-[150px]">{key}:</span>
+                          <span className="text-white flex-1 break-all">
+                            {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Raw Data */}
+                <div className="bg-white/10 rounded-xl p-4">
+                  <h4 className="text-white font-bold mb-3 text-lg">Raw JSON Data</h4>
+                  <pre className="text-blue-100 text-xs bg-black/30 p-4 rounded-lg overflow-x-auto">
+                    {JSON.stringify(selectedEvent, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -206,6 +206,32 @@ export async function GET(request: NextRequest) {
       eventsOverTime[key] = (eventsOverTime[key] || 0) + 1;
     });
 
+    // Calculate average time spent on each page
+    const pageTimeStats: Record<string, { totalTime: number; count: number; avgTime: number }> = {};
+    events.forEach(event => {
+      if (event.eventType === 'page_leave' && event.metadata && typeof event.metadata === 'object') {
+        const metadata = event.metadata as any;
+        if (metadata.timeSpentSeconds) {
+          if (!pageTimeStats[event.pagePath]) {
+            pageTimeStats[event.pagePath] = { totalTime: 0, count: 0, avgTime: 0 };
+          }
+          pageTimeStats[event.pagePath].totalTime += metadata.timeSpentSeconds;
+          pageTimeStats[event.pagePath].count += 1;
+        }
+      }
+    });
+    
+    // Calculate averages and sort by total time
+    const pageTimeArray = Object.entries(pageTimeStats)
+      .map(([page, stats]) => ({
+        page,
+        avgTimeSeconds: Math.round(stats.totalTime / stats.count),
+        totalTimeSeconds: stats.totalTime,
+        visits: stats.count,
+      }))
+      .sort((a, b) => b.totalTimeSeconds - a.totalTimeSeconds)
+      .slice(0, 10);
+
     return NextResponse.json({
       statistics: {
         totalEvents,
@@ -214,11 +240,12 @@ export async function GET(request: NextRequest) {
         eventsByType,
         topPages,
         topEvents,
+        pageTimeStats: pageTimeArray,
         eventsOverTime: Object.entries(eventsOverTime)
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([time, count]) => ({ time, count })),
       },
-      recentEvents: events.slice(0, 50).map(event => {
+      recentEvents: events.slice(0, 100).map(event => {
         const user = event.userId ? userMap.get(event.userId) : null;
         return {
           id: event.id,

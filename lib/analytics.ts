@@ -44,14 +44,53 @@ async function trackEvent(
 export function useAnalytics() {
   const pathname = usePathname();
   const trackedPages = useRef(new Set<string>());
+  const pageStartTime = useRef<number>(Date.now());
+  const currentPage = useRef<string>(pathname || "/");
 
-  // Track page view
+  // Track page view with time spent on previous page
   useEffect(() => {
-    if (pathname && !trackedPages.current.has(pathname)) {
-      trackedPages.current.add(pathname);
-      trackEvent("page_view", `view_${pathname}`, pathname);
+    const page = pathname || "/";
+    
+    // Track time spent on previous page
+    if (currentPage.current !== page) {
+      const timeSpent = Date.now() - pageStartTime.current;
+      trackEvent("page_leave", `leave_${currentPage.current}`, currentPage.current, {
+        timeSpentMs: timeSpent,
+        timeSpentSeconds: Math.round(timeSpent / 1000),
+        nextPage: page,
+      });
     }
+
+    // Track entering new page
+    trackEvent("page_view", `view_${page}`, page, {
+      fullUrl: typeof window !== "undefined" ? window.location.href : "",
+      referrer: typeof document !== "undefined" ? document.referrer : "",
+      screenWidth: typeof window !== "undefined" ? window.screen.width : 0,
+      screenHeight: typeof window !== "undefined" ? window.screen.height : 0,
+      timestamp: new Date().toISOString(),
+    });
+
+    currentPage.current = page;
+    pageStartTime.current = Date.now();
   }, [pathname]);
+
+  // Track page leave when component unmounts or window closes
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const timeSpent = Date.now() - pageStartTime.current;
+      trackEvent("page_leave", `leave_${currentPage.current}`, currentPage.current, {
+        timeSpentMs: timeSpent,
+        timeSpentSeconds: Math.round(timeSpent / 1000),
+        reason: "window_close",
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      handleBeforeUnload();
+    };
+  }, []);
 
   // Track click event
   const trackClick = useCallback((elementName: string, metadata?: Record<string, any>) => {
