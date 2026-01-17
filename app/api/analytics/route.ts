@@ -122,21 +122,25 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: { createdAt: "desc" },
       take: 1000, // Limit to prevent huge responses
-      include: {
-        user: {
-          select: {
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
+    });
+
+    // Get unique user IDs to fetch user details
+    const userIds = [...new Set(events.filter(e => e.userId).map(e => e.userId))];
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds as string[] } },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
       },
     });
+    const userMap = new Map(users.map(u => [u.id, u]));
 
     // Calculate statistics
     const totalEvents = events.length;
     const uniqueSessions = new Set(events.map(e => e.sessionId)).size;
-    const uniqueUsers = new Set(events.filter(e => e.userId).map(e => e.userId)).size;
+    const uniqueUsers = userIds.length;
 
     // Group by event type
     const eventsByType: Record<string, number> = {};
@@ -191,15 +195,18 @@ export async function GET(request: NextRequest) {
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([time, count]) => ({ time, count })),
       },
-      recentEvents: events.slice(0, 50).map(event => ({
-        id: event.id,
-        eventType: event.eventType,
-        eventName: event.eventName,
-        pagePath: event.pagePath,
-        metadata: event.metadata,
-        user: event.user ? `${event.user.firstName} ${event.user.lastName} (${event.user.email})` : "Anonymous",
-        createdAt: event.createdAt,
-      })),
+      recentEvents: events.slice(0, 50).map(event => {
+        const user = event.userId ? userMap.get(event.userId) : null;
+        return {
+          id: event.id,
+          eventType: event.eventType,
+          eventName: event.eventName,
+          pagePath: event.pagePath,
+          metadata: event.metadata,
+          user: user ? `${user.firstName} ${user.lastName} (${user.email})` : "Anonymous",
+          createdAt: event.createdAt,
+        };
+      }),
     });
   } catch (error) {
     console.error("Get analytics error:", error);
