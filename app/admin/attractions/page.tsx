@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,6 +18,7 @@ interface Attraction {
 export default function AdminAttractionsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const formRef = useRef<HTMLDivElement>(null);
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,6 +130,11 @@ export default function AdminAttractionsPage() {
       order: attraction.order,
     });
     setIsAddingNew(false);
+    
+    // Scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleAddNew = () => {
@@ -141,6 +147,11 @@ export default function AdminAttractionsPage() {
       order: attractions.length,
     });
     setIsAddingNew(true);
+    
+    // Scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -293,9 +304,9 @@ export default function AdminAttractionsPage() {
 
         {/* Add/Edit Form */}
         {(isAddingNew || editingAttraction) && (
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 mb-8 border border-white/20">
+          <div ref={formRef} className="bg-white/10 backdrop-blur-md rounded-xl p-6 mb-8 border-2 border-yellow-400/50 shadow-xl">
             <h2 className="text-2xl font-bold text-white mb-4">
-              {editingAttraction ? "Edit Attraction" : "Add New Attraction"}
+              {editingAttraction ? `Edit: ${editingAttraction.title}` : "Add New Attraction"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -402,7 +413,11 @@ export default function AdminAttractionsPage() {
           {attractions.map((attraction) => (
             <div
               key={attraction.id}
-              className="bg-white/10 backdrop-blur-md rounded-xl overflow-hidden border border-white/20"
+              className={`bg-white/10 backdrop-blur-md rounded-xl overflow-hidden border-2 transition-all ${
+                editingAttraction?.id === attraction.id
+                  ? 'border-yellow-400 shadow-xl shadow-yellow-400/30'
+                  : 'border-white/20'
+              }`}
             >
               <div className="relative h-48">
                 <img
@@ -410,6 +425,11 @@ export default function AdminAttractionsPage() {
                   alt={attraction.title}
                   className="w-full h-full object-cover"
                 />
+                {editingAttraction?.id === attraction.id && (
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold">
+                    ✏️ EDITING
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="text-xl font-bold text-white mb-2">
