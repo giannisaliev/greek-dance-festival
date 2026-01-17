@@ -22,6 +22,7 @@ export default function AdminAttractionsPage() {
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState("");
   const [editingAttraction, setEditingAttraction] = useState<Attraction | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -252,6 +253,36 @@ export default function AdminAttractionsPage() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError("");
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("files", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      const data = await response.json();
+      if (data.urls && data.urls.length > 0) {
+        setFormData({ ...formData, image: data.urls[0] });
+      } else {
+        setError("Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError("Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 flex items-center justify-center">
@@ -341,21 +372,67 @@ export default function AdminAttractionsPage() {
 
               <div>
                 <label className="block text-white font-semibold mb-2">
-                  Image URL *
+                  Image
                 </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.value })
-                  }
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-                  required
-                />
-                <p className="text-blue-200 text-sm mt-1">
-                  Use Unsplash or any image URL
-                </p>
+                
+                {/* Image Preview */}
+                {formData.image && (
+                  <div className="mb-4 relative rounded-lg overflow-hidden border-2 border-white/20">
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="mb-3">
+                  <label className="block">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                    <div className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold cursor-pointer inline-flex items-center gap-2 disabled:opacity-50">
+                      {uploadingImage ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          📤 Upload Image
+                        </>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* OR Divider */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1 h-px bg-white/20"></div>
+                  <span className="text-white/60 text-sm">OR</span>
+                  <div className="flex-1 h-px bg-white/20"></div>
+                </div>
+
+                {/* URL Input */}
+                <div>
+                  <input
+                    type="url"
+                    value={formData.image}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.value })
+                    }
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  />
+                  <p className="text-blue-200 text-sm mt-1">
+                    Or paste an image URL from Unsplash or any source
+                  </p>
+                </div>
               </div>
 
               <div>
