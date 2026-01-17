@@ -135,7 +135,7 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
-    // Check registration status and user auth
+    // Check registration status and user auth on initial load only
     const checkStatus = async () => {
       try {
         const [settingsRes, userRes] = await Promise.all([
@@ -150,10 +150,6 @@ export default function RegisterPage() {
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData.user);
-          // Auto-skip login step if user is already logged in
-          if (step === 2 && userData.user) {
-            // Already logged in, stay on step 2
-          }
         }
       } catch (err) {
         console.error("Error checking status:", err);
@@ -163,7 +159,7 @@ export default function RegisterPage() {
     };
     
     checkStatus();
-  }, [step]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -431,7 +427,7 @@ export default function RegisterPage() {
                 <button
                   key={pkg.name}
                   onClick={() => setSelectedPackage(pkg)}
-                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 transition-all transform hover:scale-[1.02] text-left ${
+                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl p-4 border-2 transition-all transform hover:scale-[1.02] text-left ${
                     selectedPackage?.name === pkg.name
                       ? 'border-white shadow-xl shadow-white/20'
                       : pkg.popular
@@ -446,33 +442,32 @@ export default function RegisterPage() {
                   )}
                   
                   {selectedPackage?.name === pkg.name && (
-                    <div className="absolute top-4 right-4 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="absolute top-3 right-3 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   )}
                   
-                  <div className="text-4xl mb-4">{pkg.icon}</div>
-                  <h3 className="text-xl font-bold text-white mb-1">{pkg.name}</h3>
-                  <p className="text-blue-100 text-sm mb-4">{pkg.description}</p>
-                  <div className="text-4xl font-bold text-white mb-4">{pkg.price}</div>
+                  <div className="text-2xl mb-2">{pkg.icon}</div>
+                  <h3 className="text-base font-bold text-white mb-1">{pkg.name}</h3>
+                  <div className="text-2xl font-bold text-white mb-3">{pkg.price}</div>
                   
-                  <ul className="space-y-2">
-                    {pkg.features.slice(0, 4).map((feature, idx) => {
+                  <ul className="space-y-1">
+                    {pkg.features.slice(0, 3).map((feature, idx) => {
                       const isSpecial = feature.includes('🍷') || feature.includes('🏆');
                       return (
                         <li 
                           key={idx} 
-                          className={`flex items-start text-sm ${isSpecial ? 'font-bold animate-pulse' : 'text-blue-100'}`}
+                          className={`flex items-start text-xs ${isSpecial ? 'font-bold' : 'text-blue-100'}`}
                         >
-                          <span className="text-green-400 mr-2">✓</span>
+                          <span className="text-green-400 mr-1.5 text-xs">✓</span>
                           <span className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300' : ''}>{feature}</span>
                         </li>
                       );
                     })}
-                    {pkg.features.length > 4 && (
-                      <li className="text-blue-200 text-sm">+{pkg.features.length - 4} more benefits</li>
+                    {pkg.features.length > 3 && (
+                      <li className="text-blue-200 text-xs">+{pkg.features.length - 3} more</li>
                     )}
                   </ul>
                 </button>
@@ -495,7 +490,14 @@ export default function RegisterPage() {
             
             <div className="flex justify-center mt-10">
               <button
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  // If user is already logged in, skip to step 3, otherwise go to step 2
+                  if (user) {
+                    setStep(3);
+                  } else {
+                    setStep(2);
+                  }
+                }}
                 disabled={!selectedPackage}
                 className="bg-white text-blue-900 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
               >
