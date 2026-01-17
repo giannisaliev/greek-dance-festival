@@ -119,12 +119,33 @@ export async function GET(request: NextRequest) {
       where.eventType = eventType;
     }
 
-    // Get analytics data
-    const events = await prisma.analytics.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: 1000, // Limit to prevent huge responses
-    });
+    // Get analytics data - handle case where table doesn't exist
+    let events: any[] = [];
+    try {
+      events = await prisma.analytics.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: 1000, // Limit to prevent huge responses
+      });
+    } catch (error: any) {
+      // If table doesn't exist, return empty data with a helpful message
+      if (error.code === 'P2021' || error.message?.includes('does not exist') || error.message?.includes('Table')) {
+        return NextResponse.json({
+          statistics: {
+            totalEvents: 0,
+            uniqueSessions: 0,
+            uniqueUsers: 0,
+            eventsByType: {},
+            topPages: [],
+            topEvents: [],
+            eventsOverTime: [],
+          },
+          recentEvents: [],
+          message: "Analytics table not created yet. Please run the migration: fetch('/api/migrate-analytics', { method: 'POST' })",
+        });
+      }
+      throw error;
+    }
 
     // Get unique user IDs to fetch user details
     const userIds = [...new Set(events.filter(e => e.userId).map(e => e.userId))];

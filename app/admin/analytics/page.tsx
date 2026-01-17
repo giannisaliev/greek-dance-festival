@@ -33,6 +33,8 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("7d");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [migrationMessage, setMigrationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -49,6 +51,7 @@ export default function AnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
+      setErrorMessage(null);
       const params = new URLSearchParams({
         timeRange,
         ...(eventTypeFilter !== "all" && { eventType: eventTypeFilter }),
@@ -62,8 +65,35 @@ export default function AnalyticsPage() {
       const data = await response.json();
       setStatistics(data.statistics);
       setRecentEvents(data.recentEvents);
+      
+      // Check if there's a migration message
+      if (data.message) {
+        setMigrationMessage(data.message);
+      }
     } catch (error) {
       console.error("Error fetching analytics:", error);
+      setErrorMessage("Failed to load analytics. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runMigration = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/migrate-analytics', { method: 'POST' });
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMigrationMessage(null);
+        alert('Analytics table created successfully! Refreshing data...');
+        await fetchAnalytics();
+      } else {
+        alert('Migration failed: ' + data.error);
+      }
+    } catch (error) {
+      console.error("Migration error:", error);
+      alert('Migration failed. Check console for details.');
     } finally {
       setLoading(false);
     }
@@ -142,6 +172,35 @@ export default function AnalyticsPage() {
             </button>
           </div>
         </div>
+
+        {/* Migration Notice */}
+        {migrationMessage && (
+          <div className="bg-yellow-500/20 border-2 border-yellow-400 rounded-2xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">⚠️</div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-2">Analytics Table Not Found</h3>
+                <p className="text-yellow-100 mb-4">{migrationMessage}</p>
+                <button
+                  onClick={runMigration}
+                  className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-xl font-bold hover:bg-yellow-300 transition-all"
+                >
+                  🔧 Create Analytics Table Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="bg-red-500/20 border-2 border-red-400 rounded-2xl p-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="text-2xl">❌</div>
+              <div className="text-white font-semibold">{errorMessage}</div>
+            </div>
+          </div>
+        )}
 
         {statistics && (
           <>
