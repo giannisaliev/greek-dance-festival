@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-config";
 
 // Migration endpoint for creating Analytics table in production
 export async function POST(request: NextRequest) {
   try {
     // Check if user is admin
-    const { getSession } = await import("@/lib/auth");
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
+      where: { email: session.user.email },
+      select: { isAdmin: true },
     });
 
     if (!user?.isAdmin) {

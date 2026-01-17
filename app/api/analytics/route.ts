@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-config";
 
 // Track analytics event
 export async function POST(request: NextRequest) {
@@ -15,19 +17,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user info if logged in
-    const { getSession } = await import("@/lib/auth");
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     
     let userId = null;
     let isAdmin = false;
 
-    if (session) {
-      userId = session.userId;
+    if (session?.user?.email) {
       const user = await prisma.user.findUnique({
-        where: { id: session.userId },
-        select: { isAdmin: true },
+        where: { email: session.user.email },
+        select: { id: true, isAdmin: true },
       });
-      isAdmin = user?.isAdmin || false;
+      if (user) {
+        userId = user.id;
+        isAdmin = user.isAdmin;
+      }
     }
 
     // Don't track admin users
@@ -73,15 +76,14 @@ export async function POST(request: NextRequest) {
 // Get analytics data (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const { getSession } = await import("@/lib/auth");
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
+      where: { email: session.user.email },
       select: { isAdmin: true },
     });
 
