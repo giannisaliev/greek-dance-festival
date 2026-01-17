@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
@@ -15,6 +16,7 @@ interface Attraction {
 }
 
 export default function AdminAttractionsPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,26 +34,29 @@ export default function AdminAttractionsPage() {
   });
 
   useEffect(() => {
-    checkAuth();
-    fetchAttractions();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (!res.ok) {
-        router.push("/login");
-        return;
-      }
-      const data = await res.json();
-      if (!data.isAdmin) {
-        router.push("/");
-      }
-    } catch (error) {
-      console.error("Auth check failed:", error);
+    if (status === "loading") return;
+    
+    if (!session) {
       router.push("/login");
+      return;
     }
-  };
+    
+    if (!(session.user as any)?.isAdmin) {
+      router.push("/");
+      return;
+    }
+
+    fetchAttractions();
+  }, [session, status, router]);
+
+  // Show loading while checking auth
+  if (status === "loading" || !session || !(session.user as any)?.isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   const fetchAttractions = async () => {
     try {

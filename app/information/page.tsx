@@ -12,6 +12,58 @@ interface Attraction {
   order: number;
 }
 
+// Default attractions (used when database is empty)
+const defaultAttractions: Attraction[] = [
+  {
+    id: 'default-1',
+    title: 'White Tower',
+    description: "The iconic symbol of Thessaloniki, this 15th-century Ottoman fortification offers panoramic views of the city and the Thermaic Gulf. Now a museum showcasing the city's history.",
+    image: 'https://images.unsplash.com/photo-1589834390005-5d4fb9bf3d32?w=800&q=80',
+    badge: '15 min walk from waterfront',
+    order: 0
+  },
+  {
+    id: 'default-2',
+    title: 'Rotunda',
+    description: 'A UNESCO World Heritage Site dating back to the 4th century. Originally built as a mausoleum, it features stunning Byzantine mosaics and impressive architecture.',
+    image: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80',
+    badge: 'UNESCO World Heritage',
+    order: 1
+  },
+  {
+    id: 'default-3',
+    title: 'Ano Poli (Upper Town)',
+    description: 'Wander through narrow cobblestone streets, traditional houses, and Byzantine walls. This historic neighborhood offers breathtaking views and authentic Greek atmosphere.',
+    image: 'https://images.unsplash.com/photo-1601823984263-b55f31c1c650?w=800&q=80',
+    badge: 'Best sunset views',
+    order: 2
+  },
+  {
+    id: 'default-4',
+    title: 'Archaeological Museum',
+    description: 'Home to priceless artifacts from ancient Macedonia, including treasures from the royal tombs of Vergina and stunning gold jewelry from the Hellenistic period.',
+    image: 'https://images.unsplash.com/photo-1566127444979-b3d2b3c9e9c0?w=800&q=80',
+    badge: 'Ancient Macedonian treasures',
+    order: 3
+  },
+  {
+    id: 'default-5',
+    title: 'Ladadika District',
+    description: "A vibrant entertainment district filled with colorful restored buildings, tavernas, bars, and restaurants. Perfect for experiencing Thessaloniki's nightlife and cuisine.",
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+    badge: 'Nightlife & dining hub',
+    order: 4
+  },
+  {
+    id: 'default-6',
+    title: 'Waterfront Promenade',
+    description: 'A scenic 3.5km promenade along the Thermaic Gulf. Ideal for walking, cycling, or relaxing at seaside cafes while enjoying views of Mount Olympus on clear days.',
+    image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&q=80',
+    badge: 'Perfect for sunset walks',
+    order: 5
+  }
+];
+
 export default function InformationPage() {
   const [activeTab, setActiveTab] = useState<'guinness' | 'workshop'>('guinness');
   const [attractions, setAttractions] = useState<Attraction[]>([]);
@@ -26,10 +78,16 @@ export default function InformationPage() {
       const res = await fetch('/api/attractions');
       if (res.ok) {
         const data = await res.json();
-        setAttractions(data);
+        // Use database attractions if available, otherwise use defaults
+        setAttractions(data.length > 0 ? data : defaultAttractions);
+      } else {
+        // If API fails, use defaults
+        setAttractions(defaultAttractions);
       }
     } catch (error) {
       console.error('Error fetching attractions:', error);
+      // If fetch fails, use defaults
+      setAttractions(defaultAttractions);
     } finally {
       setIsLoadingAttractions(false);
     }
@@ -235,7 +293,7 @@ export default function InformationPage() {
                 <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
                 <p>Loading attractions...</p>
               </div>
-            ) : attractions.length > 0 ? (
+            ) : (
               attractions.map((attraction) => (
                 <div
                   key={attraction.id}
@@ -275,11 +333,6 @@ export default function InformationPage() {
                   </div>
                 </div>
               ))
-            ) : (
-              <div className="col-span-full text-center text-white py-12">
-                <p className="text-xl">No attractions available yet.</p>
-                <p className="text-blue-200 mt-2">Check back soon for exciting places to visit in Thessaloniki!</p>
-              </div>
             )}
           </div>
 
