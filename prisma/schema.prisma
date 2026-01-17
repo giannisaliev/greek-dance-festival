@@ -140,3 +140,24 @@ model Attraction {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Analytics {
+  id          String   @id @default(cuid())
+  userId      String?  // Null for anonymous visitors
+  sessionId   String   // Unique session identifier
+  eventType   String   // "page_view", "click", "navigation", etc.
+  eventName   String   // Specific event like "view_pricing", "click_register", etc.
+  pagePath    String   // Current page path
+  metadata    Json?    // Additional data like button text, link destination, etc.
+  ipAddress   String?  // Visitor IP address
+  userAgent   String?  // Browser user agent
+  referrer    String?  // Referring page
+  isAdmin     Boolean  @default(false) // Flag to exclude admin users
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([isAdmin])
+}

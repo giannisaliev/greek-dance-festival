@@ -339,6 +339,12 @@ export default function AdminPage() {
             <h2 className="text-2xl sm:text-4xl font-bold text-white">Admin Dashboard</h2>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
+                href="/admin/analytics"
+                className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                📊 Analytics
+              </Link>
+              <Link
                 href="/admin/hotels"
                 className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg text-sm sm:text-base text-center"
               >
