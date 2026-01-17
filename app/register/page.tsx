@@ -16,6 +16,33 @@ interface Package {
 
 const packages: Package[] = [
   {
+    name: "Guinness Record Only",
+    price: "€30",
+    priceValue: 30,
+    description: "Join the world record attempt",
+    features: [
+      "🏆 Guinness Record Attempt",
+      "Festival merchandise",
+      "Certificate of participation",
+      "Be part of history!"
+    ],
+    popular: false,
+    icon: "🏆"
+  },
+  {
+    name: "Greek Night Only",
+    price: "€40",
+    priceValue: 40,
+    description: "Authentic Greek evening experience",
+    features: [
+      "🍷 Greek Night",
+      "Traditional food and drinks",
+      "Unforgettable experience"
+    ],
+    popular: false,
+    icon: "🍷"
+  },
+  {
     name: "Starter Pass",
     price: "€70",
     priceValue: 70,
@@ -36,7 +63,6 @@ const packages: Package[] = [
     features: [
       "Access to 4 classes",
       "Festival program",
-      "Festival merchandise",
       "Certificate of participation"
     ],
     popular: false,
@@ -50,7 +76,6 @@ const packages: Package[] = [
     features: [
       "Access to 8 classes",
       "Festival program",
-      "Festival merchandise",
       "Priority class selection",
       "Certificate of participation"
     ],
@@ -98,8 +123,10 @@ export default function RegisterPage() {
     if (!selectedPackage) return 0;
     let total = selectedPackage.priceValue;
     
-    // Full Pass already includes Greek Night and Guinness Record
-    if (selectedPackage.name !== "Full Pass") {
+    // Full Pass and standalone packages already include what they offer
+    if (selectedPackage.name !== "Full Pass" && 
+        selectedPackage.name !== "Guinness Record Only" && 
+        selectedPackage.name !== "Greek Night Only") {
       if (formData.guinnessRecordAttempt) total += 30;
       if (formData.greekNight) total += 40;
     }
@@ -123,6 +150,10 @@ export default function RegisterPage() {
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData.user);
+          // Auto-skip login step if user is already logged in
+          if (step === 2 && userData.user) {
+            // Already logged in, stay on step 2
+          }
         }
       } catch (err) {
         console.error("Error checking status:", err);
@@ -132,7 +163,7 @@ export default function RegisterPage() {
     };
     
     checkStatus();
-  }, []);
+  }, [step]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,9 +173,22 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      // Full Pass includes Greek Night and Guinness Record
-      const includesGreekNight = selectedPackage.name === "Full Pass" || formData.greekNight;
-      const includesGuinness = selectedPackage.name === "Full Pass" || formData.guinnessRecordAttempt;
+      // Determine what's included based on package type
+      let includesGreekNight = false;
+      let includesGuinness = false;
+
+      if (selectedPackage.name === "Full Pass") {
+        includesGreekNight = true;
+        includesGuinness = true;
+      } else if (selectedPackage.name === "Greek Night Only") {
+        includesGreekNight = true;
+      } else if (selectedPackage.name === "Guinness Record Only") {
+        includesGuinness = true;
+      } else {
+        // Class passes - check add-ons
+        includesGreekNight = formData.greekNight;
+        includesGuinness = formData.guinnessRecordAttempt;
+      }
       
       const response = await fetch("/api/register", {
         method: "POST",
@@ -382,7 +426,7 @@ export default function RegisterPage() {
             <h2 className="text-2xl font-bold text-white text-center mb-8">
               Select Your Festival Package
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
               {packages.map((pkg) => (
                 <button
                   key={pkg.name}
@@ -528,7 +572,10 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Add-ons Section */}
-                  {selectedPackage && selectedPackage.name !== "Full Pass" && (
+                  {selectedPackage && 
+                   selectedPackage.name !== "Full Pass" && 
+                   selectedPackage.name !== "Guinness Record Only" && 
+                   selectedPackage.name !== "Greek Night Only" && (
                     <div className="mb-6">
                       <label className="block text-white font-semibold mb-4 text-lg">
                         Optional Add-ons
