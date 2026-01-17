@@ -33,6 +33,52 @@ export default function AdminAttractionsPage() {
     order: 0,
   });
 
+  // Default attractions to seed
+  const defaultAttractions = [
+    {
+      title: 'White Tower',
+      description: "The iconic symbol of Thessaloniki, this 15th-century Ottoman fortification offers panoramic views of the city and the Thermaic Gulf. Now a museum showcasing the city's history.",
+      image: 'https://images.unsplash.com/photo-1589834390005-5d4fb9bf3d32?w=800&q=80',
+      badge: '15 min walk from waterfront',
+      order: 0
+    },
+    {
+      title: 'Rotunda',
+      description: 'A UNESCO World Heritage Site dating back to the 4th century. Originally built as a mausoleum, it features stunning Byzantine mosaics and impressive architecture.',
+      image: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80',
+      badge: 'UNESCO World Heritage',
+      order: 1
+    },
+    {
+      title: 'Ano Poli (Upper Town)',
+      description: 'Wander through narrow cobblestone streets, traditional houses, and Byzantine walls. This historic neighborhood offers breathtaking views and authentic Greek atmosphere.',
+      image: 'https://images.unsplash.com/photo-1601823984263-b55f31c1c650?w=800&q=80',
+      badge: 'Best sunset views',
+      order: 2
+    },
+    {
+      title: 'Archaeological Museum',
+      description: 'Home to priceless artifacts from ancient Macedonia, including treasures from the royal tombs of Vergina and stunning gold jewelry from the Hellenistic period.',
+      image: 'https://images.unsplash.com/photo-1566127444979-b3d2b3c9e9c0?w=800&q=80',
+      badge: 'Ancient Macedonian treasures',
+      order: 3
+    },
+    {
+      title: 'Ladadika District',
+      description: "A vibrant entertainment district filled with colorful restored buildings, tavernas, bars, and restaurants. Perfect for experiencing Thessaloniki's nightlife and cuisine.",
+      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+      badge: 'Nightlife & dining hub',
+      order: 4
+    },
+    {
+      title: 'Waterfront Promenade',
+      description: 'A scenic 3.5km promenade along the Thermaic Gulf. Ideal for walking, cycling, or relaxing at seaside cafes while enjoying views of Mount Olympus on clear days.',
+      image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&q=80',
+      badge: 'Perfect for sunset walks',
+      order: 5
+    }
+  ];
+
   useEffect(() => {
     if (status === "loading") return;
     
@@ -168,6 +214,33 @@ export default function AdminAttractionsPage() {
     });
   };
 
+  const loadDefaultAttractions = async () => {
+    if (!confirm("This will add all default Thessaloniki attractions to the database. Continue?")) return;
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      // Add each default attraction
+      for (const attraction of defaultAttractions) {
+        await fetch("/api/attractions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(attraction),
+        });
+      }
+      
+      // Refresh the list
+      await fetchAttractions();
+      alert("Default attractions loaded successfully!");
+    } catch (error) {
+      console.error("Error loading default attractions:", error);
+      setError("Failed to load default attractions");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 flex items-center justify-center">
@@ -193,12 +266,23 @@ export default function AdminAttractionsPage() {
               Manage Sightseeing Attractions
             </h1>
           </div>
-          <button
-            onClick={handleAddNew}
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-          >
-            + Add New Attraction
-          </button>
+          <div className="flex gap-3">
+            {attractions.length === 0 && (
+              <button
+                onClick={loadDefaultAttractions}
+                disabled={isSubmitting}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                📥 Load Defaults
+              </button>
+            )}
+            <button
+              onClick={handleAddNew}
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              + Add New Attraction
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -359,12 +443,21 @@ export default function AdminAttractionsPage() {
         {attractions.length === 0 && (
           <div className="text-center text-white py-12">
             <p className="text-xl mb-4">No attractions yet</p>
-            <button
-              onClick={handleAddNew}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Add Your First Attraction
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={loadDefaultAttractions}
+                disabled={isSubmitting}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                📥 Load Default Attractions
+              </button>
+              <button
+                onClick={handleAddNew}
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Add Your First Attraction
+              </button>
+            </div>
           </div>
         )}
       </div>
