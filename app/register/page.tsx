@@ -480,9 +480,17 @@ export default function RegisterPage() {
                 <div className="text-3xl flex-shrink-0">🎬</div>
                 <div>
                   <h3 className="text-white font-bold text-lg mb-2">Zeimpekiko Choreography Video</h3>
+                  <p className="text-blue-100 text-sm leading-relaxed mb-3">
+                    The choreography will be sent to the dance schools in February.
+                  </p>
                   <p className="text-blue-100 text-sm leading-relaxed">
-                    The Zeimpekiko choreography video will be sent to your email in April. 
-                    <span className="font-semibold text-white"> You must be registered for the Guinness Record to receive the video.</span>
+                    If you do not belong to any dance school, you can request a video by sending an email to:{" "}
+                    <a href="mailto:info@greekdancefestival.gr" className="text-white font-semibold hover:underline">
+                      info@greekdancefestival.gr
+                    </a>
+                  </p>
+                  <p className="text-yellow-200 text-sm font-semibold mt-3">
+                    ⚠️ You must be registered in order to receive the video.
                   </p>
                 </div>
               </div>
@@ -806,9 +814,17 @@ export default function RegisterPage() {
                     <div className="text-3xl flex-shrink-0">🎬</div>
                     <div>
                       <h3 className="text-white font-bold text-lg mb-2">Zeimpekiko Choreography Video</h3>
+                      <p className="text-blue-100 text-sm leading-relaxed mb-3">
+                        The choreography will be sent to the dance schools in February.
+                      </p>
                       <p className="text-blue-100 text-sm leading-relaxed">
-                        The Zeimpekiko choreography video will be sent to your email in April. 
-                        <span className="font-semibold text-white"> You must be registered for the Guinness Record to receive the video.</span>
+                        If you do not belong to any dance school, you can request a video by sending an email to:{" "}
+                        <a href="mailto:info@greekdancefestival.gr" className="text-white font-semibold hover:underline">
+                          info@greekdancefestival.gr
+                        </a>
+                      </p>
+                      <p className="text-yellow-200 text-sm font-semibold mt-3">
+                        ⚠️ You must be registered in order to receive the video.
                       </p>
                     </div>
                   </div>
