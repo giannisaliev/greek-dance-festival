@@ -22,13 +22,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { students } = body;
     
+    console.log("Bulk registration request:", { 
+      studentsCount: students?.length,
+      students: students
+    });
+    
     // Get authenticated user (the teacher/studio owner)
     const session = await getServerSession(authOptions);
     
-    if (!session || !session.user) {
+    if (!session || !session.user?.email) {
       return NextResponse.json(
         { error: "You must be logged in to register students" },
         { status: 401 }
+      );
+    }
+
+    // Get the teacher's user ID from the database
+    const teacher = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!teacher) {
+      return NextResponse.json(
+        { error: "Teacher account not found" },
+        { status: 404 }
       );
     }
 
@@ -49,8 +67,9 @@ export async function POST(request: NextRequest) {
         const { firstName, lastName, email, packageType, guinnessRecordAttempt, greekNight, totalPrice } = student;
 
         // Validate required fields
-        if (!firstName || !lastName || !email || !packageType || !totalPrice) {
-          errors.push({ email, error: "Missing required fields" });
+        if (!firstName || !lastName || !email || !packageType || totalPrice === undefined || totalPrice === null) {
+          console.log("Validation failed for student:", { firstName, lastName, email, packageType, totalPrice });
+          errors.push({ email: email || "unknown", error: "Missing required fields", details: { firstName: !!firstName, lastName: !!lastName, email: !!email, packageType: !!packageType, totalPrice: totalPrice } });
           continue;
         }
 
@@ -93,7 +112,7 @@ export async function POST(request: NextRequest) {
             guinnessRecordAttempt: guinnessRecordAttempt || false,
             greekNight: greekNight || false,
             totalPrice,
-            registeredBy: (session.user as any).id, // Track who registered this participant
+            registeredBy: teacher.id, // Track who registered this participant
           },
         });
 
