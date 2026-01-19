@@ -133,6 +133,14 @@ export default function BulkRegisterPage() {
     setIsSubmitting(true);
     setError("");
 
+    // Validate no empty fields
+    const hasEmptyFields = students.some(s => !s.firstName || !s.lastName || !s.email);
+    if (hasEmptyFields) {
+      setError("Please fill in all fields for each student (name and email)");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       console.log("Submitting students:", students);
       
@@ -147,11 +155,22 @@ export default function BulkRegisterPage() {
 
       if (!response.ok) {
         console.error("Bulk registration failed:", data);
-        const errorMsg = data.error || "Registration failed";
-        const details = data.details ? `\n\nDetails: ${JSON.stringify(data.details, null, 2)}` : "";
-        throw new Error(errorMsg + details);
+        
+        // Show which students failed and why
+        if (data.details && Array.isArray(data.details)) {
+          const errorSummary = data.details.map((d: any) => `${d.email}: ${d.error}`).join('\n');
+          throw new Error(`Registration failed:\n\n${errorSummary}`);
+        }
+        
+        throw new Error(data.error || "Registration failed");
       }
 
+      // Show success even with some errors
+      if (data.errors && data.errors.length > 0) {
+        const partialSuccess = `Successfully registered ${data.registered.length} student(s).\n\nFailed registrations:\n${data.errors.map((e: any) => `${e.email}: ${e.error}`).join('\n')}`;
+        setError(partialSuccess);
+      }
+      
       setSuccess(true);
     } catch (err) {
       console.error("Error during registration:", err);
@@ -271,8 +290,9 @@ export default function BulkRegisterPage() {
         </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 text-red-200 text-center max-w-2xl mx-auto">
-            {error}
+          <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 text-red-200 max-w-2xl mx-auto">
+            <div className="font-bold text-red-100 mb-2">⚠️ Registration Error</div>
+            <pre className="whitespace-pre-wrap text-sm">{error}</pre>
           </div>
         )}
 

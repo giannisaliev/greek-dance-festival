@@ -103,6 +103,7 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
   const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
+  const [showDuplicates, setShowDuplicates] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     checkedIn: 0,
@@ -331,7 +332,7 @@ export default function AdminPage() {
 
   // Group participants by registeredBy
   const groupedParticipants = () => {
-    const individualParticipants = participants.filter(p => !p.registeredBy);
+    let individualParticipants = participants.filter(p => !p.registeredBy);
     const teacherGroups: { [key: string]: Participant[] } = {};
     
     participants.forEach(p => {
@@ -343,8 +344,42 @@ export default function AdminPage() {
       }
     });
 
+    // Filter duplicates if enabled
+    if (showDuplicates) {
+      const duplicateEmails = getDuplicateEmails();
+      individualParticipants = individualParticipants.filter(p => duplicateEmails.has(p.user.email));
+      
+      // Filter teacher groups to only show those with duplicate students
+      Object.keys(teacherGroups).forEach(teacherId => {
+        teacherGroups[teacherId] = teacherGroups[teacherId].filter(p => duplicateEmails.has(p.user.email));
+        if (teacherGroups[teacherId].length === 0) {
+          delete teacherGroups[teacherId];
+        }
+      });
+    }
+
     return { individualParticipants, teacherGroups };
   };
+
+  // Find duplicate emails
+  const getDuplicateEmails = () => {
+    const emailCounts = new Map<string, number>();
+    participants.forEach(p => {
+      const email = p.user.email.toLowerCase();
+      emailCounts.set(email, (emailCounts.get(email) || 0) + 1);
+    });
+    
+    const duplicates = new Set<string>();
+    emailCounts.forEach((count, email) => {
+      if (count > 1) {
+        duplicates.add(email);
+      }
+    });
+    
+    return duplicates;
+  };
+
+  const duplicateCount = getDuplicateEmails().size;
 
   // Schedule handlers
   const handleScheduleSubmit = async (e: React.FormEvent) => {
@@ -518,7 +553,7 @@ export default function AdminPage() {
               </div>
 
               {/* Search */}
-              <form onSubmit={handleSearch} className="mb-8">
+              <form onSubmit={handleSearch} className="mb-6">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   <input
                     type="text"
@@ -537,6 +572,7 @@ export default function AdminPage() {
                     type="button"
                     onClick={() => {
                       setSearchQuery("");
+                      setShowDuplicates(false);
                       fetchParticipants();
                     }}
                     className="px-6 sm:px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm sm:text-base"
@@ -545,6 +581,30 @@ export default function AdminPage() {
                   </button>
                 </div>
               </form>
+
+              {/* Duplicate Filter */}
+              <div className="mb-8 flex items-center justify-between bg-white/5 rounded-xl p-4 border border-white/10">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowDuplicates(!showDuplicates)}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                      showDuplicates
+                        ? "bg-yellow-500 text-white"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {showDuplicates ? "✓ " : ""}Show Duplicate Emails Only
+                  </button>
+                  {duplicateCount > 0 && (
+                    <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      {duplicateCount} duplicate email{duplicateCount !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                <div className="text-blue-100 text-sm">
+                  {showDuplicates ? "Showing only participants with duplicate emails" : "Showing all participants"}
+                </div>
+              </div>
 
               {/* Participants List */}
               {isLoading ? (
