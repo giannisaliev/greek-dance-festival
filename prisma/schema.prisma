@@ -68,12 +68,15 @@ model Participant {
   id                    String   @id @default(cuid())
   userId                String   @unique
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrantFirstName   String?  // Custom first name for registration (if different from user)
+  registrantLastName    String?  // Custom last name for registration (if different from user)
   phone                 String
   packageType           String
   guinnessRecordAttempt Boolean  @default(false)
   greekNight            Boolean  @default(false)
   totalPrice            Int      // Total price in euros
   checkedIn             Boolean  @default(false)
+  registeredBy          String?  // ID of the teacher/studio owner who registered this participant
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

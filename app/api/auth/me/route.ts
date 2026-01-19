@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-config";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
+      where: { id: (session.user as any).id },
       include: {
         participant: true,
       },

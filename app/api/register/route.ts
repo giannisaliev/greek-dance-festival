@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendRegistrationEmail } from "@/lib/email";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,12 +19,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { phone, packageType, guinnessRecordAttempt, greekNight, totalPrice } = body;
+    const { phone, registrantFirstName, registrantLastName, packageType, guinnessRecordAttempt, greekNight, totalPrice } = body;
     
-    // Get authenticated user
-    const session = await getSession();
+    // Get authenticated user from NextAuth session
+    const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { error: "You must be logged in to register" },
         { status: 401 }
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Get user details
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
+      where: { id: (session.user as any).id },
       include: { participant: true },
     });
 
@@ -63,6 +64,8 @@ export async function POST(request: NextRequest) {
     const participant = await prisma.participant.create({
       data: {
         userId: user.id,
+        registrantFirstName,
+        registrantLastName,
         phone,
         packageType,
         guinnessRecordAttempt: guinnessRecordAttempt || false,

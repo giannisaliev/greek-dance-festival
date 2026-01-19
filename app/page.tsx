@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navigation from "./components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function Home() {
+  const { t, language } = useLanguage();
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
@@ -96,39 +98,39 @@ export default function Home() {
         <div className="mt-8 mb-8 bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 backdrop-blur-md rounded-2xl p-8 border-2 border-yellow-400/60 shadow-2xl">
           <div className="text-center">
             <h3 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 mb-4">
-              🏆 Guinness World Record Attempt Countdown
+              🏆 {t.home.guinnesCountdown}
             </h3>
             <p className="text-white text-lg mb-6">
-              Join us on <span className="font-bold">June 14, 2026 at 12:00 PM</span> (Athens time)
+              {t.home.description}
             </p>
             <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-2xl mx-auto">
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
                 <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.days}
                 </div>
-                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Days</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">{t.home.days}</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
                 <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.hours}
                 </div>
-                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Hours</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">{t.home.hours}</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
                 <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.minutes}
                 </div>
-                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Minutes</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">{t.home.minutes}</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 sm:p-4 border border-white/30">
                 <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-1 sm:mb-2">
                   {timeLeft.seconds}
                 </div>
-                <div className="text-blue-100 text-xs sm:text-sm md:text-base">Seconds</div>
+                <div className="text-blue-100 text-xs sm:text-sm md:text-base">{t.home.seconds}</div>
               </div>
             </div>
             <p className="text-blue-100 mt-6 text-sm">
-              Be part of history with the largest Zeimpekiko dance performance!
+              {t.home.historyMessage}
             </p>
           </div>
         </div>
@@ -138,34 +140,35 @@ export default function Home() {
             href="/register"
             className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
           >
-            Register Now
+            {t.nav.register}
           </Link>
           <Link
             href="/pricing"
             className="bg-blue-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-600 transition-colors border-2 border-white/30"
           >
-            View Packages
+            {t.nav.pricing}
           </Link>
         </div>
 
         {/* Festival Schedule */}
         <div className="mt-20">
-          <h3 className="text-3xl font-bold text-white mb-8 text-center">Festival Schedule</h3>
+          <h3 className="text-3xl font-bold text-white mb-8 text-center">{t.home.scheduleTitle}</h3>
           
           {isLoading ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-blue-100">Loading schedule...</p>
+              <p className="text-blue-100">{t.home.loading}</p>
             </div>
           ) : (
           <div className="space-y-12">
             {["Friday", "Saturday", "Sunday"].map((day) => {
               const dayItems = scheduleByDay[day as keyof typeof scheduleByDay];
               const dateMap: { [key: string]: string } = {
-                Friday: "June 12",
-                Saturday: "June 13",
-                Sunday: "June 14",
+                Friday: language === 'el' ? t.home.june12 : "June 12",
+                Saturday: language === 'el' ? t.home.june13 : "June 13",
+                Sunday: language === 'el' ? t.home.june14 : "June 14",
               };
+              const dayName = day === "Friday" ? t.home.friday : day === "Saturday" ? t.home.saturday : t.home.sunday;
               
               // Get ALL unique time slots for this day (including special events)
               // Sort times chronologically (e.g., "09:00 - 10:00" before "10:00 - 11:00")
@@ -189,7 +192,7 @@ export default function Home() {
               
               return (
                 <div key={day} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-8 border border-white/20">
-                  <h4 className="text-2xl font-bold text-white mb-6">{day}, {dateMap[day]}</h4>
+                  <h4 className="text-2xl font-bold text-white mb-6">{dayName}, {dateMap[day]}</h4>
                   
                   {dayItems.length > 0 ? (
                     <>
@@ -245,7 +248,7 @@ export default function Home() {
                                     return (
                                       <div key={hall} className="bg-white/5 rounded-xl p-4 border border-white/10 opacity-50">
                                         <div className="text-white font-semibold mb-2">{hall}</div>
-                                        <div className="text-blue-200 text-sm">No session</div>
+                                      <div className="text-blue-200 text-sm">{t.home.noSession}</div>
                                       </div>
                                     );
                                   }
@@ -262,13 +265,13 @@ export default function Home() {
                                       <div className="text-white font-bold mb-3 text-lg">{hall}</div>
                                       <div className="space-y-2">
                                         <div className="text-blue-100">
-                                          <span className="font-semibold text-white">Dance:</span> {hallItem.danceStyle}
+                                          <span className="font-semibold text-white">{t.home.dance}:</span> {hallItem.danceStyle}
                                         </div>
                                         <div className="text-blue-100">
-                                          <span className="font-semibold text-white">Lecturer:</span> {hallItem.lecturer}
+                                          <span className="font-semibold text-white">{t.home.lecturer}:</span> {hallItem.lecturer}
                                         </div>
                                         <div className="text-blue-100">
-                                          <span className="font-semibold text-white">Level:</span> {hallItem.level}
+                                          <span className="font-semibold text-white">{t.home.level}:</span> {hallItem.level}
                                         </div>
                                       </div>
                                     </div>
@@ -373,16 +376,16 @@ export default function Home() {
                                                 {hallItem.danceStyle}
                                               </div>
                                               <div className="text-blue-100 text-xs">
-                                                <span className="font-semibold text-white">Lecturer:</span> {hallItem.lecturer}
+                                                <span className="font-semibold text-white">{t.home.lecturer}:</span> {hallItem.lecturer}
                                               </div>
                                               <div className="text-blue-100 text-xs">
-                                                <span className="font-semibold text-white">Level:</span> {hallItem.level}
+                                                <span className="font-semibold text-white">{t.home.level}:</span> {hallItem.level}
                                               </div>
                                             </div>
                                           </div>
                                         ) : (
                                           <div className="text-blue-200 text-xs italic py-2">
-                                            No class scheduled
+                                            {t.home.noClass}
                                           </div>
                                         )}
                                       </td>
@@ -408,31 +411,29 @@ export default function Home() {
         {/* Festival Information */}
         <div className="mt-16 grid md:grid-cols-2 gap-8">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-            <h3 className="text-2xl font-bold text-white mb-4">About the Festival</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">{t.home.aboutTitle}</h3>
             <p className="text-blue-100 leading-relaxed">
-              Join us for an unforgettable celebration of Greek culture! Our festival brings together dancers, musicians, 
-              and enthusiasts from around the world to share in the joy of traditional Greek dance. Experience authentic 
-              performances, workshops, and cultural events that showcase the rich heritage of Greece.
+              {t.home.aboutDescription}
             </p>
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-            <h3 className="text-2xl font-bold text-white mb-4">What to Expect</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">{t.home.whatToExpectTitle}</h3>
             <ul className="text-blue-100 space-y-3">
               <li className="flex items-start">
                 <span className="text-2xl mr-2">🎭</span>
-                <span>Traditional Greek dance performances</span>
+                <span>{t.home.traditionalPerformances}</span>
               </li>
               <li className="flex items-start">
                 <span className="text-2xl mr-2">✨</span>
-                <span>Unforgettable experience</span>
+                <span>{t.home.unforgettableExperience}</span>
               </li>
               <li className="flex items-start">
                 <span className="text-2xl mr-2">👥</span>
-                <span>Interactive workshops and dance lessons</span>
+                <span>{t.home.interactiveWorkshops}</span>
               </li>
               <li className="flex items-start">
                 <span className="text-2xl mr-2">🍽️</span>
-                <span>Authentic Greek cuisine and refreshments</span>
+                <span>{t.home.authenticCuisine}</span>
               </li>
             </ul>
           </div>
@@ -440,15 +441,15 @@ export default function Home() {
 
         {/* Call to Action */}
         <div className="mt-16 text-center bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-          <h3 className="text-3xl font-bold text-white mb-4">Ready to Join Us?</h3>
+          <h3 className="text-3xl font-bold text-white mb-4">{t.home.readyToJoinTitle}</h3>
           <p className="text-xl text-blue-100 mb-8">
-            Don&apos;t miss this incredible opportunity to be part of the Greek Dance Festival!
+            {t.home.readyToJoinDescription}
           </p>
           <Link
             href="/register"
             className="inline-block bg-white text-blue-900 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-colors"
           >
-            Register Today
+            {t.home.registerToday}
           </Link>
         </div>
       </div>

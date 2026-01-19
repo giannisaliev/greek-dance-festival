@@ -1,89 +1,94 @@
+"use client";
+
 import Link from "next/link";
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-const packages = [
+export default function PricingPage() {
+  const { t } = useLanguage();
+  
+  const packages = [
   {
-    name: "Guinness Record Only",
+    name: t.pricing.guinnessOnly,
     price: "€30",
-    description: "Join the world record attempt",
+    description: t.pricing.guinnessOnlyDesc,
     features: [
-      "🏆 Guinness Record Attempt",
-      "Festival merchandise",
-      "Certificate of participation",
-      "Be part of history!"
+      t.pricing.features.guinnessRecord,
+      t.pricing.features.merchandise,
+      t.pricing.features.certificate,
+      t.pricing.features.bePartOfHistory
     ],
     popular: false,
     category: "standalone"
   },
   {
-    name: "Greek Night Only",
+    name: t.pricing.greekNightOnly,
     price: "€40",
-    description: "Authentic Greek evening experience",
+    description: t.pricing.greekNightOnlyDesc,
     features: [
-      "🍷 Greek Night",
-      "Traditional food and drinks",
-      "Unforgettable experience"
+      t.pricing.features.greekNight,
+      t.pricing.features.traditionalFood,
+      t.pricing.features.unforgettable
     ],
     popular: false,
     category: "standalone"
   },
   {
-    name: "Starter Pass",
+    name: t.pricing.starterPass,
     price: "€70",
-    description: "Get a taste of the festival",
+    description: t.pricing.starterPassDesc,
     features: [
-      "Access to 2 classes",
-      "Festival program",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '2'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.certificate
     ],
     popular: false,
     category: "classes"
   },
   {
-    name: "Explorer Pass",
+    name: t.pricing.explorerPass,
     price: "€100",
-    description: "Explore more Greek dance styles",
+    description: t.pricing.explorerPassDesc,
     features: [
-      "Access to 4 classes",
-      "Festival program",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '4'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.certificate
     ],
     popular: false,
     category: "classes"
   },
   {
-    name: "Enthusiast Pass",
+    name: t.pricing.enthusiastPass,
     price: "€160",
-    description: "For serious dance enthusiasts",
+    description: t.pricing.enthusiastPassDesc,
     features: [
-      "Access to 8 classes",
-      "Festival program",
-      "Priority class selection",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '8'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.prioritySelection,
+      t.pricing.features.certificate
     ],
     popular: false,
     category: "classes"
   },
   {
-    name: "Full Pass",
+    name: t.pricing.fullPass,
     price: "€260",
-    description: "The ultimate festival experience",
+    description: t.pricing.fullPassDesc,
     features: [
-      "Access to all 24 classes",
-      "Unlimited class participation",
-      "🍷 Greek Night",
-      "🏆 Guinness Record",
-      "Festival program",
-      "Premium merchandise",
-      "Priority class selection",
-      "Certificate of participation"
+      t.pricing.features.unlimitedClasses,
+      t.pricing.features.unlimitedParticipation,
+      "🍷 " + t.pricing.features.greekNight,
+      "🏆 " + t.pricing.features.guinnessRecord,
+      t.pricing.features.festivalProgram,
+      t.pricing.features.premiumMerchandise,
+      t.pricing.features.prioritySelection,
+      t.pricing.features.certificate
     ],
     popular: true,
     category: "classes"
   }
 ];
 
-export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
@@ -92,20 +97,20 @@ export default function PricingPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-3">
-            Festival Packages
+            {t.pricing.title}
           </h1>
           <p className="text-lg text-blue-100">
-            Choose the package that best fits your festival experience
+            {t.pricing.subtitle}
           </p>
         </div>
 
         {/* Standalone Events */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4 text-center">
-            🎉 Standalone Events
+            🎉 {t.pricing.standaloneEvents}
           </h2>
           <p className="text-blue-100 text-center mb-6 text-sm">
-            Join just one event or combine them with any class package
+            {t.pricing.standaloneEventsDesc}
           </p>
           <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
             {packages.filter(pkg => pkg.category === "standalone").map((pkg) => (
@@ -123,7 +128,7 @@ export default function PricingPage() {
                   <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 mb-1">
                     {pkg.price}
                   </div>
-                  <p className="text-blue-100 text-xs">per person</p>
+                  <p className="text-blue-100 text-xs">{t.pricing.perPerson}</p>
                 </div>
 
                 <ul className="space-y-2 mb-4">
@@ -142,7 +147,7 @@ export default function PricingPage() {
                   href={`/register?package=${encodeURIComponent(pkg.name)}`}
                   className="block w-full text-center py-2 rounded-full font-semibold transition-colors bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 hover:from-yellow-300 hover:to-orange-300 text-sm"
                 >
-                  Select {pkg.name}
+                  {t.pricing.selectPackage}
                 </Link>
               </div>
             ))}
@@ -152,10 +157,10 @@ export default function PricingPage() {
         {/* Class Packages */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4 text-center">
-            💃 Class Packages
+            💃 {t.pricing.classPackagesTitle}
           </h2>
           <p className="text-blue-100 text-center mb-6 text-sm">
-            Access to dance classes throughout the festival
+            {t.pricing.classPackagesDesc}
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {packages.filter(pkg => pkg.category === "classes").map((pkg) => (
@@ -169,7 +174,7 @@ export default function PricingPage() {
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-blue-900 px-3 py-0.5 rounded-full font-bold text-xs">
-                    MOST POPULAR
+                    {t.pricing.popular}
                   </div>
                 )}
                 
@@ -209,7 +214,7 @@ export default function PricingPage() {
                     : "bg-white text-blue-900 hover:bg-blue-50"
                 }`}
               >
-                Select {pkg.name}
+                {t.pricing.selectPackage}
               </Link>
             </div>
           ))}
@@ -219,47 +224,47 @@ export default function PricingPage() {
         {/* Optional Add-ons Section */}
         <div className="mt-8 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-md rounded-2xl p-8 border-2 border-blue-400/50">
           <h3 className="text-2xl font-bold text-white mb-4 text-center">
-            💡 Add Events to Your Class Package
+            💡 {t.pricing.addEventsTitle}
           </h3>
           <p className="text-blue-100 text-center mb-8">
-            Already chose a class package? You can add these events during registration!
+            {t.pricing.addEventsDesc}
           </p>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
               <div className="text-4xl mb-3 text-center">🏆</div>
-              <h4 className="font-bold text-white text-xl mb-2 text-center">Guinness Record Attempt</h4>
+              <h4 className="font-bold text-white text-xl mb-2 text-center">{t.pricing.guinnessAddTitle}</h4>
               <p className="text-green-400 font-bold text-2xl mb-3 text-center">+€30</p>
               <p className="text-blue-100 text-sm text-center">
-                Be part of history! Join our attempt to break the world record for the largest Greek dance performance Zeimpekiko. Certificate included!
+                {t.pricing.guinnessAddDesc}
               </p>
             </div>
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
               <div className="text-4xl mb-3 text-center">🍷</div>
-              <h4 className="font-bold text-white text-xl mb-2 text-center">Greek Night</h4>
+              <h4 className="font-bold text-white text-xl mb-2 text-center">{t.pricing.greekNightAddTitle}</h4>
               <p className="text-green-400 font-bold text-2xl mb-3 text-center">+€40</p>
               <p className="text-blue-100 text-sm text-center">
-                Enjoy an authentic Greek evening with traditional food and drinks. Unforgettable!
+                {t.pricing.greekNightAddDesc}
               </p>
             </div>
           </div>
           <p className="text-center text-blue-100 text-sm mt-6">
-            💡 These can be added to any class package during registration
+            💡 {t.pricing.addEventsNote}
           </p>
         </div>
 
         {/* Additional Information */}
         <div className="mt-16 bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
           <h3 className="text-2xl font-bold text-white mb-6 text-center">
-            Package Information
+            {t.pricing.packageInfo}
           </h3>
           <div className="grid md:grid-cols-2 gap-8 text-blue-100">
             <div>
-              <h4 className="font-bold text-white mb-2">Cancellation Policy</h4>
-              <p>Full refund available up to 30 days before the event. 50% refund up to 14 days before.</p>
+              <h4 className="font-bold text-white mb-2">{t.pricing.cancellationPolicy}</h4>
+              <p>{t.pricing.cancellationText}</p>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-2">Need Help?</h4>
-              <p>Contact us at info@greekdancefestival.gr or call +30 6974 793912 for assistance.</p>
+              <h4 className="font-bold text-white mb-2">{t.pricing.needHelp}</h4>
+              <p>{t.pricing.needHelpText}</p>
             </div>
           </div>
         </div>
@@ -270,7 +275,7 @@ export default function PricingPage() {
             href="/register"
             className="inline-block bg-white text-blue-900 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-colors"
           >
-            Register Now
+            {t.nav.register}
           </Link>
         </div>
       </div>

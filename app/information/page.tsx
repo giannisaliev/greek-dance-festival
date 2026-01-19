@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Attraction {
   id: string;
@@ -65,6 +66,7 @@ const defaultAttractions: Attraction[] = [
 ];
 
 export default function InformationPage() {
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'guinness' | 'workshop'>('guinness');
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [isLoadingAttractions, setIsLoadingAttractions] = useState(true);
@@ -93,6 +95,48 @@ export default function InformationPage() {
     }
   };
 
+  // Function to get translated attraction data
+  const getTranslatedAttraction = (attraction: Attraction) => {
+    const translationMap: { [key: string]: { title: string; description: string; badge: string } } = {
+      'White Tower': {
+        title: language === 'el' ? t.information.whiteTower : 'White Tower',
+        description: language === 'el' ? t.information.whiteTowerDesc : attraction.description,
+        badge: language === 'el' ? t.information.whiteTowerBadge : attraction.badge,
+      },
+      'Rotunda': {
+        title: language === 'el' ? t.information.rotunda : 'Rotunda',
+        description: language === 'el' ? t.information.rotundaDesc : attraction.description,
+        badge: language === 'el' ? t.information.rotundaBadge : attraction.badge,
+      },
+      'Ano Poli (Upper Town)': {
+        title: language === 'el' ? t.information.anoPoli : 'Ano Poli (Upper Town)',
+        description: language === 'el' ? t.information.anoPoliDesc : attraction.description,
+        badge: language === 'el' ? t.information.anoPoliBadge : attraction.badge,
+      },
+      'Archaeological Museum': {
+        title: language === 'el' ? t.information.archaeologicalMuseum : 'Archaeological Museum',
+        description: language === 'el' ? t.information.archaeologicalMuseumDesc : attraction.description,
+        badge: language === 'el' ? t.information.archaeologicalMuseumBadge : attraction.badge,
+      },
+      'Ladadika District': {
+        title: language === 'el' ? t.information.ladadika : 'Ladadika District',
+        description: language === 'el' ? t.information.ladadikaDesc : attraction.description,
+        badge: language === 'el' ? t.information.ladadikaBadge : attraction.badge,
+      },
+      'Waterfront Promenade': {
+        title: language === 'el' ? t.information.waterfrontPromenade : 'Waterfront Promenade',
+        description: language === 'el' ? t.information.waterfrontPromenadeDesc : attraction.description,
+        badge: language === 'el' ? t.information.waterfrontPromenadeBadge : attraction.badge,
+      },
+    };
+
+    return translationMap[attraction.title] || {
+      title: attraction.title,
+      description: attraction.description,
+      badge: attraction.badge,
+    };
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
@@ -100,7 +144,7 @@ export default function InformationPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Festival Information
+            {t.information.festivalInfoTitle}
           </h1>
         </div>
 
@@ -114,7 +158,7 @@ export default function InformationPage() {
                 : 'bg-white/10 text-white border-2 border-white/20 hover:border-white/40'
             }`}
           >
-            🏆 Guinness Record
+            🏆 {t.information.guinnessRecordTab}
           </button>
           <button
             onClick={() => setActiveTab('workshop')}
@@ -124,7 +168,7 @@ export default function InformationPage() {
                 : 'bg-white/10 text-white border-2 border-white/20 hover:border-white/40'
             }`}
           >
-            🎭 Workshops
+            🎭 {t.information.workshopsTab}
           </button>
         </div>
 
@@ -142,12 +186,12 @@ export default function InformationPage() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 text-center mb-2">
-                🏆 Guinness Record Attempt
+                🏆 {t.information.guinnessRecordTitle}
               </h2>
               <div className="bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-pink-400/20 rounded-xl p-4 border-2 border-yellow-400/50 mb-6">
                 <div className="text-center">
-                  <p className="text-white font-bold text-2xl mb-2">Sunday, June 14th, 2026</p>
-                  <p className="text-yellow-200 font-bold text-3xl">12:00 PM</p>
+                  <p className="text-white font-bold text-2xl mb-2">{t.information.sundayDate}</p>
+                  <p className="text-yellow-200 font-bold text-3xl">{t.information.time12pm}</p>
                 </div>
               </div>
               <div className="bg-white/5 rounded-xl p-4 mb-4">
@@ -155,10 +199,10 @@ export default function InformationPage() {
                   <svg className="w-5 h-5 mr-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
-                  Location
+                  {t.information.locationLabel}
                 </h3>
-                <p className="text-blue-100 font-semibold">Aristotelous Square</p>
-                <p className="text-blue-200 text-sm">Thessaloniki, Greece</p>
+                <p className="text-blue-100 font-semibold">{t.information.aristotelousSquare}</p>
+                <p className="text-blue-200 text-sm">{t.information.thessaloniki}</p>
               </div>
             </div>
             
@@ -182,7 +226,7 @@ export default function InformationPage() {
               rel="noopener noreferrer"
               className="mt-6 block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-center py-4 rounded-full font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
             >
-              Open in Google Maps
+              {t.information.openInMaps}
             </a>
           </div>
 
@@ -199,14 +243,14 @@ export default function InformationPage() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 text-center mb-2">
-                🎭 Workshop Location
+                🎭 {t.information.workshopLocationTitle}
               </h2>
               <div className="bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-xl p-4 border-2 border-blue-400/50 mb-6">
                 <div className="text-center">
-                  <p className="text-white font-bold text-xl mb-1">Friday - Sunday</p>
-                  <p className="text-blue-200 font-semibold text-lg">June 12-14, 2026</p>
+                  <p className="text-white font-bold text-xl mb-1">{t.information.fridayToSunday}</p>
+                  <p className="text-blue-200 font-semibold text-lg">{t.information.festivalDates}</p>
                   <a href="/#schedule" className="inline-block mt-2 text-yellow-300 hover:text-yellow-200 font-semibold underline transition-colors duration-200">
-                    View Full Schedule →
+                    {t.information.viewFullSchedule} →
                   </a>
                 </div>
               </div>
@@ -215,10 +259,10 @@ export default function InformationPage() {
                   <svg className="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
-                  Location
+                  {t.information.locationLabel}
                 </h3>
-                <p className="text-blue-100 font-semibold">YMCA Thessaloniki</p>
-                <p className="text-blue-200 text-sm">Thessaloniki, Greece</p>
+                <p className="text-blue-100 font-semibold">{t.information.ymcaThessaloniki}</p>
+                <p className="text-blue-200 text-sm">{t.information.thessaloniki}</p>
               </div>
             </div>
             
@@ -242,7 +286,7 @@ export default function InformationPage() {
               rel="noopener noreferrer"
               className="mt-6 block w-full bg-gradient-to-r from-blue-400 to-purple-500 text-white text-center py-4 rounded-full font-bold text-lg hover:from-blue-500 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
             >
-              Open in Google Maps
+              {t.information.openInMaps}
             </a>
           </div>
         </div>
@@ -250,25 +294,25 @@ export default function InformationPage() {
         {/* Additional Info Section */}
         <div className="mt-12 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-3xl p-8 border-2 border-white/30">
           <h3 className="text-2xl font-bold text-white mb-6 text-center">
-            📍 Important Notes
+            📍 {t.information.importantNotes}
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
               <h4 className="font-bold text-white text-lg mb-3 flex items-center">
                 <span className="text-2xl mr-2">🚌</span>
-                Getting Around
+                {t.information.gettingAround}
               </h4>
               <p className="text-blue-100 text-sm">
-                Both locations are easily accessible by public transportation. Thessaloniki&apos;s bus system covers both areas extensively.
+                {t.information.gettingAroundText}
               </p>
             </div>
             <div className="bg-white/10 rounded-xl p-6 border border-white/20">
               <h4 className="font-bold text-white text-lg mb-3 flex items-center">
                 <span className="text-2xl mr-2">🅿️</span>
-                Parking
+                {t.information.parking}
               </h4>
               <p className="text-blue-100 text-sm">
-                Parking is available near both locations. We recommend arriving early, especially for the Guinness Record event at Aristotelous Square.
+                {t.information.parkingText}
               </p>
             </div>
           </div>
@@ -279,11 +323,11 @@ export default function InformationPage() {
           <div className="text-center mb-10">
             <h2 className="text-4xl font-bold text-white mb-3 flex items-center justify-center gap-3">
               <span>🏛️</span>
-              Explore Thessaloniki
+              {t.information.exploreThessaloniki}
               <span>🌟</span>
             </h2>
             <p className="text-blue-100 text-lg">
-              Discover the rich history and vibrant culture of Greece&apos;s second-largest city
+              {t.information.exploreDescription}
             </p>
           </div>
 
@@ -294,7 +338,9 @@ export default function InformationPage() {
                 <p>Loading attractions...</p>
               </div>
             ) : (
-              attractions.map((attraction) => (
+              attractions.map((attraction) => {
+                const translated = getTranslatedAttraction(attraction);
+                return (
                 <div
                   key={attraction.id}
                   className="bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
@@ -302,19 +348,19 @@ export default function InformationPage() {
                   <div className="relative h-64 overflow-hidden">
                     <img
                       src={attraction.image}
-                      alt={attraction.title}
+                      alt={translated.title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent"></div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <h3 className="text-2xl font-bold text-white">
-                        {attraction.title}
+                        {translated.title}
                       </h3>
                     </div>
                   </div>
                   <div className="p-6">
                     <p className="text-blue-100 text-sm mb-4">
-                      {attraction.description}
+                      {translated.description}
                     </p>
                     <div className="flex items-center text-yellow-300 text-sm">
                       <svg
@@ -328,11 +374,12 @@ export default function InformationPage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      {attraction.badge}
+                      {translated.badge}
                     </div>
                   </div>
                 </div>
-              ))
+              );
+              })
             )}
           </div>
 
@@ -340,28 +387,28 @@ export default function InformationPage() {
           <div className="mt-10 bg-gradient-to-r from-green-500/20 to-teal-500/20 backdrop-blur-md rounded-3xl p-8 border-2 border-green-400/30">
             <h3 className="text-2xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
               <span>💡</span>
-              Travel Tips
+              {t.information.travelTipsTitle}
             </h3>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-white/10 rounded-xl p-5 border border-white/20">
                 <div className="text-3xl mb-3">🎫</div>
-                <h4 className="font-bold text-white text-lg mb-2">City Pass</h4>
+                <h4 className="font-bold text-white text-lg mb-2">{t.information.cityPassTitle}</h4>
                 <p className="text-blue-100 text-sm">
-                  Consider getting a Thessaloniki City Card for free entry to museums and public transport.
+                  {t.information.cityPassDesc}
                 </p>
               </div>
               <div className="bg-white/10 rounded-xl p-5 border border-white/20">
                 <div className="text-3xl mb-3">🍽️</div>
-                <h4 className="font-bold text-white text-lg mb-2">Local Cuisine</h4>
+                <h4 className="font-bold text-white text-lg mb-2">{t.information.localCuisineTitle}</h4>
                 <p className="text-blue-100 text-sm">
-                  Don&apos;t miss trying bougatsa for breakfast and fresh seafood at the tavernas near the port.
+                  {t.information.localCuisineDesc}
                 </p>
               </div>
               <div className="bg-white/10 rounded-xl p-5 border border-white/20">
                 <div className="text-3xl mb-3">🚶</div>
-                <h4 className="font-bold text-white text-lg mb-2">Best Way to Explore</h4>
+                <h4 className="font-bold text-white text-lg mb-2">{t.information.bestWayTitle}</h4>
                 <p className="text-blue-100 text-sm">
-                  The city center is very walkable. Wear comfortable shoes and explore on foot to discover hidden gems.
+                  {t.information.bestWayDesc}
                 </p>
               </div>
             </div>

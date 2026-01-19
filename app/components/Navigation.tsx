@@ -4,20 +4,26 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
+
+  // Don't show translations on admin pages
+  const isAdminPage = pathname?.startsWith('/admin');
 
   const menuItems = [
-    { href: "/", label: "Home" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/information", label: "Information" },
-    { href: "/teachers", label: "Teachers" },
-    { href: "/hotel", label: "Hotel" },
-    { href: "/register", label: "Register" },
+    { href: "/", label: isAdminPage ? "Home" : t.nav.home },
+    { href: "/pricing", label: isAdminPage ? "Pricing" : t.nav.pricing },
+    { href: "/information", label: isAdminPage ? "Information" : t.nav.information },
+    { href: "/teachers", label: isAdminPage ? "Teachers" : t.nav.teachers },
+    { href: "/hotel", label: isAdminPage ? "Hotel" : t.nav.hotel },
+    { href: "/register", label: isAdminPage ? "Register" : t.nav.register },
   ];
 
   const handleSignOut = async () => {
@@ -52,6 +58,9 @@ export default function Navigation() {
                 </Link>
               ))}
               
+              {/* Language Switcher - Hide on admin pages */}
+              {!isAdminPage && <LanguageSwitcher />}
+              
               {/* User Menu or Login */}
               {!isLoading && (
                 <>
@@ -75,14 +84,14 @@ export default function Navigation() {
                               className="block px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors"
                               onClick={() => setShowUserMenu(false)}
                             >
-                              🛡️ Admin Panel
+                              🛡️ {isAdminPage ? "Admin Panel" : t.nav.adminPanel}
                             </Link>
                           )}
                           <button
                             onClick={handleSignOut}
                             className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors"
                           >
-                            🚪 Sign Out
+                            🚪 {isAdminPage ? "Sign Out" : t.nav.signOut}
                           </button>
                         </div>
                       )}
@@ -92,7 +101,7 @@ export default function Navigation() {
                       href="/login"
                       className="text-white hover:text-blue-200 transition-colors bg-white/10 px-4 py-2 rounded-lg"
                     >
-                      Login
+                      {isAdminPage ? "Login" : t.nav.login}
                     </Link>
                   )}
                 </>
@@ -153,7 +162,19 @@ export default function Navigation() {
           </button>
 
           {/* Menu Title */}
-          <h2 className="text-2xl font-bold text-white mb-12 mt-4">Menu</h2>
+          <h2 className="text-2xl font-bold text-white mb-6 mt-4">Menu</h2>
+
+          {/* Language Switcher for Mobile - Hide on admin pages */}
+          {!isAdminPage && (
+            <div className="mb-8 pb-6 border-b border-white/30">
+              <div className="text-center mb-4">
+                <p className="text-white/80 text-sm font-semibold mb-3">🌍 Language / Γλώσσα</p>
+              </div>
+              <div className="flex justify-center">
+                <LanguageSwitcher />
+              </div>
+            </div>
+          )}
 
           {/* Menu Items with Beautiful Continuous Animations */}
           <div className="space-y-3">
@@ -218,7 +239,7 @@ export default function Navigation() {
                     onClick={() => setIsOpen(false)}
                     className="block bg-yellow-400/25 border-2 border-yellow-300/60 rounded-xl p-4 text-white hover:bg-yellow-400/35 transition-all font-semibold"
                   >
-                    🛡️ Admin Panel
+                    🛡️ {isAdminPage ? "Admin Panel" : t.nav.adminPanel}
                   </Link>
                 )}
                 <button
@@ -228,7 +249,7 @@ export default function Navigation() {
                   }}
                   className="block w-full bg-red-400/25 border-2 border-red-300/60 rounded-xl p-4 text-white hover:bg-red-400/35 transition-all text-left font-semibold"
                 >
-                  🚪 Sign Out
+                  🚪 {isAdminPage ? "Sign Out" : t.nav.signOut}
                 </button>
               </div>
             </div>
@@ -241,7 +262,7 @@ export default function Navigation() {
                 onClick={() => setIsOpen(false)}
                 className="block bg-white/20 border-2 border-white/40 rounded-xl p-4 text-white hover:bg-white/30 transition-all text-center font-semibold"
               >
-                Login
+                {isAdminPage ? "Login" : t.nav.login}
               </Link>
             </div>
           )}

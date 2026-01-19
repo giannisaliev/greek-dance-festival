@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Package {
   name: string;
@@ -14,95 +15,97 @@ interface Package {
   icon: string;
 }
 
-const packages: Package[] = [
+export default function RegisterPage() {
+  const { t } = useLanguage();
+  
+  const packages: Package[] = [
   {
-    name: "Guinness Record Only",
+    name: t.pricing.guinnessOnly,
     price: "€30",
     priceValue: 30,
-    description: "Join the world record attempt",
+    description: t.pricing.guinnessOnlyDesc,
     features: [
-      "🏆 Guinness Record Attempt",
-      "Festival merchandise",
-      "Certificate of participation",
-      "Be part of history!"
+      t.pricing.features.guinnessRecord,
+      t.pricing.features.merchandise,
+      t.pricing.features.certificate,
+      t.pricing.features.bePartOfHistory
     ],
     popular: false,
     icon: "🏆"
   },
   {
-    name: "Greek Night Only",
+    name: t.pricing.greekNightOnly,
     price: "€40",
     priceValue: 40,
-    description: "Authentic Greek evening experience",
+    description: t.pricing.greekNightOnlyDesc,
     features: [
-      "🍷 Greek Night",
-      "Traditional food and drinks",
-      "Unforgettable experience"
+      t.pricing.features.greekNight,
+      t.pricing.features.traditionalFood,
+      t.pricing.features.unforgettable
     ],
     popular: false,
     icon: "🍷"
   },
   {
-    name: "Starter Pass",
+    name: t.pricing.starterPass,
     price: "€70",
     priceValue: 70,
-    description: "Get a taste of the festival",
+    description: t.pricing.starterPassDesc,
     features: [
-      "Access to 2 classes",
-      "Festival program",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '2'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.certificate
     ],
     popular: false,
     icon: "🌟"
   },
   {
-    name: "Explorer Pass",
+    name: t.pricing.explorerPass,
     price: "€100",
     priceValue: 100,
-    description: "Explore more Greek dance styles",
+    description: t.pricing.explorerPassDesc,
     features: [
-      "Access to 4 classes",
-      "Festival program",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '4'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.certificate
     ],
     popular: false,
     icon: "🎭"
   },
   {
-    name: "Enthusiast Pass",
+    name: t.pricing.enthusiastPass,
     price: "€160",
     priceValue: 160,
-    description: "For serious dance enthusiasts",
+    description: t.pricing.enthusiastPassDesc,
     features: [
-      "Access to 8 classes",
-      "Festival program",
-      "Priority class selection",
-      "Certificate of participation"
+      t.pricing.features.accessToClasses.replace('{count}', '8'),
+      t.pricing.features.festivalProgram,
+      t.pricing.features.prioritySelection,
+      t.pricing.features.certificate
     ],
     popular: false,
     icon: "⭐"
   },
   {
-    name: "Full Pass",
+    name: t.pricing.fullPass,
     price: "€260",
     priceValue: 260,
-    description: "The ultimate festival experience",
+    description: t.pricing.fullPassDesc,
     features: [
-      "Access to all 24 classes",
-      "Unlimited class participation",
-      "🍷 Greek Night",
-      "🏆 Guinness Record",
-      "Festival program",
-      "Premium merchandise",
-      "Priority class selection",
-      "Certificate of participation"
+      t.pricing.features.unlimitedClasses,
+      t.pricing.features.unlimitedParticipation,
+      "🍷 " + t.pricing.features.greekNight,
+      "🏆 " + t.pricing.features.guinnessRecord,
+      t.pricing.features.festivalProgram,
+      t.pricing.features.premiumMerchandise,
+      t.pricing.features.prioritySelection,
+      t.pricing.features.certificate
     ],
     popular: true,
     icon: "👑"
   }
 ];
-
-export default function RegisterPage() {
+  
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [closedMessage, setClosedMessage] = useState("");
   const [step, setStep] = useState(1);
@@ -114,6 +117,8 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     phone: "",
+    firstName: "",
+    lastName: "",
     guinnessRecordAttempt: false,
     greekNight: false,
   });
@@ -150,6 +155,12 @@ export default function RegisterPage() {
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData.user);
+          // Pre-fill form with user data
+          setFormData(prev => ({
+            ...prev,
+            firstName: userData.user.firstName || "",
+            lastName: userData.user.lastName || "",
+          }));
         }
       } catch (err) {
         console.error("Error checking status:", err);
@@ -193,6 +204,8 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           phone: formData.phone,
+          registrantFirstName: formData.firstName,
+          registrantLastName: formData.lastName,
           packageType: selectedPackage.name,
           guinnessRecordAttempt: includesGuinness,
           greekNight: includesGreekNight,
@@ -222,7 +235,7 @@ export default function RegisterPage() {
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-white text-xl">Loading...</p>
+            <p className="text-white text-xl">{t.common.loading}</p>
           </div>
         </div>
       </div>
@@ -249,22 +262,21 @@ export default function RegisterPage() {
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">
-                Registration Opens Soon!
+                {t.register.registrationOpensSoon}
               </h2>
 
               <p className="text-xl md:text-2xl text-blue-100 text-center mb-8">
-                Mark your calendars
+                {t.register.markYourCalendars}
               </p>
 
               <div className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-2xl p-8 border border-white/30 mb-8">
                 <p className="text-center text-white font-bold text-2xl md:text-3xl">
-                  Registration opens on February 1st, 2026
+                  {t.register.registrationOpensOn}
                 </p>
               </div>
 
               <p className="text-center text-blue-100 text-lg mb-10 leading-relaxed">
-                Get ready for an unforgettable experience at the Greek Dance Festival!<br />
-                Don&apos;t miss your chance to be part of this incredible celebration.
+                {t.register.getReadyMessage}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -272,13 +284,13 @@ export default function RegisterPage() {
                   href="/"
                   className="bg-white text-blue-900 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-all transform hover:scale-105 text-center shadow-lg"
                 >
-                  Back to Home
+                  {t.register.backToHome}
                 </Link>
                 <Link
                   href="/pricing"
                   className="bg-blue-700/50 text-white px-8 py-4 rounded-full font-semibold hover:bg-blue-600/50 transition-all transform hover:scale-105 border-2 border-white/30 text-center backdrop-blur-sm"
                 >
-                  View Packages
+                  {t.register.viewPackages}
                 </Link>
               </div>
 
@@ -286,13 +298,13 @@ export default function RegisterPage() {
                 <div className="grid md:grid-cols-2 gap-6 text-center">
                   <div>
                     <div className="text-3xl mb-2">📅</div>
-                    <p className="text-white font-semibold mb-1">Festival Dates</p>
-                    <p className="text-blue-100 text-sm">June 12-14, 2026</p>
+                    <p className="text-white font-semibold mb-1">{t.register.festivalDates}</p>
+                    <p className="text-blue-100 text-sm">{t.register.festivalDatesText}</p>
                   </div>
                   <div>
                     <div className="text-3xl mb-2">🎭</div>
-                    <p className="text-white font-semibold mb-1">Dance Workshops</p>
-                    <p className="text-blue-100 text-sm">All skill levels welcome</p>
+                    <p className="text-white font-semibold mb-1">{t.register.danceWorkshops}</p>
+                    <p className="text-blue-100 text-sm">{t.register.allSkillLevels}</p>
                   </div>
                 </div>
               </div>
@@ -320,9 +332,9 @@ export default function RegisterPage() {
                 </svg>
               </div>
               
-              <h2 className="text-4xl font-bold text-white mb-4">Registration Complete!</h2>
+              <h2 className="text-4xl font-bold text-white mb-4">{t.register.registrationComplete}</h2>
               <p className="text-xl text-blue-100 mb-8">
-                Welcome to the Greek Dance Festival, {user?.firstName}!
+                {t.register.welcomeMessage}, {user?.firstName}!
               </p>
               
               <div className="bg-white/10 rounded-2xl p-6 mb-8 border border-white/20">
@@ -344,7 +356,7 @@ export default function RegisterPage() {
                   </div>
                 )}
                 <p className="text-blue-100 text-sm text-center">
-                  A confirmation email has been sent to {user?.email}
+                  {t.register.confirmationSent} {user?.email}
                 </p>
               </div>
               
@@ -353,13 +365,13 @@ export default function RegisterPage() {
                   href="/dashboard"
                   className="bg-white text-blue-900 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-all transform hover:scale-105 text-center shadow-lg"
                 >
-                  Go to Dashboard
+                  {t.register.goToDashboard}
                 </Link>
                 <Link
                   href="/"
                   className="bg-white/20 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/30 transition-all border border-white/30 text-center"
                 >
-                  Back to Home
+                  {t.register.backToHome}
                 </Link>
               </div>
             </div>
@@ -377,11 +389,24 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Register for the Festival
+            {t.register.title}
           </h1>
           <p className="text-xl text-blue-100">
-            Join us for an unforgettable celebration of Greek culture and dance
+            {t.register.subtitle}
           </p>
+          
+          {/* Dance Studio Registration Link */}
+          <div className="mt-6">
+            <Link
+              href="/register/bulk"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Click here for Dance Studio / Teacher registering their students
+            </Link>
+          </div>
         </div>
 
         {/* Progress Steps */}
@@ -393,7 +418,7 @@ export default function RegisterPage() {
               }`}>
                 {step > 1 ? '✓' : '1'}
               </div>
-              <span className="font-semibold hidden sm:inline">Choose Package</span>
+              <span className="font-semibold hidden sm:inline">{t.register.step1}</span>
             </div>
             <div className={`w-16 h-1 rounded ${step >= 2 ? 'bg-white' : 'bg-white/20'}`} />
             <div className={`flex items-center gap-2 ${step >= 2 ? 'text-white' : 'text-blue-300'}`}>
@@ -408,8 +433,8 @@ export default function RegisterPage() {
             <div className={`flex items-center gap-2 ${step >= 3 ? 'text-white' : 'text-blue-300'}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                 step >= 3 ? 'bg-white text-blue-900' : 'bg-white/20'
-              }`}>2 lg:grid-cols-4
-                3
+              }`}>
+                {step > 3 ? '✓' : '3'}
               </div>
               <span className="font-semibold hidden sm:inline">Confirm</span>
             </div>
@@ -498,18 +523,11 @@ export default function RegisterPage() {
             
             <div className="flex justify-center mt-10">
               <button
-                onClick={() => {
-                  // If user is already logged in, skip to step 3, otherwise go to step 2
-                  if (user) {
-                    setStep(3);
-                  } else {
-                    setStep(2);
-                  }
-                }}
+                onClick={() => setStep(2)}
                 disabled={!selectedPackage}
                 className="bg-white text-blue-900 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
               >
-                Continue with {selectedPackage?.name || 'Package'}
+                {t.register.continueWith} {selectedPackage?.name || 'Package'}
               </button>
             </div>
           </div>
@@ -531,20 +549,20 @@ export default function RegisterPage() {
                     </svg>
                   </div>
                   <p className="text-blue-100 text-lg mb-6">
-                    Please sign in or create an account to continue
+                    {t.register.signInRequired}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
                       href="/login"
                       className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all"
                     >
-                      Sign In
+                      {t.login.signIn}
                     </Link>
                     <Link
                       href="/signup"
                       className="bg-white/20 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/30 transition-all border border-white/30"
                     >
-                      Create Account
+                      {t.register.createAccount}
                     </Link>
                   </div>
                 </div>
@@ -552,15 +570,47 @@ export default function RegisterPage() {
                 <form onSubmit={(e) => { e.preventDefault(); setStep(3); }}>
                   {/* User Info Display */}
                   <div className="bg-white/5 rounded-xl p-6 mb-6 border border-white/10">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 mb-4">
                       <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        {user.firstName[0]}{user.lastName[0]}
+                        {(formData.firstName || user.firstName)[0]}{(formData.lastName || user.lastName)[0]}
                       </div>
                       <div>
                         <p className="text-white font-semibold text-lg">{user.firstName} {user.lastName}</p>
                         <p className="text-blue-100">{user.email}</p>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Name Fields - Can be edited */}
+                  <div className="mb-6">
+                    <label className="block text-white font-semibold mb-3">
+                      Registration Name (editable)
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <input
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                          placeholder="First Name"
+                          className="w-full px-5 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                          placeholder="Last Name"
+                          className="w-full px-5 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <p className="text-blue-200 text-sm mt-2">
+                      This name will appear on your festival badge and certificate
+                    </p>
                   </div>
                   
                   {/* Phone Number */}
@@ -727,7 +777,7 @@ export default function RegisterPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={!formData.phone}
+                      disabled={!formData.phone || !formData.firstName || !formData.lastName}
                       className="flex-1 bg-white text-blue-900 px-6 py-4 rounded-full font-bold hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                     >
                       Review & Confirm
@@ -770,8 +820,17 @@ export default function RegisterPage() {
                 
                 <div className="p-6 space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-white/10">
-                    <span className="text-blue-100">Name</span>
-                    <span className="text-white font-semibold">{user.firstName} {user.lastName}</span>
+                    <span className="text-blue-100">Registration Name</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-white font-semibold">{formData.firstName} {formData.lastName}</span>
+                      <button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        className="text-blue-300 text-sm hover:text-white underline"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-blue-100">Email</span>
@@ -779,7 +838,16 @@ export default function RegisterPage() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-blue-100">Phone</span>
-                    <span className="text-white font-semibold">{formData.phone}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-white font-semibold">{formData.phone}</span>
+                      <button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        className="text-blue-300 text-sm hover:text-white underline"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center py-2">
                     <span className="text-blue-100">Festival Dates</span>

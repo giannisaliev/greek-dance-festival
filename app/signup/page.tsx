@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function SignupPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -87,10 +89,10 @@ export default function SignupPage() {
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
           <h1 className="text-4xl font-bold text-white mb-2 text-center">
-            Create Account
+            {t.signup.title}
           </h1>
           <p className="text-blue-100 mb-8 text-center">
-            Sign up to register for the festival
+            {t.signup.subtitle}
           </p>
 
           {error && (

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
@@ -69,10 +71,10 @@ export default function LoginPage() {
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
           <h1 className="text-4xl font-bold text-white mb-2 text-center">
-            Welcome Back
+            {t.login.title}
           </h1>
           <p className="text-blue-100 mb-8 text-center">
-            Log in to manage your registration
+            {t.login.subtitle}
           </p>
 
           {error && (
@@ -84,7 +86,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-white font-medium mb-2">
-                Email Address
+                {t.login.email}
               </label>
               <input
                 type="email"
@@ -101,7 +103,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-white font-medium mb-2">
-                Password
+                {t.login.password}
               </label>
               <input
                 type="password"
@@ -121,7 +123,7 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="w-full bg-white text-blue-900 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Logging in..." : "Log In"}
+              {isSubmitting ? t.login.signingIn : t.login.signIn}
             </button>
           </form>
 
@@ -131,7 +133,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-white/30"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-transparent text-blue-100">Or continue with</span>
+              <span className="px-4 bg-transparent text-blue-100">{t.login.orContinueWith}</span>
             </div>
           </div>
 
@@ -159,14 +161,14 @@ export default function LoginPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Sign in with Google
+            {t.login.googleSignIn}
           </button>
 
           <div className="mt-6 text-center">
             <p className="text-blue-100">
-              Don&apos;t have an account?{" "}
+              {t.login.noAccount}{" "}
               <Link href="/signup" className="text-white font-semibold hover:underline">
-                Sign up
+                {t.login.signUp}
               </Link>
             </p>
           </div>

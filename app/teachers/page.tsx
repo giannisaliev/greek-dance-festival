@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navigation from "../components/Navigation";
 import Image from "next/image";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Teacher {
   id: string;
@@ -36,6 +37,7 @@ const getFlagUrl = (countryCode: string) => {
 };
 
 export default function TeachersPage() {
+  const { t } = useLanguage();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({ showTbaTeachers: false, tbaTeachersCount: 3 });
@@ -78,10 +80,10 @@ export default function TeachersPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Teachers
+            {t.teachers.title}
           </h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            Meet the exceptional instructors who will guide you through the beautiful world of Greek dance
+            {t.teachers.subtitle}
           </p>
         </div>
 
@@ -222,10 +224,10 @@ export default function TeachersPage() {
                   {/* Name overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                     <h3 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
-                      To Be Announced
+                      {t.teachers.toBeAnnounced}
                     </h3>
                     <div className="flex items-center gap-2 text-blue-200">
-                      <span className="font-semibold">Coming Soon</span>
+                      <span className="font-semibold">{t.teachers.comingSoon}</span>
                     </div>
                   </div>
                 </div>
@@ -235,9 +237,9 @@ export default function TeachersPage() {
                   <div className="flex items-start gap-3">
                     <div className="text-3xl opacity-50">💃</div>
                     <div>
-                      <h4 className="text-sm font-semibold text-blue-200 mb-1">Teaching Style</h4>
+                      <h4 className="text-sm font-semibold text-blue-200 mb-1">{t.teachers.teachingStyle}</h4>
                       <p className="text-blue-100/70 leading-relaxed italic">
-                        More amazing instructors coming soon...
+                        {t.teachers.moreInstructors}
                       </p>
                     </div>
                   </div>
@@ -250,22 +252,22 @@ export default function TeachersPage() {
         {/* Call to Action */}
         {teachers.length > 0 && (
           <div className="mt-16 text-center bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-            <h3 className="text-3xl font-bold text-white mb-4">Ready to Learn?</h3>
+            <h3 className="text-3xl font-bold text-white mb-4">{t.teachers.readyToLearn}</h3>
             <p className="text-xl text-blue-100 mb-8">
-              Join us and learn from these incredible instructors!
+              {t.teachers.joinInstructors}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/register"
                 className="inline-block bg-white text-blue-900 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
               >
-                Register Now
+                {t.teachers.registerNow}
               </a>
               <a
                 href="/pricing"
                 className="inline-block bg-blue-700/50 text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-600/50 transition-colors border-2 border-white/30 backdrop-blur-sm"
               >
-                View Packages
+                {t.teachers.viewPackages}
               </a>
             </div>
           </div>

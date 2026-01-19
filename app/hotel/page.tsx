@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Navigation from "../components/Navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Hotel {
   id: string;
@@ -17,6 +18,7 @@ interface Hotel {
 }
 
 export default function HotelPage() {
+  const { t } = useLanguage();
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Record<string, string>>({});
@@ -81,15 +83,15 @@ export default function HotelPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white mb-4">
-              🏨 Festival Hotels
+              🏨 {t.hotel.title}
             </h1>
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20 max-w-2xl mx-auto">
               <div className="text-6xl mb-6">🏨</div>
               <p className="text-2xl text-white font-semibold mb-4">
-                Hotel information will be here soon!
+                {t.hotel.noHotels}
               </p>
               <p className="text-blue-100">
-                We're working on bringing you the best accommodation options for the festival. Check back soon for updates!
+                {t.hotel.noHotelsDesc}
               </p>
             </div>
           </div>
@@ -106,10 +108,10 @@ export default function HotelPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🏨 Festival Hotels
+            🏨 {t.hotel.title}
           </h1>
           <p className="text-lg text-blue-100">
-            Book your stay at our recommended partner hotels
+            {t.hotel.subtitle}
           </p>
         </div>
 
