@@ -21,6 +21,8 @@ model User {
   emailVerified DateTime?
   image         String?
   isAdmin       Boolean   @default(false)
+  isTeacher     Boolean   @default(false)   // Teacher or dance studio owner
+  studioName    String?                     // Dance studio name (if applicable)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   

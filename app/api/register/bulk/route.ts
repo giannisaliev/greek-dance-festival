@@ -20,11 +20,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { students } = body;
+    const { students, registrantType, studioName } = body;
     
     console.log("Bulk registration request:", { 
       studentsCount: students?.length,
-      students: students
+      registrantType,
+      studioName
     });
     
     // Get authenticated user (the teacher/studio owner)
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the teacher's user ID from the database
+    // Get the teacher's user ID from the database and update their profile
     const teacher = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
@@ -49,6 +50,15 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Update teacher's profile with registration type and studio name
+    await prisma.user.update({
+      where: { id: teacher.id },
+      data: {
+        isTeacher: true,
+        studioName: registrantType === "studio" ? studioName : null
+      }
+    });
 
     // Validate that students array is provided
     if (!students || !Array.isArray(students) || students.length === 0) {

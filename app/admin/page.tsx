@@ -54,6 +54,8 @@ interface Teacher {
   email: string;
   firstName: string;
   lastName: string;
+  isTeacher: boolean;
+  studioName: string | null;
   participant?: {
     id: string;
     packageType: string;
@@ -726,8 +728,15 @@ export default function AdminPage() {
                                 <div className="flex items-center gap-4">
                                   <span className="text-2xl">{isExpanded ? "▼" : "▶"}</span>
                                   <div className="text-left">
-                                    <div className="text-white font-bold text-lg">
-                                      {teacher.participant?.registrantFirstName || teacher.firstName} {teacher.participant?.registrantLastName || teacher.lastName}
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-white font-bold text-lg">
+                                        {teacher.participant?.registrantFirstName || teacher.firstName} {teacher.participant?.registrantLastName || teacher.lastName}
+                                      </span>
+                                      {teacher.studioName && (
+                                        <span className="bg-purple-500/30 text-purple-100 px-3 py-1 rounded-full text-xs font-semibold">
+                                          🏢 {teacher.studioName}
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="text-blue-200 text-sm">{teacher.email}</div>
                                   </div>

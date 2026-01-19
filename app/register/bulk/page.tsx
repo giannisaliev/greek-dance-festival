@@ -40,6 +40,8 @@ export default function BulkRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [registrantType, setRegistrantType] = useState<"teacher" | "studio">("teacher");
+  const [studioName, setStudioName] = useState("");
   const [students, setStudents] = useState<Student[]>([{
     id: crypto.randomUUID(),
     firstName: "",
@@ -133,6 +135,13 @@ export default function BulkRegisterPage() {
     setIsSubmitting(true);
     setError("");
 
+    // Validate studio name if registrant is a studio
+    if (registrantType === "studio" && !studioName.trim()) {
+      setError("Please enter your dance studio name");
+      setIsSubmitting(false);
+      return;
+    }
+
     // Validate no empty fields
     const hasEmptyFields = students.some(s => !s.firstName || !s.lastName || !s.email);
     if (hasEmptyFields) {
@@ -147,7 +156,11 @@ export default function BulkRegisterPage() {
       const response = await fetch("/api/register/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ students }),
+        body: JSON.stringify({ 
+          students,
+          registrantType,
+          studioName: registrantType === "studio" ? studioName : undefined
+        }),
       });
 
       const data = await response.json();
@@ -297,6 +310,58 @@ export default function BulkRegisterPage() {
         )}
 
         <form onSubmit={handleSubmit}>
+          {/* Registrant Type Selection */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-6">
+            <h3 className="text-2xl font-bold text-white mb-6">Registration Information</h3>
+            
+            <div className="mb-6">
+              <label className="block text-white font-semibold mb-3">I am registering as:</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setRegistrantType("teacher")}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    registrantType === "teacher"
+                      ? "bg-white/20 border-white text-white"
+                      : "bg-white/5 border-white/20 text-blue-100 hover:border-white/40"
+                  }`}
+                >
+                  <div className="text-3xl mb-2">👨‍🏫</div>
+                  <div className="font-bold text-lg">Individual Teacher</div>
+                  <div className="text-sm mt-1 opacity-80">Registering students independently</div>
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => setRegistrantType("studio")}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    registrantType === "studio"
+                      ? "bg-white/20 border-white text-white"
+                      : "bg-white/5 border-white/20 text-blue-100 hover:border-white/40"
+                  }`}
+                >
+                  <div className="text-3xl mb-2">🏢</div>
+                  <div className="font-bold text-lg">Dance Studio</div>
+                  <div className="text-sm mt-1 opacity-80">Registering for a dance school</div>
+                </button>
+              </div>
+            </div>
+
+            {registrantType === "studio" && (
+              <div>
+                <label className="block text-white font-semibold mb-2">Dance Studio Name *</label>
+                <input
+                  type="text"
+                  value={studioName}
+                  onChange={(e) => setStudioName(e.target.value)}
+                  placeholder="Enter your dance studio name"
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  required={registrantType === "studio"}
+                />
+              </div>
+            )}
+          </div>
+
           <div className="space-y-6">
             {students.map((student, index) => (
               <div key={student.id} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
