@@ -20,7 +20,42 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json({ participants: participants || [] });
+
+      // Get all unique teacher IDs
+      const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
+      
+      // Fetch teacher information
+      const teachers = await prisma.user.findMany({
+        where: {
+          id: {
+            in: teacherIds as string[]
+          }
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          participant: {
+            select: {
+              id: true,
+              packageType: true,
+              phone: true,
+              guinnessRecordAttempt: true,
+              greekNight: true,
+              totalPrice: true,
+              checkedIn: true,
+              registrantFirstName: true,
+              registrantLastName: true,
+            }
+          }
+        }
+      });
+
+      return NextResponse.json({ 
+        participants: participants || [], 
+        teachers: teachers || []
+      });
     }
 
     // Search by name, email, or phone
@@ -48,12 +83,46 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ participants: participants || [] });
+    // Get all unique teacher IDs from search results
+    const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
+    
+    // Fetch teacher information
+    const teachers = await prisma.user.findMany({
+      where: {
+        id: {
+          in: teacherIds as string[]
+        }
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        participant: {
+          select: {
+            id: true,
+            packageType: true,
+            phone: true,
+            guinnessRecordAttempt: true,
+            greekNight: true,
+            totalPrice: true,
+            checkedIn: true,
+            registrantFirstName: true,
+            registrantLastName: true,
+          }
+        }
+      }
+    });
+
+    return NextResponse.json({ 
+      participants: participants || [], 
+      teachers: teachers || []
+    });
   } catch (error) {
     console.error("Search error:", error);
     // Return empty array on error to prevent frontend crashes
     return NextResponse.json(
-      { participants: [], error: "Search failed" },
+      { participants: [], teachers: [], error: "Search failed" },
       { status: 500 }
     );
   }

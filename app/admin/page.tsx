@@ -49,6 +49,24 @@ interface User {
   image: string | null;
 }
 
+interface Teacher {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  participant?: {
+    id: string;
+    packageType: string;
+    phone: string;
+    guinnessRecordAttempt: boolean;
+    greekNight: boolean;
+    totalPrice: number;
+    checkedIn: boolean;
+    registrantFirstName: string | null;
+    registrantLastName: string | null;
+  } | null;
+}
+
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -80,6 +98,7 @@ export default function AdminPage() {
   
   // Participants state
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
@@ -130,7 +149,9 @@ export default function AdminPage() {
       const response = await fetch(url);
       const data = await response.json();
       const participantsList = Array.isArray(data.participants) ? data.participants : [];
+      const teachersList = Array.isArray(data.teachers) ? data.teachers : [];
       setParticipants(participantsList);
+      setTeachers(teachersList);
       
       const total = participantsList.length;
       const checkedIn = participantsList.filter((p: Participant) => p.checkedIn).length;
@@ -142,6 +163,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching participants:", error);
       setParticipants([]);
+      setTeachers([]);
       setStats({ total: 0, checkedIn: 0, pending: 0 });
     } finally {
       setIsLoading(false);
@@ -627,7 +649,7 @@ export default function AdminPage() {
                       <h3 className="text-2xl font-bold text-white mb-4">Teacher/Studio Registrations</h3>
                       <div className="space-y-4">
                         {Object.entries(groupedParticipants().teacherGroups).map(([teacherId, students]) => {
-                          const teacher = participants.find(p => p.user.id === teacherId);
+                          const teacher = teachers.find(t => t.id === teacherId);
                           if (!teacher) return null;
 
                           const isExpanded = expandedTeachers.has(teacherId);
@@ -645,9 +667,9 @@ export default function AdminPage() {
                                   <span className="text-2xl">{isExpanded ? "▼" : "▶"}</span>
                                   <div className="text-left">
                                     <div className="text-white font-bold text-lg">
-                                      {teacher.registrantFirstName || teacher.user.firstName} {teacher.registrantLastName || teacher.user.lastName}
+                                      {teacher.participant?.registrantFirstName || teacher.firstName} {teacher.participant?.registrantLastName || teacher.lastName}
                                     </div>
-                                    <div className="text-blue-200 text-sm">{teacher.user.email}</div>
+                                    <div className="text-blue-200 text-sm">{teacher.email}</div>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -655,70 +677,83 @@ export default function AdminPage() {
                                     <div className="text-white font-bold">{totalStudents} Students</div>
                                     <div className="text-blue-200 text-sm">{checkedInStudents} checked in</div>
                                   </div>
-                                  <div className={`px-4 py-2 rounded-lg font-semibold ${
-                                    teacher.checkedIn ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
-                                  }`}>
-                                    Teacher: {teacher.checkedIn ? "✓" : "Pending"}
-                                  </div>
+                                  {teacher.participant && (
+                                    <div className={`px-4 py-2 rounded-lg font-semibold ${
+                                      teacher.participant.checkedIn ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                                    }`}>
+                                      Teacher: {teacher.participant.checkedIn ? "✓" : "Pending"}
+                                    </div>
+                                  )}
                                 </div>
                               </button>
 
                               {/* Teacher Details */}
                               {isExpanded && (
                                 <div className="border-t border-white/10">
-                                  {/* Teacher's Own Registration */}
-                                  <div className="px-6 py-4 bg-blue-900/30">
-                                    <div className="flex items-center justify-between mb-3">
-                                      <h4 className="text-white font-bold">Teacher Registration</h4>
-                                    </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                                      <div>
-                                        <div className="text-blue-200">Package</div>
-                                        <div className="text-white">{teacher.packageType}</div>
+                                  {/* Teacher's Own Registration (if exists) */}
+                                  {teacher.participant && (
+                                    <div className="px-6 py-4 bg-blue-900/30">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <h4 className="text-white font-bold">Teacher Registration</h4>
                                       </div>
-                                      <div>
-                                        <div className="text-blue-200">Phone</div>
-                                        <div className="text-white">{teacher.phone || "—"}</div>
-                                      </div>
-                                      <div>
-                                        <div className="text-blue-200">Add-ons</div>
-                                        <div className="text-white">
-                                          {teacher.guinnessRecordAttempt && "🏆 "}
-                                          {teacher.greekNight && "🍷 "}
-                                          {!teacher.guinnessRecordAttempt && !teacher.greekNight && "—"}
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                                        <div>
+                                          <div className="text-blue-200">Package</div>
+                                          <div className="text-white">{teacher.participant.packageType}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">Phone</div>
+                                          <div className="text-white">{teacher.participant.phone || "—"}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">Add-ons</div>
+                                          <div className="text-white">
+                                            {teacher.participant.guinnessRecordAttempt && "🏆 "}
+                                            {teacher.participant.greekNight && "🍷 "}
+                                            {!teacher.participant.guinnessRecordAttempt && !teacher.participant.greekNight && "—"}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">Price</div>
+                                          <div className="text-white font-bold">€{teacher.participant.totalPrice}</div>
                                         </div>
                                       </div>
-                                      <div>
-                                        <div className="text-blue-200">Price</div>
-                                        <div className="text-white font-bold">€{teacher.totalPrice}</div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => handleCheckIn(teacher.participant!.id, teacher.participant!.checkedIn)}
+                                          className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                                            teacher.participant.checkedIn
+                                              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                              : "bg-green-500 hover:bg-green-600 text-white"
+                                          }`}
+                                        >
+                                          {teacher.participant.checkedIn ? "Undo Check-in" : "Check In Teacher"}
+                                        </button>
+                                        {teacher.participant.checkedIn && qrCodes[teacher.participant.id] && (
+                                          <button
+                                            onClick={() => {
+                                              const link = document.createElement('a');
+                                              link.download = `qr-teacher-${teacher.firstName}-${teacher.lastName}.png`;
+                                              link.href = qrCodes[teacher.participant!.id];
+                                              link.click();
+                                            }}
+                                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                          >
+                                            📥 Download QR Code
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                      <button
-                                        onClick={() => handleCheckIn(teacher.id, teacher.checkedIn)}
-                                        className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
-                                          teacher.checkedIn
-                                            ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                                            : "bg-green-500 hover:bg-green-600 text-white"
-                                        }`}
-                                      >
-                                        {teacher.checkedIn ? "Undo Check-in" : "Check In Teacher"}
-                                      </button>
-                                      {teacher.checkedIn && qrCodes[teacher.id] && (
-                                        <button
-                                          onClick={() => {
-                                            const link = document.createElement('a');
-                                            link.download = `qr-teacher-${teacher.user.firstName}-${teacher.user.lastName}.png`;
-                                            link.href = qrCodes[teacher.id];
-                                            link.click();
-                                          }}
-                                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
-                                        >
-                                          📥 Download QR Code
-                                        </button>
-                                      )}
+                                  )}
+
+                                  {/* Teacher info if no participant record */}
+                                  {!teacher.participant && (
+                                    <div className="px-6 py-4 bg-blue-900/20">
+                                      <p className="text-blue-200 text-sm">
+                                        <span className="font-semibold text-white">{teacher.firstName} {teacher.lastName}</span> has not registered themselves yet.
+                                      </p>
                                     </div>
-                                  </div>
+                                  )}
 
                                   {/* Students List */}
                                   <div className="px-6 py-4">
