@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !session.user) {
+    if (!session || !session.user?.email) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: (session.user as any).id },
+      where: { email: session.user.email },
       include: {
         participant: true,
       },

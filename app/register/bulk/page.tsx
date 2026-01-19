@@ -36,12 +36,15 @@ export default function BulkRegisterPage() {
   ];
 
   const [user, setUser] = useState<{firstName: string; lastName: string; email: string} | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [registrantType, setRegistrantType] = useState<"teacher" | "studio">("teacher");
   const [studioName, setStudioName] = useState("");
+  const [teacherEmail, setTeacherEmail] = useState("");
+  const [teacherFirstName, setTeacherFirstName] = useState("");
+  const [teacherLastName, setTeacherLastName] = useState("");
   const [students, setStudents] = useState<Student[]>([{
     id: crypto.randomUUID(),
     firstName: "",
@@ -60,11 +63,12 @@ export default function BulkRegisterPage() {
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData.user);
+          setTeacherEmail(userData.user.email);
+          setTeacherFirstName(userData.user.firstName);
+          setTeacherLastName(userData.user.lastName);
         }
       } catch (err) {
         console.error("Error checking auth:", err);
-      } finally {
-        setIsLoading(false);
       }
     };
     checkAuth();
@@ -130,10 +134,16 @@ export default function BulkRegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
 
     setIsSubmitting(true);
     setError("");
+
+    // Validate teacher information
+    if (!teacherEmail || !teacherFirstName || !teacherLastName) {
+      setError("Please fill in your contact information (name and email)");
+      setIsSubmitting(false);
+      return;
+    }
 
     // Validate studio name if registrant is a studio
     if (registrantType === "studio" && !studioName.trim()) {
@@ -159,7 +169,10 @@ export default function BulkRegisterPage() {
         body: JSON.stringify({ 
           students,
           registrantType,
-          studioName: registrantType === "studio" ? studioName : undefined
+          studioName: registrantType === "studio" ? studioName : undefined,
+          teacherEmail,
+          teacherFirstName,
+          teacherLastName,
         }),
       });
 
@@ -192,42 +205,6 @@ export default function BulkRegisterPage() {
       setIsSubmitting(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
-        <Navigation />
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-white text-xl">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
-        <Navigation />
-        <div className="max-w-2xl mx-auto px-4 py-20">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20 text-center">
-            <h2 className="text-3xl font-bold text-white mb-6">Authentication Required</h2>
-            <p className="text-blue-100 mb-8">
-              You must be logged in to register students for your dance studio.
-            </p>
-            <Link
-              href="/login"
-              className="inline-block bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (success) {
     return (
@@ -314,6 +291,37 @@ export default function BulkRegisterPage() {
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-6">
             <h3 className="text-2xl font-bold text-white mb-6">Registration Information</h3>
             
+            {/* Teacher Contact Information */}
+            <div className="mb-6">
+              <label className="block text-white font-semibold mb-3">Your Contact Information</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input
+                  type="text"
+                  value={teacherFirstName}
+                  onChange={(e) => setTeacherFirstName(e.target.value)}
+                  placeholder="Your First Name *"
+                  className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  required
+                />
+                <input
+                  type="text"
+                  value={teacherLastName}
+                  onChange={(e) => setTeacherLastName(e.target.value)}
+                  placeholder="Your Last Name *"
+                  className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  required
+                />
+                <input
+                  type="email"
+                  value={teacherEmail}
+                  onChange={(e) => setTeacherEmail(e.target.value)}
+                  placeholder="Your Email *"
+                  className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  required
+                />
+              </div>
+            </div>
+
             <div className="mb-6">
               <label className="block text-white font-semibold mb-3">I am registering as:</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

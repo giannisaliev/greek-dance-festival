@@ -20,45 +20,55 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { students, registrantType, studioName } = body;
+    const { students, registrantType, studioName, teacherEmail, teacherFirstName, teacherLastName } = body;
     
     console.log("Bulk registration request:", { 
       studentsCount: students?.length,
       registrantType,
-      studioName
+      studioName,
+      teacherEmail
     });
-    
-    // Get authenticated user (the teacher/studio owner)
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user?.email) {
+
+    // Validate teacher information
+    if (!teacherEmail || !teacherFirstName || !teacherLastName) {
       return NextResponse.json(
-        { error: "You must be logged in to register students" },
-        { status: 401 }
+        { error: "Teacher contact information is required" },
+        { status: 400 }
       );
     }
-
-    // Get the teacher's user ID from the database and update their profile
-    const teacher = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    
+    // Find or create teacher account
+    let teacher = await prisma.user.findUnique({
+      where: { email: teacherEmail },
       select: { id: true }
     });
 
     if (!teacher) {
-      return NextResponse.json(
-        { error: "Teacher account not found" },
-        { status: 404 }
-      );
+      // Create teacher account
+      const randomPassword = crypto.randomUUID();
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
+      teacher = await prisma.user.create({
+        data: {
+          email: teacherEmail,
+          firstName: teacherFirstName,
+          lastName: teacherLastName,
+          password: hashedPassword,
+          isTeacher: true,
+          studioName: registrantType === "studio" ? studioName : null
+        },
+        select: { id: true }
+      });
+    } else {
+      // Update existing teacher's profile
+      await prisma.user.update({
+        where: { id: teacher.id },
+        data: {
+          isTeacher: true,
+          studioName: registrantType === "studio" ? studioName : null
+        }
+      });
     }
-
-    // Update teacher's profile with registration type and studio name
-    await prisma.user.update({
-      where: { id: teacher.id },
-      data: {
-        isTeacher: true,
-        studioName: registrantType === "studio" ? studioName : null
-      }
-    });
 
     // Validate that students array is provided
     if (!students || !Array.isArray(students) || students.length === 0) {
