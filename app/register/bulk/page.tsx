@@ -134,6 +134,8 @@ export default function BulkRegisterPage() {
     setError("");
 
     try {
+      console.log("Submitting students:", students);
+      
       const response = await fetch("/api/register/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,13 +143,18 @@ export default function BulkRegisterPage() {
       });
 
       const data = await response.json();
+      console.log("API Response:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
+        console.error("Bulk registration failed:", data);
+        const errorMsg = data.error || "Registration failed";
+        const details = data.details ? `\n\nDetails: ${JSON.stringify(data.details, null, 2)}` : "";
+        throw new Error(errorMsg + details);
       }
 
       setSuccess(true);
     } catch (err) {
+      console.error("Error during registration:", err);
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setIsSubmitting(false);

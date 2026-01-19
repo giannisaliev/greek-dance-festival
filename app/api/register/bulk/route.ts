@@ -141,10 +141,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (registeredStudents.length === 0) {
+      console.error("No students registered. Errors:", errors);
       return NextResponse.json(
         { 
           error: "No students were registered", 
-          details: errors 
+          details: errors,
+          message: errors.length > 0 ? `All registrations failed: ${errors.map(e => e.error).join(', ')}` : "Unknown error"
         },
         { status: 400 }
       );
