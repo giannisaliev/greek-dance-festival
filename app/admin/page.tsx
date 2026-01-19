@@ -12,7 +12,14 @@ interface Participant {
   packageType: string;
   checkedIn: boolean;
   createdAt: string;
+  registrantFirstName: string | null;
+  registrantLastName: string | null;
+  registeredBy: string | null;
+  guinnessRecordAttempt: boolean;
+  greekNight: boolean;
+  totalPrice: number;
   user: {
+    id: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -75,6 +82,8 @@ export default function AdminPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
+  const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
   const [stats, setStats] = useState({
     total: 0,
     checkedIn: 0,
@@ -254,10 +263,65 @@ export default function AdminPage() {
 
       if (response.ok) {
         fetchParticipants(searchQuery);
+        
+        // Generate QR code if checking in
+        if (!currentStatus) {
+          const QRCode = (await import('qrcode')).default;
+          const qrData = JSON.stringify({
+            participantId: id,
+            checkedInAt: new Date().toISOString(),
+            festivalName: "Greek Dance Festival 2026"
+          });
+          const qrCodeUrl = await QRCode.toDataURL(qrData, {
+            width: 300,
+            margin: 2,
+            color: {
+              dark: '#1e40af',
+              light: '#ffffff'
+            }
+          });
+          setQrCodes(prev => ({ ...prev, [id]: qrCodeUrl }));
+        } else {
+          // Remove QR code if undoing check-in
+          setQrCodes(prev => {
+            const newQrCodes = { ...prev };
+            delete newQrCodes[id];
+            return newQrCodes;
+          });
+        }
       }
     } catch (error) {
       console.error("Error updating check-in status:", error);
     }
+  };
+
+  const toggleTeacherExpansion = (userId: string) => {
+    setExpandedTeachers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  // Group participants by registeredBy
+  const groupedParticipants = () => {
+    const individualParticipants = participants.filter(p => !p.registeredBy);
+    const teacherGroups: { [key: string]: Participant[] } = {};
+    
+    participants.forEach(p => {
+      if (p.registeredBy) {
+        if (!teacherGroups[p.registeredBy]) {
+          teacherGroups[p.registeredBy] = [];
+        }
+        teacherGroups[p.registeredBy].push(p);
+      }
+    });
+
+    return { individualParticipants, teacherGroups };
   };
 
   // Schedule handlers
@@ -468,57 +532,276 @@ export default function AdminPage() {
                   No participants found
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/20">
-                        <th className="text-left text-white font-semibold py-4 px-4">Name</th>
-                        <th className="text-left text-white font-semibold py-4 px-4">Email</th>
-                        <th className="text-left text-white font-semibold py-4 px-4">Phone</th>
-                        <th className="text-left text-white font-semibold py-4 px-4">Package</th>
-                        <th className="text-left text-white font-semibold py-4 px-4">Status</th>
-                        <th className="text-left text-white font-semibold py-4 px-4">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {participants.map((participant) => (
-                        <tr
-                          key={participant.id}
-                          className="border-b border-white/10 hover:bg-white/5 transition-colors"
-                        >
-                          <td className="py-4 px-4 text-white">
-                            {participant.user.firstName} {participant.user.lastName}
-                          </td>
-                          <td className="py-4 px-4 text-blue-100">{participant.user.email}</td>
-                          <td className="py-4 px-4 text-blue-100">{participant.phone}</td>
-                          <td className="py-4 px-4 text-blue-100">{participant.packageType}</td>
-                          <td className="py-4 px-4">
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                participant.checkedIn
-                                  ? "bg-green-500 text-white"
-                                  : "bg-yellow-500 text-white"
-                              }`}
-                            >
-                              {participant.checkedIn ? "Checked In" : "Pending"}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <button
-                              onClick={() => handleCheckIn(participant.id, participant.checkedIn)}
-                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                                participant.checkedIn
-                                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                                  : "bg-green-500 hover:bg-green-600 text-white"
-                              }`}
-                            >
-                              {participant.checkedIn ? "Undo Check-in" : "Check In"}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-6">
+                  {/* Individual Participants */}
+                  {groupedParticipants().individualParticipants.length > 0 && (
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-4">Individual Registrations</h3>
+                      <div className="overflow-x-auto bg-white/5 rounded-xl border border-white/10">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-white/20">
+                              <th className="text-left text-white font-semibold py-4 px-4">Name</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Email</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Phone</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Package</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Add-ons</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Price</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Status</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {groupedParticipants().individualParticipants.map((participant) => (
+                              <tr
+                                key={participant.id}
+                                className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                              >
+                                <td className="py-4 px-4 text-white">
+                                  {participant.registrantFirstName || participant.user.firstName} {participant.registrantLastName || participant.user.lastName}
+                                </td>
+                                <td className="py-4 px-4 text-blue-100">{participant.user.email}</td>
+                                <td className="py-4 px-4 text-blue-100">{participant.phone || "—"}</td>
+                                <td className="py-4 px-4 text-blue-100">{participant.packageType}</td>
+                                <td className="py-4 px-4 text-blue-100">
+                                  <div className="flex gap-1">
+                                    {participant.guinnessRecordAttempt && (
+                                      <span className="text-xs bg-blue-500/30 px-2 py-1 rounded">🏆</span>
+                                    )}
+                                    {participant.greekNight && (
+                                      <span className="text-xs bg-purple-500/30 px-2 py-1 rounded">🍷</span>
+                                    )}
+                                    {!participant.guinnessRecordAttempt && !participant.greekNight && "—"}
+                                  </div>
+                                </td>
+                                <td className="py-4 px-4 text-blue-100">€{participant.totalPrice}</td>
+                                <td className="py-4 px-4">
+                                  <span
+                                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      participant.checkedIn
+                                        ? "bg-green-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {participant.checkedIn ? "✓ Checked In" : "Pending"}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="flex flex-col gap-2">
+                                    <button
+                                      onClick={() => handleCheckIn(participant.id, participant.checkedIn)}
+                                      className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                                        participant.checkedIn
+                                          ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                          : "bg-green-500 hover:bg-green-600 text-white"
+                                      }`}
+                                    >
+                                      {participant.checkedIn ? "Undo" : "Check In"}
+                                    </button>
+                                    {participant.checkedIn && qrCodes[participant.id] && (
+                                      <button
+                                        onClick={() => {
+                                          const link = document.createElement('a');
+                                          link.download = `qr-${participant.user.firstName}-${participant.user.lastName}.png`;
+                                          link.href = qrCodes[participant.id];
+                                          link.click();
+                                        }}
+                                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                      >
+                                        📥 QR
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Teacher Groups */}
+                  {Object.keys(groupedParticipants().teacherGroups).length > 0 && (
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-4">Teacher/Studio Registrations</h3>
+                      <div className="space-y-4">
+                        {Object.entries(groupedParticipants().teacherGroups).map(([teacherId, students]) => {
+                          const teacher = participants.find(p => p.user.id === teacherId);
+                          if (!teacher) return null;
+
+                          const isExpanded = expandedTeachers.has(teacherId);
+                          const totalStudents = students.length;
+                          const checkedInStudents = students.filter(s => s.checkedIn).length;
+
+                          return (
+                            <div key={teacherId} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+                              {/* Teacher Header - Clickable */}
+                              <button
+                                onClick={() => toggleTeacherExpansion(teacherId)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                              >
+                                <div className="flex items-center gap-4">
+                                  <span className="text-2xl">{isExpanded ? "▼" : "▶"}</span>
+                                  <div className="text-left">
+                                    <div className="text-white font-bold text-lg">
+                                      {teacher.registrantFirstName || teacher.user.firstName} {teacher.registrantLastName || teacher.user.lastName}
+                                    </div>
+                                    <div className="text-blue-200 text-sm">{teacher.user.email}</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <div className="text-white font-bold">{totalStudents} Students</div>
+                                    <div className="text-blue-200 text-sm">{checkedInStudents} checked in</div>
+                                  </div>
+                                  <div className={`px-4 py-2 rounded-lg font-semibold ${
+                                    teacher.checkedIn ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                                  }`}>
+                                    Teacher: {teacher.checkedIn ? "✓" : "Pending"}
+                                  </div>
+                                </div>
+                              </button>
+
+                              {/* Teacher Details */}
+                              {isExpanded && (
+                                <div className="border-t border-white/10">
+                                  {/* Teacher's Own Registration */}
+                                  <div className="px-6 py-4 bg-blue-900/30">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <h4 className="text-white font-bold">Teacher Registration</h4>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                                      <div>
+                                        <div className="text-blue-200">Package</div>
+                                        <div className="text-white">{teacher.packageType}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-blue-200">Phone</div>
+                                        <div className="text-white">{teacher.phone || "—"}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-blue-200">Add-ons</div>
+                                        <div className="text-white">
+                                          {teacher.guinnessRecordAttempt && "🏆 "}
+                                          {teacher.greekNight && "🍷 "}
+                                          {!teacher.guinnessRecordAttempt && !teacher.greekNight && "—"}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div className="text-blue-200">Price</div>
+                                        <div className="text-white font-bold">€{teacher.totalPrice}</div>
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => handleCheckIn(teacher.id, teacher.checkedIn)}
+                                        className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                                          teacher.checkedIn
+                                            ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                            : "bg-green-500 hover:bg-green-600 text-white"
+                                        }`}
+                                      >
+                                        {teacher.checkedIn ? "Undo Check-in" : "Check In Teacher"}
+                                      </button>
+                                      {teacher.checkedIn && qrCodes[teacher.id] && (
+                                        <button
+                                          onClick={() => {
+                                            const link = document.createElement('a');
+                                            link.download = `qr-teacher-${teacher.user.firstName}-${teacher.user.lastName}.png`;
+                                            link.href = qrCodes[teacher.id];
+                                            link.click();
+                                          }}
+                                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                        >
+                                          📥 Download QR Code
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Students List */}
+                                  <div className="px-6 py-4">
+                                    <h4 className="text-white font-bold mb-3">Registered Students ({totalStudents})</h4>
+                                    <div className="overflow-x-auto">
+                                      <table className="w-full">
+                                        <thead>
+                                          <tr className="border-b border-white/20">
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Name</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Email</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Package</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Add-ons</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Price</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Status</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Actions</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {students.map((student) => (
+                                            <tr key={student.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
+                                              <td className="py-3 px-2 text-white text-sm">
+                                                {student.registrantFirstName} {student.registrantLastName}
+                                              </td>
+                                              <td className="py-3 px-2 text-blue-100 text-sm">{student.user.email}</td>
+                                              <td className="py-3 px-2 text-blue-100 text-sm">{student.packageType}</td>
+                                              <td className="py-3 px-2 text-blue-100 text-sm">
+                                                {student.guinnessRecordAttempt && "🏆 "}
+                                                {student.greekNight && "🍷 "}
+                                                {!student.guinnessRecordAttempt && !student.greekNight && "—"}
+                                              </td>
+                                              <td className="py-3 px-2 text-blue-100 text-sm">€{student.totalPrice}</td>
+                                              <td className="py-3 px-2">
+                                                <span
+                                                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                                    student.checkedIn
+                                                      ? "bg-green-500 text-white"
+                                                      : "bg-yellow-500 text-white"
+                                                  }`}
+                                                >
+                                                  {student.checkedIn ? "✓" : "Pending"}
+                                                </span>
+                                              </td>
+                                              <td className="py-3 px-2">
+                                                <div className="flex gap-1">
+                                                  <button
+                                                    onClick={() => handleCheckIn(student.id, student.checkedIn)}
+                                                    className={`px-3 py-1 rounded-lg font-semibold transition-colors text-xs ${
+                                                      student.checkedIn
+                                                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                                        : "bg-green-500 hover:bg-green-600 text-white"
+                                                    }`}
+                                                  >
+                                                    {student.checkedIn ? "Undo" : "Check In"}
+                                                  </button>
+                                                  {student.checkedIn && qrCodes[student.id] && (
+                                                    <button
+                                                      onClick={() => {
+                                                        const link = document.createElement('a');
+                                                        link.download = `qr-${student.registrantFirstName}-${student.registrantLastName}.png`;
+                                                        link.href = qrCodes[student.id];
+                                                        link.click();
+                                                      }}
+                                                      className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-xs"
+                                                    >
+                                                      📥
+                                                    </button>
+                                                  )}
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>

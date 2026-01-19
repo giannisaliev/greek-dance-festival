@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
         include: {
           user: {
             select: {
+              id: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -30,11 +31,14 @@ export async function GET(request: NextRequest) {
           { user: { lastName: { contains: query, mode: 'insensitive' } } },
           { user: { email: { contains: query, mode: 'insensitive' } } },
           { phone: { contains: query } },
+          { registrantFirstName: { contains: query, mode: 'insensitive' } },
+          { registrantLastName: { contains: query, mode: 'insensitive' } },
         ],
       },
       include: {
         user: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             email: true,
