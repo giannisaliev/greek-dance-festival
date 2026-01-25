@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // POST - Run migration to add order column (Admin only, one-time use)
 export async function POST(request: Request) {
@@ -15,10 +15,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // Run the migration SQL directly (IF NOT EXISTS handles if column already exists)
-    await prisma.$executeRawUnsafe(`
-      ALTER TABLE "Teacher" ADD COLUMN IF NOT EXISTS "order" INTEGER NOT NULL DEFAULT 0;
-    `);
+    // Create a direct connection using DIRECT_URL for migration
+    const directPrisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DIRECT_URL || process.env.DATABASE_URL,
+        },
+      },
+    });
+
+    try {
+      // Run the migration SQL directly (IF NOT EXISTS handles if column already exists)
+      await directPrisma.$executeRawUnsafe(`
+        ALTER TABLE "Teacher" ADD COLUMN IF NOT EXISTS "order" INTEGER NOT NULL DEFAULT 0;
+      `);
+    } finally {
+      await directPrisma.$disconnect();
+    }
 
     return NextResponse.json({
       success: true,
