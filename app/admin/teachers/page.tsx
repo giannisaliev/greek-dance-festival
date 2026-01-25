@@ -19,6 +19,7 @@ interface Teacher {
   imagePadding: number;
   instagram?: string;
   facebook?: string;
+  order: number;
 }
 
 // Popular countries with their codes
@@ -90,6 +91,7 @@ export default function AdminTeachersPage() {
     imagePadding: 0,
     instagram: "",
     facebook: "",
+    order: 0,
   });
 
   // Check authentication
@@ -252,6 +254,7 @@ export default function AdminTeachersPage() {
           imagePadding: 0,
           instagram: "",
           facebook: "",
+          order: 0,
         });
       } else {
         alert("Failed to save teacher");
@@ -276,6 +279,7 @@ export default function AdminTeachersPage() {
       imagePadding: teacher.imagePadding || 0,
       instagram: teacher.instagram || "",
       facebook: teacher.facebook || "",
+      order: teacher.order || 0,
     });
     setShowForm(true);
   };
@@ -337,6 +341,7 @@ export default function AdminTeachersPage() {
                     imagePadding: 0,
                     instagram: "",
                     facebook: "",
+                    order: 0,
                   });
                 }}
                 className="bg-white text-blue-900 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all"
@@ -481,6 +486,19 @@ export default function AdminTeachersPage() {
                     className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
                     placeholder="Profile URL"
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-white font-semibold mb-2">Display Order</label>
+                  <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
+                    className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="0"
+                    min="0"
+                  />
+                  <p className="text-blue-200 text-sm mt-1">Lower numbers appear first (0 = first position)</p>
                 </div>
               </div>
 
