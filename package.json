@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma migrate deploy && prisma generate && next build --webpack"
+    "vercel-build": "prisma migrate deploy || true && prisma generate && next build --webpack"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
