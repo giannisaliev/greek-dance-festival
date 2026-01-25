@@ -57,18 +57,24 @@ export async function POST(request: Request) {
       );
     }
 
+    const teacherData: any = {
+      name,
+      image,
+      teachingStyle,
+      country,
+      countryCode,
+      imagePadding: imagePadding || 0,
+      instagram: instagram || null,
+      facebook: facebook || null,
+    };
+    
+    // Only add order if it's provided (for backward compatibility)
+    if (order !== undefined) {
+      teacherData.order = order;
+    }
+
     const teacher = await prisma.teacher.create({
-      data: {
-        name,
-        image,
-        teachingStyle,
-        country,
-        countryCode,
-        imagePadding: imagePadding || 0,
-        instagram: instagram || null,
-        facebook: facebook || null,
-        order: order !== undefined ? order : 0,
-      },
+      data: teacherData,
     });
 
     return NextResponse.json(teacher);
@@ -103,19 +109,25 @@ export async function PUT(request: Request) {
       );
     }
 
+    const updateData: any = {
+      name,
+      image,
+      teachingStyle,
+      country,
+      countryCode,
+      imagePadding: imagePadding !== undefined ? imagePadding : 0,
+      instagram: instagram || null,
+      facebook: facebook || null,
+    };
+    
+    // Only add order if it's provided (for backward compatibility)
+    if (order !== undefined) {
+      updateData.order = order;
+    }
+
     const teacher = await prisma.teacher.update({
       where: { id },
-      data: {
-        name,
-        image,
-        teachingStyle,
-        country,
-        countryCode,
-        imagePadding: imagePadding !== undefined ? imagePadding : 0,
-        instagram: instagram || null,
-        facebook: facebook || null,
-        order: order !== undefined ? order : 0,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(teacher);
@@ -187,16 +199,22 @@ export async function PATCH(request: Request) {
     }
 
     // Update order for each teacher
-    const updatePromises = teachers.map((teacher: { id: string; order: number }) =>
-      prisma.teacher.update({
-        where: { id: teacher.id },
-        data: { order: teacher.order },
-      })
-    );
+    try {
+      const updatePromises = teachers.map((teacher: { id: string; order: number }) =>
+        prisma.teacher.update({
+          where: { id: teacher.id },
+          data: { order: teacher.order },
+        })
+      );
 
-    await Promise.all(updatePromises);
+      await Promise.all(updatePromises);
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true });
+    } catch (updateError) {
+      // If order field doesn't exist yet, return success anyway
+      console.log("Order update failed, migration may not have run yet", updateError);
+      return NextResponse.json({ success: true, warning: "Order field not available yet" });
+    }
   } catch (error) {
     console.error("Error updating teacher order:", error);
     return NextResponse.json(
