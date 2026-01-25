@@ -74,8 +74,6 @@ export default function AdminTeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [draggedTeacher, setDraggedTeacher] = useState<string | null>(null);
-  const [isReordering, setIsReordering] = useState(false);
   
   // Image cropping states
   const [showCropModal, setShowCropModal] = useState(false);
@@ -300,66 +298,6 @@ export default function AdminTeachersPage() {
     }
   };
 
-  // Handle drag and drop
-  const handleDragStart = (e: React.DragEvent, teacherId: string) => {
-    setDraggedTeacher(teacherId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDrop = async (e: React.DragEvent, targetTeacherId: string) => {
-    e.preventDefault();
-    
-    if (!draggedTeacher || draggedTeacher === targetTeacherId) {
-      setDraggedTeacher(null);
-      return;
-    }
-
-    const draggedIndex = teachers.findIndex((t) => t.id === draggedTeacher);
-    const targetIndex = teachers.findIndex((t) => t.id === targetTeacherId);
-
-    if (draggedIndex === -1 || targetIndex === -1) return;
-
-    // Reorder the teachers array
-    const newTeachers = [...teachers];
-    const [removed] = newTeachers.splice(draggedIndex, 1);
-    newTeachers.splice(targetIndex, 0, removed);
-
-    // Update order values
-    const updatedTeachers = newTeachers.map((teacher, index) => ({
-      ...teacher,
-      order: index,
-    }));
-
-    setTeachers(updatedTeachers);
-    setDraggedTeacher(null);
-
-    // Save new order to backend
-    setIsReordering(true);
-    try {
-      await fetch("/api/teachers", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          teachers: updatedTeachers.map((t) => ({ id: t.id, order: t.order })),
-        }),
-      });
-    } catch (error) {
-      console.error("Error updating teacher order:", error);
-      fetchTeachers(); // Revert on error
-    } finally {
-      setIsReordering(false);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedTeacher(null);
-  };
-
   // Show loading while checking auth
   if (status === "loading" || !session || !(session.user as any)?.isAdmin) {
     return (
@@ -577,49 +515,32 @@ export default function AdminTeachersPage() {
               No teachers added yet. Click "Add Teacher" to get started!
             </div>
           ) : (
-            <div>
-              <div className="mb-4 bg-blue-500/20 border border-blue-400/30 rounded-lg p-3">
-                <p className="text-blue-100 text-sm">
-                  💡 <strong>Tip:</strong> Drag and drop teachers to reorder them. The order will be reflected on the public teachers page.
-                  {isReordering && <span className="ml-2 text-yellow-200">Saving order...</span>}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teachers.map((teacher) => (
-                  <div
-                    key={teacher.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, teacher.id)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, teacher.id)}
-                    onDragEnd={handleDragEnd}
-                    className={`bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all cursor-move ${
-                      draggedTeacher === teacher.id ? "opacity-50 scale-95" : ""
-                    }`}
-                  >
-                    <div className="relative h-64">
-                      <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5">
-                        <span className="text-sm font-bold text-gray-800">#{(teacher.order ?? 0) + 1}</span>
-                      </div>
-                      <Image
-                        src={teacher.image}
-                        alt={teacher.name}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        style={{ objectPosition: `center ${teacher.imagePadding || 0}px` }}
-                      />
-                      <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                        <span className="text-2xl">{getFlagEmoji(teacher.countryCode)}</span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teachers.map((teacher) => (
+                <div
+                  key={teacher.id}
+                  className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all"
+                >
+                  <div className="relative h-64">
+                    <Image
+                      src={teacher.image}
+                      alt={teacher.name}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      style={{ objectPosition: `center ${teacher.imagePadding || 0}px` }}
+                    />
+                    <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                      <span className="text-2xl">{getFlagEmoji(teacher.countryCode)}</span>
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-bold text-white mb-2">{teacher.name}</h3>
-                      <div className="flex items-center gap-2 text-blue-100 mb-3">
-                        <span>{getFlagEmoji(teacher.countryCode)}</span>
-                        <span className="text-sm">{teacher.country}</span>
-                      </div>
-                      <p className="text-blue-100 text-sm mb-4 line-clamp-3">
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold text-white mb-2">{teacher.name}</h3>
+                    <div className="flex items-center gap-2 text-blue-100 mb-3">
+                      <span>{getFlagEmoji(teacher.countryCode)}</span>
+                      <span className="text-sm">{teacher.country}</span>
+                    </div>
+                    <p className="text-blue-100 text-sm mb-4 line-clamp-3">
                         {teacher.teachingStyle}
                       </p>
                       <div className="flex gap-2">
@@ -640,7 +561,6 @@ export default function AdminTeachersPage() {
                   </div>
                 ))}
               </div>
-            </div>
           )}
         </div>
       </div>
