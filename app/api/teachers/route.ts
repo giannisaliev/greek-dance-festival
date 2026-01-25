@@ -6,12 +6,24 @@ import { prisma } from "@/lib/prisma";
 // GET all teachers
 export async function GET() {
   try {
-    const teachers = await prisma.teacher.findMany({
-      orderBy: [
-        { order: 'asc' },
-        { name: 'asc' },
-      ],
-    });
+    // Try to fetch with order field, fall back to name only if it fails
+    let teachers;
+    try {
+      teachers = await prisma.teacher.findMany({
+        orderBy: [
+          { order: 'asc' },
+          { name: 'asc' },
+        ],
+      });
+    } catch (error) {
+      // Fallback if order column doesn't exist yet
+      console.log("Order field not available, falling back to name sorting");
+      teachers = await prisma.teacher.findMany({
+        orderBy: {
+          name: 'asc',
+        },
+      });
+    }
 
     return NextResponse.json(teachers);
   } catch (error) {
