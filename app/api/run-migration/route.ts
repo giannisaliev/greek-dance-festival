@@ -15,17 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if order column already exists
-    const teacher = await prisma.teacher.findFirst();
-    if (teacher && 'order' in teacher) {
-      return NextResponse.json({
-        success: true,
-        message: "Order column already exists",
-        alreadyExists: true,
-      });
-    }
-
-    // Run the migration SQL directly
+    // Run the migration SQL directly (IF NOT EXISTS handles if column already exists)
     await prisma.$executeRawUnsafe(`
       ALTER TABLE "Teacher" ADD COLUMN IF NOT EXISTS "order" INTEGER NOT NULL DEFAULT 0;
     `);
