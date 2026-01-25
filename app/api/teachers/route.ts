@@ -7,9 +7,10 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const teachers = await prisma.teacher.findMany({
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' },
+      ],
     });
 
     return NextResponse.json(teachers);
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook } = body;
+    const { name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook, order } = body;
 
     if (!name || !image || !teachingStyle || !country || !countryCode) {
       return NextResponse.json(
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
         imagePadding: imagePadding || 0,
         instagram: instagram || null,
         facebook: facebook || null,
+        order: order !== undefined ? order : 0,
       },
     });
 
@@ -80,7 +82,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook } = body;
+    const { id, name, image, teachingStyle, country, countryCode, imagePadding, instagram, facebook, order } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -100,6 +102,7 @@ export async function PUT(request: Request) {
         imagePadding: imagePadding !== undefined ? imagePadding : 0,
         instagram: instagram || null,
         facebook: facebook || null,
+        order: order !== undefined ? order : 0,
       },
     });
 
@@ -144,6 +147,48 @@ export async function DELETE(request: Request) {
     console.error("Error deleting teacher:", error);
     return NextResponse.json(
       { error: "Failed to delete teacher" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH - Update teacher order (Admin only)
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || !(session.user as any).isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { teachers } = body;
+
+    if (!Array.isArray(teachers)) {
+      return NextResponse.json(
+        { error: "Teachers array is required" },
+        { status: 400 }
+      );
+    }
+
+    // Update order for each teacher
+    const updatePromises = teachers.map((teacher: { id: string; order: number }) =>
+      prisma.teacher.update({
+        where: { id: teacher.id },
+        data: { order: teacher.order },
+      })
+    );
+
+    await Promise.all(updatePromises);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating teacher order:", error);
+    return NextResponse.json(
+      { error: "Failed to update teacher order" },
       { status: 500 }
     );
   }

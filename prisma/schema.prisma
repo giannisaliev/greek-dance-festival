@@ -116,6 +116,7 @@ model Teacher {
   imagePadding  Int      @default(0) // Top padding for image display (0-100)
   instagram     String?  // Instagram handle or URL (optional)
   facebook      String?  // Facebook profile URL (optional)
+  order         Int      @default(0) // For sorting teachers
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
