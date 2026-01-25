@@ -7,9 +7,10 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const teachers = await prisma.teacher.findMany({
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' },
+      ],
     });
 
     return NextResponse.json(teachers);
