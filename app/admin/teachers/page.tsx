@@ -19,7 +19,7 @@ interface Teacher {
   imagePadding: number;
   instagram?: string;
   facebook?: string;
-  order: number;
+  order?: number;
 }
 
 // Popular countries with their codes
@@ -599,7 +599,7 @@ export default function AdminTeachersPage() {
                   >
                     <div className="relative h-64">
                       <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5">
-                        <span className="text-sm font-bold text-gray-800">#{teacher.order + 1}</span>
+                        <span className="text-sm font-bold text-gray-800">#{(teacher.order ?? 0) + 1}</span>
                       </div>
                       <Image
                         src={teacher.image}
