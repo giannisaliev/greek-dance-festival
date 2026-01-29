@@ -11,7 +11,15 @@ export async function GET() {
         order: 'asc'
       }
     });
-    return NextResponse.json({ hotels });
+    
+    // Ensure backwards compatibility - add default values if fields don't exist
+    const normalizedHotels = hotels.map(hotel => ({
+      ...hotel,
+      breakfastIncluded: hotel.breakfastIncluded ?? false,
+      cityTax: hotel.cityTax ?? null
+    }));
+    
+    return NextResponse.json({ hotels: normalizedHotels });
   } catch (error) {
     console.error("Error fetching hotels:", error);
     return NextResponse.json(
