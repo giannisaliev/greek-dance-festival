@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 // GET all hotels
 export async function GET() {
   try {
+    // Try to fetch with all fields
     const hotels = await prisma.hotel.findMany({
       orderBy: {
         order: 'asc'
@@ -20,8 +21,36 @@ export async function GET() {
     }));
     
     return NextResponse.json({ hotels: normalizedHotels });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching hotels:", error);
+    
+    // If error is about missing column, fetch without new fields
+    if (error.message?.includes('breakfastIncluded') || error.message?.includes('column')) {
+      try {
+        // Use raw query to fetch only existing fields
+        const hotelsRaw = await prisma.$queryRaw<any[]>`
+          SELECT id, name, logo, stars, location, description, images, prices, amenities, "order", "createdAt", "updatedAt"
+          FROM "Hotel"
+          ORDER BY "order" ASC
+        `;
+        
+        // Add default values for new fields
+        const normalizedHotels = hotelsRaw.map(hotel => ({
+          ...hotel,
+          breakfastIncluded: false,
+          cityTax: null
+        }));
+        
+        return NextResponse.json({ hotels: normalizedHotels });
+      } catch (rawError) {
+        console.error("Error with raw query:", rawError);
+        return NextResponse.json(
+          { error: "Failed to fetch hotels" },
+          { status: 500 }
+        );
+      }
+    }
+    
     return NextResponse.json(
       { error: "Failed to fetch hotels" },
       { status: 500 }
