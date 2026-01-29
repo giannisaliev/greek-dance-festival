@@ -12,8 +12,10 @@ interface Hotel {
   location: string;
   description?: string;
   images: string[];
-  prices: Record<string, number>;
+  prices: Record<string, { price: number; additionalInfo?: string }>;
   amenities: string[];
+  breakfastIncluded: boolean;
+  cityTax?: number;
   order: number;
 }
 
@@ -38,7 +40,7 @@ export default function HotelPage() {
       // Initialize active tab for each hotel
       const initialTabs: Record<string, string> = {};
       fetchedHotels.forEach((hotel: Hotel) => {
-        initialTabs[hotel.id] = "info";
+        initialTabs[hotel.id] = "gallery";
       });
       setActiveTab(initialTabs);
     } catch (error) {
@@ -57,7 +59,7 @@ export default function HotelPage() {
   };
 
   const getAvailableTabs = (hotel: Hotel) => {
-    const tabs = ["info", "gallery"];
+    const tabs = ["gallery", "info"];
     if (hotel.amenities && hotel.amenities.length > 0) {
       tabs.push("amenities");
     }
@@ -168,33 +170,6 @@ export default function HotelPage() {
 
               {/* Tab Content */}
               <div className="p-4 min-h-[300px]">
-                {/* Info Tab */}
-                {activeTab[hotel.id] === "info" && (
-                  <div className="h-full">
-                    <h3 className="text-lg font-bold text-white mb-3">
-                      📍 Location
-                    </h3>
-                    {hotel.location && hotel.location.includes('google.com/maps/embed') ? (
-                      <div className="w-full h-64 rounded-lg overflow-hidden mb-4">
-                        <iframe
-                          src={hotel.location}
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          allowFullScreen
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                        ></iframe>
-                      </div>
-                    ) : (
-                      <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-4">
-                        <p className="text-red-100 text-sm mb-2">⚠️ Invalid Google Maps embed URL</p>
-                        <p className="text-blue-200 text-xs">The admin needs to update this with a proper Google Maps embed link.</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {/* Gallery Tab */}
                 {activeTab[hotel.id] === "gallery" && (
                   <div>
@@ -225,6 +200,33 @@ export default function HotelPage() {
                   </div>
                 )}
 
+                {/* Info Tab */}
+                {activeTab[hotel.id] === "info" && (
+                  <div className="h-full">
+                    <h3 className="text-lg font-bold text-white mb-3">
+                      📍 Location
+                    </h3>
+                    {hotel.location && hotel.location.includes('google.com/maps/embed') ? (
+                      <div className="w-full h-64 rounded-lg overflow-hidden mb-4">
+                        <iframe
+                          src={hotel.location}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                      </div>
+                    ) : (
+                      <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-4">
+                        <p className="text-red-100 text-sm mb-2">⚠️ Invalid Google Maps embed URL</p>
+                        <p className="text-blue-200 text-xs">The admin needs to update this with a proper Google Maps embed link.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Amenities Tab */}
                 {activeTab[hotel.id] === "amenities" && (
                   <div>
@@ -250,10 +252,16 @@ export default function HotelPage() {
                 {/* Prices Tab */}
                 {activeTab[hotel.id] === "prices" && (
                   <div>
+                    {hotel.breakfastIncluded && (
+                      <div className="bg-green-500/20 border border-green-400/30 rounded-lg p-3 mb-4">
+                        <p className="text-green-100 font-semibold">🍳 Breakfast Included</p>
+                      </div>
+                    )}
+                    
                     {Object.keys(hotel.prices).length > 0 ? (
                       <div className="space-y-3">
                         {Object.entries(hotel.prices).map(
-                          ([roomType, price]) => (
+                          ([roomType, priceData]) => (
                             <div
                               key={roomType}
                               className="bg-gradient-to-br from-white/20 to-white/10 rounded-lg p-3 border border-white/30"
@@ -261,14 +269,25 @@ export default function HotelPage() {
                               <h4 className="text-white font-semibold mb-1">
                                 {roomType}
                               </h4>
+                              {priceData.additionalInfo && (
+                                <p className="text-blue-200 text-sm mb-2">{priceData.additionalInfo}</p>
+                              )}
                               <p className="text-2xl font-bold text-yellow-300">
-                                €{price}
+                                €{priceData.price}
                                 <span className="text-sm text-blue-100 ml-1">
                                   /night
                                 </span>
                               </p>
                             </div>
                           )
+                        )}
+                        
+                        {hotel.cityTax && (
+                          <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-3 mt-4">
+                            <p className="text-yellow-100 text-sm">
+                              <span className="font-semibold">🏦 City Tax:</span> €{hotel.cityTax} per night per room
+                            </p>
+                          </div>
                         )}
                       </div>
                     ) : (

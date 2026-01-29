@@ -122,18 +122,20 @@ model Teacher {
 }
 
 model Hotel {
-  id          String   @id @default(cuid())
-  name        String
-  logo        String?  // Path to hotel logo image
-  stars       Int      // 1-5 star rating
-  location    String   // Google Maps embed URL
-  description String?
-  images      String[] // Array of image paths
-  prices      Json     // JSON object for different room types and prices
-  amenities   String[] // Array of amenities
-  order       Int      @default(0) // For sorting hotels
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  name             String
+  logo             String?  // Path to hotel logo image
+  stars            Int      // 1-5 star rating
+  location         String   // Google Maps embed URL
+  description      String?
+  images           String[] // Array of image paths
+  prices           Json     // JSON object for different room types, prices, and additional info
+  amenities        String[] // Array of amenities
+  breakfastIncluded Boolean @default(false) // Whether breakfast is included
+  cityTax          Float?   // City tax per night per room (optional)
+  order            Int      @default(0) // For sorting hotels
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Attraction {

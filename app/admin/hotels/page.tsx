@@ -12,8 +12,10 @@ interface Hotel {
   location: string;
   description?: string;
   images: string[];
-  prices: Record<string, number>;
+  prices: Record<string, { price: number; additionalInfo?: string }>;
   amenities: string[];
+  breakfastIncluded: boolean;
+  cityTax?: number;
   order: number;
 }
 
@@ -35,8 +37,10 @@ export default function AdminHotelsPage() {
     location: "",
     description: "",
     images: [] as string[],
-    prices: {} as Record<string, number>,
+    prices: {} as Record<string, { price: number; additionalInfo?: string }>,
     amenities: [] as string[],
+    breakfastIncluded: false,
+    cityTax: undefined as number | undefined,
     order: 0,
   });
 
@@ -45,6 +49,7 @@ export default function AdminHotelsPage() {
   const [amenityInput, setAmenityInput] = useState("");
   const [roomType, setRoomType] = useState("");
   const [roomPrice, setRoomPrice] = useState("");
+  const [roomAdditionalInfo, setRoomAdditionalInfo] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -80,12 +85,15 @@ export default function AdminHotelsPage() {
       images: [],
       prices: {},
       amenities: [],
+      breakfastIncluded: false,
+      cityTax: undefined,
       order: 0,
     });
     setImageInput("");
     setAmenityInput("");
     setRoomType("");
     setRoomPrice("");
+    setRoomAdditionalInfo("");
     setEditingHotel(null);
     setShowForm(false);
   };
@@ -101,6 +109,8 @@ export default function AdminHotelsPage() {
       images: hotel.images,
       prices: hotel.prices,
       amenities: hotel.amenities,
+      breakfastIncluded: hotel.breakfastIncluded || false,
+      cityTax: hotel.cityTax,
       order: hotel.order,
     });
     setShowForm(true);
@@ -279,10 +289,17 @@ export default function AdminHotelsPage() {
     if (roomType.trim() && roomPrice) {
       setFormData({
         ...formData,
-        prices: { ...formData.prices, [roomType.trim()]: parseFloat(roomPrice) },
+        prices: { 
+          ...formData.prices, 
+          [roomType.trim()]: { 
+            price: parseFloat(roomPrice),
+            additionalInfo: roomAdditionalInfo.trim() || undefined
+          }
+        },
       });
       setRoomType("");
       setRoomPrice("");
+      setRoomAdditionalInfo("");
     }
   };
 
@@ -516,39 +533,53 @@ export default function AdminHotelsPage() {
                 <label className="block text-white font-semibold mb-2">
                   Room Prices
                 </label>
-                <div className="grid md:grid-cols-3 gap-2 mb-3">
+                <div className="space-y-2 mb-3">
+                  <div className="grid md:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={roomType}
+                      onChange={(e) => setRoomType(e.target.value)}
+                      className="px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
+                      placeholder="Room type (e.g., Single)"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={roomPrice}
+                      onChange={(e) => setRoomPrice(e.target.value)}
+                      className="px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
+                      placeholder="Price (€)"
+                    />
+                    <button
+                      type="button"
+                      onClick={addRoomPrice}
+                      className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+                    >
+                      Add Price
+                    </button>
+                  </div>
                   <input
                     type="text"
-                    value={roomType}
-                    onChange={(e) => setRoomType(e.target.value)}
-                    className="px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                    placeholder="Room type (e.g., Single)"
+                    value={roomAdditionalInfo}
+                    onChange={(e) => setRoomAdditionalInfo(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
+                    placeholder="Additional info (optional, e.g., 'with balcony', 'city view')"
                   />
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={roomPrice}
-                    onChange={(e) => setRoomPrice(e.target.value)}
-                    className="px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                    placeholder="Price (€)"
-                  />
-                  <button
-                    type="button"
-                    onClick={addRoomPrice}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-                  >
-                    Add Price
-                  </button>
                 </div>
                 <div className="space-y-2">
-                  {Object.entries(formData.prices).map(([type, price]) => (
+                  {Object.entries(formData.prices).map(([type, priceData]) => (
                     <div
                       key={type}
                       className="flex items-center justify-between bg-white/10 p-3 rounded-lg"
                     >
-                      <span className="text-white font-medium">{type}</span>
+                      <div>
+                        <span className="text-white font-medium">{type}</span>
+                        {priceData.additionalInfo && (
+                          <p className="text-blue-200 text-sm">{priceData.additionalInfo}</p>
+                        )}
+                      </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-yellow-300 font-bold">€{price}</span>
+                        <span className="text-yellow-300 font-bold">€{priceData.price}</span>
                         <button
                           type="button"
                           onClick={() => removeRoomPrice(type)}
@@ -560,6 +591,41 @@ export default function AdminHotelsPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Breakfast Included */}
+              <div>
+                <label className="flex items-center gap-3 text-white font-semibold cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.breakfastIncluded}
+                    onChange={(e) =>
+                      setFormData({ ...formData, breakfastIncluded: e.target.checked })
+                    }
+                    className="w-5 h-5 rounded"
+                  />
+                  <span>🍳 Breakfast Included in Room Price</span>
+                </label>
+              </div>
+
+              {/* City Tax */}
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  City Tax (per night per room)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.cityTax || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cityTax: e.target.value ? parseFloat(e.target.value) : undefined })
+                  }
+                  className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
+                  placeholder="e.g., 3.50"
+                />
+                <p className="text-blue-200 text-sm mt-2">
+                  💡 Optional: City tax charged separately per night per room
+                </p>
               </div>
 
               {/* Amenities */}

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Hotel" ADD COLUMN "breakfastIncluded" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "cityTax" DOUBLE PRECISION;

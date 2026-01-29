@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, logo, stars, location, description, images, prices, amenities, order } = body;
+    const { name, logo, stars, location, description, images, prices, amenities, breakfastIncluded, cityTax, order } = body;
 
     // Validate required fields
     if (!name || !stars || !location) {
@@ -67,6 +67,8 @@ export async function POST(request: Request) {
         images: images || [],
         prices: prices || {},
         amenities: amenities || [],
+        breakfastIncluded: breakfastIncluded || false,
+        cityTax: cityTax || null,
         order: order || 0
       }
     });
@@ -156,7 +158,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, logo, stars, location, description, images, prices, amenities, order } = body;
+    const { id, name, logo, stars, location, description, images, prices, amenities, breakfastIncluded, cityTax, order } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -176,6 +178,8 @@ export async function PUT(request: Request) {
         ...(images && { images }),
         ...(prices && { prices }),
         ...(amenities && { amenities }),
+        ...(breakfastIncluded !== undefined && { breakfastIncluded }),
+        ...(cityTax !== undefined && { cityTax }),
         ...(order !== undefined && { order })
       }
     });
