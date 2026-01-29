@@ -40,11 +40,16 @@ export async function POST(request: Request) {
     try {
       // Run the migration SQL directly (IF NOT EXISTS handles if columns already exist)
       await directPrisma.$executeRawUnsafe(`
-        ALTER TABLE "Hotel" ADD COLUMN IF NOT EXISTS "breakfastIncluded" BOOLEAN NOT NULL DEFAULT false;
+        ALTER TABLE "Hotel" ADD COLUMN IF NOT EXISTS "breakfastIncluded" BOOLEAN DEFAULT false;
       `);
       
       await directPrisma.$executeRawUnsafe(`
         ALTER TABLE "Hotel" ADD COLUMN IF NOT EXISTS "cityTax" DOUBLE PRECISION;
+      `);
+      
+      // Update existing records to set breakfastIncluded to false if NULL
+      await directPrisma.$executeRawUnsafe(`
+        UPDATE "Hotel" SET "breakfastIncluded" = false WHERE "breakfastIncluded" IS NULL;
       `);
     } finally {
       await directPrisma.$disconnect();

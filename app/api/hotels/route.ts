@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         images: images || [],
         prices: prices || {},
         amenities: amenities || [],
-        breakfastIncluded: breakfastIncluded || false,
+        breakfastIncluded: breakfastIncluded !== undefined ? breakfastIncluded : false,
         cityTax: cityTax || null,
         order: order || 0
       }

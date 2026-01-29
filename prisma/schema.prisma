@@ -131,7 +131,7 @@ model Hotel {
   images           String[] // Array of image paths
   prices           Json     // JSON object for different room types, prices, and additional info
   amenities        String[] // Array of amenities
-  breakfastIncluded Boolean @default(false) // Whether breakfast is included
+  breakfastIncluded Boolean? @default(false) // Whether breakfast is included
   cityTax          Float?   // City tax per night per room (optional)
   order            Int      @default(0) // For sorting hotels
   createdAt        DateTime @default(now())
