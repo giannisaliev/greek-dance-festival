@@ -144,8 +144,23 @@ export default function AdminTeachersPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas context not available');
 
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
+    // Resize to max 800x800 while maintaining aspect ratio
+    const maxSize = 800;
+    let width = pixelCrop.width;
+    let height = pixelCrop.height;
+    
+    if (width > maxSize || height > maxSize) {
+      if (width > height) {
+        height = (height / width) * maxSize;
+        width = maxSize;
+      } else {
+        width = (width / height) * maxSize;
+        height = maxSize;
+      }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
 
     ctx.drawImage(
       image,
@@ -155,14 +170,14 @@ export default function AdminTeachersPage() {
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height
+      width,
+      height
     );
 
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         if (blob) resolve(blob);
-      }, 'image/jpeg', 0.95);
+      }, 'image/jpeg', 0.85); // Reduced quality for smaller file size
     });
   };
 
@@ -187,6 +202,16 @@ export default function AdminTeachersPage() {
     try {
       const croppedBlob = await createCroppedImage(imageToCrop, croppedAreaPixels);
       
+      // Check blob size
+      const sizeInMB = croppedBlob.size / (1024 * 1024);
+      console.log(`Image size: ${sizeInMB.toFixed(2)} MB`);
+      
+      if (sizeInMB > 8) {
+        alert('Image is too large even after compression. Please try a smaller image or lower quality photo.');
+        setUploadingImage(false);
+        return;
+      }
+      
       const formDataUpload = new FormData();
       formDataUpload.append("files", croppedBlob, "teacher-photo.jpg");
 
@@ -194,6 +219,12 @@ export default function AdminTeachersPage() {
         method: "POST",
         body: formDataUpload,
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload failed:', response.status, errorText);
+        throw new Error(`Upload failed with status ${response.status}`);
+      }
 
       const data = await response.json();
       if (data.urls && data.urls.length > 0) {
@@ -203,7 +234,7 @@ export default function AdminTeachersPage() {
       setImageToCrop(null);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload image");
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploadingImage(false);
     }
