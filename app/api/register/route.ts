@@ -6,24 +6,13 @@ import { authOptions } from "@/lib/auth-config";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if registration is open
-    const settings = await prisma.settings.findUnique({
-      where: { id: "settings" },
-    });
-
-    if (!settings?.registrationOpen) {
-      return NextResponse.json(
-        { error: "Registration is currently closed" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { phone, registrantFirstName, registrantLastName, packageType, guinnessRecordAttempt, greekNight, totalPrice } = body;
     
     // Get authenticated user from NextAuth session
     const session = await getServerSession(authOptions);
     
+    // Get user details first to check if they're admin
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "You must be logged in to register" },
@@ -31,15 +20,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate required fields
-    if (!phone || !packageType || !totalPrice) {
-      return NextResponse.json(
-        { error: "Phone, package type, and total price are required" },
-        { status: 400 }
-      );
-    }
-
-    // Get user details
     const user = await prisma.user.findUnique({
       where: { id: (session.user as any).id },
       include: { participant: true },
@@ -49,6 +29,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
+      );
+    }
+
+    // Check if registration is open (skip check for admins)
+    if (!user.isAdmin) {
+      const settings = await prisma.settings.findUnique({
+        where: { id: "settings" },
+      });
+
+      if (!settings?.registrationOpen) {
+        return NextResponse.json(
+          { error: "Registration is currently closed" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Validate required fields
+    if (!phone || !packageType || !totalPrice) {
+      return NextResponse.json(
+        { error: "Phone, package type, and total price are required" },
+        { status: 400 }
       );
     }
 

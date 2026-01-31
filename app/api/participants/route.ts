@@ -24,35 +24,38 @@ export async function GET(request: NextRequest) {
       // Get all unique teacher IDs
       const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
       
-      // Fetch teacher information
-      const teachers = await prisma.user.findMany({
-        where: {
-          id: {
-            in: teacherIds as string[]
-          }
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          isTeacher: true,
-          studioName: true,
-          participant: {
-            select: {
-              id: true,
-              packageType: true,
-              phone: true,
-              guinnessRecordAttempt: true,
-              greekNight: true,
-              totalPrice: true,
-              checkedIn: true,
-              registrantFirstName: true,
-              registrantLastName: true,
+      // Fetch teacher information only if there are teacher IDs
+      let teachers = [];
+      if (teacherIds.length > 0) {
+        teachers = await prisma.user.findMany({
+          where: {
+            id: {
+              in: teacherIds as string[]
+            }
+          },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            isTeacher: true,
+            studioName: true,
+            participant: {
+              select: {
+                id: true,
+                packageType: true,
+                phone: true,
+                guinnessRecordAttempt: true,
+                greekNight: true,
+                totalPrice: true,
+                checkedIn: true,
+                registrantFirstName: true,
+                registrantLastName: true,
+              }
             }
           }
-        }
-      });
+        });
+      }
 
       return NextResponse.json({ 
         participants: participants || [], 
@@ -88,35 +91,38 @@ export async function GET(request: NextRequest) {
     // Get all unique teacher IDs from search results
     const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
     
-    // Fetch teacher information
-    const teachers = await prisma.user.findMany({
-      where: {
-        id: {
-          in: teacherIds as string[]
-        }
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        isTeacher: true,
-        studioName: true,
-        participant: {
-          select: {
-            id: true,
-            packageType: true,
-            phone: true,
-            guinnessRecordAttempt: true,
-            greekNight: true,
-            totalPrice: true,
-            checkedIn: true,
-            registrantFirstName: true,
-            registrantLastName: true,
+    // Fetch teacher information only if there are teacher IDs
+    let teachers = [];
+    if (teacherIds.length > 0) {
+      teachers = await prisma.user.findMany({
+        where: {
+          id: {
+            in: teacherIds as string[]
+          }
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          isTeacher: true,
+          studioName: true,
+          participant: {
+            select: {
+              id: true,
+              packageType: true,
+              phone: true,
+              guinnessRecordAttempt: true,
+              greekNight: true,
+              totalPrice: true,
+              checkedIn: true,
+              registrantFirstName: true,
+              registrantLastName: true,
+            }
           }
         }
-      }
-    });
+      });
+    }
 
     return NextResponse.json({ 
       participants: participants || [], 

@@ -110,7 +110,7 @@ export default function RegisterPage() {
   const [closedMessage, setClosedMessage] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [user, setUser] = useState<{firstName: string; lastName: string; email: string} | null>(null);
+  const [user, setUser] = useState<{firstName: string; lastName: string; email: string; isAdmin?: boolean} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -242,8 +242,8 @@ export default function RegisterPage() {
     );
   }
 
-  // Registration closed state
-  if (!isOpen) {
+  // Registration closed state (but admins can still register)
+  if (!isOpen && !user?.isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
         <Navigation />
@@ -386,6 +386,21 @@ export default function RegisterPage() {
       <Navigation />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
+        {/* Admin Testing Notice */}
+        {user?.isAdmin && !isOpen && (
+          <div className="mb-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl p-6 border-2 border-yellow-300 shadow-xl">
+            <div className="flex items-center justify-center gap-3">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <div className="text-center">
+                <p className="text-white font-bold text-xl">👑 ADMIN TESTING MODE</p>
+                <p className="text-white/90 text-sm">Registration is closed for public, but you can test as admin</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
