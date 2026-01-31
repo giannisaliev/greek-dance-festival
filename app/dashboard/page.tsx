@@ -17,6 +17,8 @@ interface Participant {
   checkedIn: boolean;
   createdAt: string;
   studioName: string | null;
+  deletedAt: string | null;
+  deletedBy: string | null;
 }
 
 const packages = [
@@ -33,6 +35,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [myRegistration, setMyRegistration] = useState<Participant | null>(null);
   const [registeredStudents, setRegisteredStudents] = useState<any[]>([]);
+  const [deletedStudents, setDeletedStudents] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"active" | "deleted">("active");
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -52,9 +56,10 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const [userRes, studentsRes] = await Promise.all([
+      const [userRes, studentsRes, deletedRes] = await Promise.all([
         fetch("/api/auth/me"),
-        fetch("/api/participants/my-registrations")
+        fetch("/api/participants/my-registrations"),
+        fetch("/api/participants/my-registrations?deleted=true")
       ]);
 
       if (userRes.ok) {
@@ -69,6 +74,11 @@ export default function DashboardPage() {
       if (studentsRes.ok) {
         const studentsData = await studentsRes.json();
         setRegisteredStudents(studentsData.students || []);
+      }
+
+      if (deletedRes.ok) {
+        const deletedData = await deletedRes.json();
+        setDeletedStudents(deletedData.students || []);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -225,6 +235,24 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error deleting registration:", error);
       alert("Error deleting registration");
+    }
+  };
+
+  const restoreRegistration = async (id: string) => {
+    try {
+      const response = await fetch(`/api/participants/${id}/restore`, {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        await fetchData();
+        setActiveTab("active"); // Switch to active tab after restore
+      } else {
+        alert("Failed to restore registration");
+      }
+    } catch (error) {
+      console.error("Error restoring registration:", error);
+      alert("Error restoring registration");
     }
   };
 
@@ -447,11 +475,11 @@ export default function DashboardPage() {
         </div>
 
         {/* Students I Registered */}
-        {registeredStudents.length > 0 && (
+        {(registeredStudents.length > 0 || deletedStudents.length > 0) && (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-3xl font-bold text-white">
-                Students I Registered ({registeredStudents.length})
+                Students I Registered
               </h2>
               <Link
                 href="/register/bulk"
@@ -461,7 +489,33 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Tabs */}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setActiveTab("active")}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeTab === "active"
+                    ? "bg-white text-blue-900"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                Active ({registeredStudents.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("deleted")}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeTab === "deleted"
+                    ? "bg-white text-blue-900"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                Deleted ({deletedStudents.length})
+              </button>
+            </div>
+
+            {/* Active Students */}
+            {activeTab === "active" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {registeredStudents.map((student) => (
                 <div
                   key={student.id}
@@ -655,6 +709,80 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+            )}
+
+            {/* Deleted Students */}
+            {activeTab === "deleted" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {deletedStudents.length === 0 ? (
+                  <div className="col-span-2 bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20 text-center">
+                    <div className="text-6xl mb-4">✓</div>
+                    <h3 className="text-2xl font-bold text-white mb-4">No Deleted Registrations</h3>
+                    <p className="text-blue-100">
+                      You don't have any deleted registrations. Deleted registrations are stored here for 7 days before permanent deletion.
+                    </p>
+                  </div>
+                ) : (
+                  deletedStudents.map((student) => (
+                    <div
+                      key={student.id}
+                      className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-red-500/30 hover:border-red-500/50 transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-3xl opacity-50">{getPackageIcon(student.participant.packageType)}</span>
+                        <div>
+                          <h3 className="text-xl font-bold text-white">
+                            {student.participant.registrantFirstName} {student.participant.registrantLastName}
+                          </h3>
+                          <p className="text-blue-200 text-sm">{student.email}</p>
+                          {student.participant.studioName && (
+                            <p className="text-blue-300 text-sm">🎭 {student.participant.studioName}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-white/5 rounded-lg p-3 mb-3 opacity-70">
+                        <div className="flex justify-between items-center">
+                          <span className="text-blue-100 text-sm">{student.participant.packageType}</span>
+                          <span className="text-white font-bold">€{student.participant.totalPrice}</span>
+                        </div>
+                      </div>
+
+                      {(student.participant.guinnessRecordAttempt || student.participant.greekNight) && (
+                        <div className="flex gap-2 mb-3 opacity-70">
+                          {student.participant.guinnessRecordAttempt && (
+                            <span className="bg-blue-500/20 text-blue-100 px-2 py-1 rounded text-xs">
+                              🏆 Guinness
+                            </span>
+                          )}
+                          {student.participant.greekNight && (
+                            <span className="bg-purple-500/20 text-purple-100 px-2 py-1 rounded text-xs">
+                              🍷 Greek Night
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-3">
+                        <p className="text-red-200 text-sm">
+                          ⚠️ Deleted on {new Date(student.participant.deletedAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-red-200 text-xs mt-1">
+                          Will be permanently deleted after 7 days
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => restoreRegistration(student.participant.id)}
+                        className="w-full px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors text-sm"
+                      >
+                        ↺ Restore Registration
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 

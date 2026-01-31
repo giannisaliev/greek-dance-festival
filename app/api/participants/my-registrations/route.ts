@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -21,11 +21,16 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Check if we should fetch deleted or active registrations
+    const { searchParams } = new URL(request.url);
+    const includeDeleted = searchParams.get('deleted') === 'true';
+
     // Get all students registered by this user (where registeredBy = user.id)
     const students = await prisma.user.findMany({
       where: {
         participant: {
-          registeredBy: user.id
+          registeredBy: user.id,
+          deletedAt: includeDeleted ? { not: null } : null
         }
       },
       select: {
@@ -45,7 +50,9 @@ export async function GET() {
             totalPrice: true,
             checkedIn: true,
             createdAt: true,
-            studioName: true
+            studioName: true,
+            deletedAt: true,
+            deletedBy: true
           }
         }
       }
