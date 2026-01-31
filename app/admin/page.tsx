@@ -153,10 +153,13 @@ export default function AdminPage() {
       const url = query
         ? `/api/participants?q=${encodeURIComponent(query)}`
         : "/api/participants";
+      console.log("Fetching from:", url);
       const response = await fetch(url);
       const data = await response.json();
+      console.log("API Response:", data);
       const participantsList = Array.isArray(data.participants) ? data.participants : [];
       const teachersList = Array.isArray(data.teachers) ? data.teachers : [];
+      console.log("Participants:", participantsList.length, "Teachers:", teachersList.length);
       setParticipants(participantsList);
       setTeachers(teachersList);
       
