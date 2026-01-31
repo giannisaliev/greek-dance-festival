@@ -125,8 +125,8 @@ export async function DELETE(
     }
 
     // Soft delete
-    await prisma..update({
-      where: { id: params.id },
+    await prisma.participant.update({
+      where: { id },
       data: {
         deletedAt: new Date(),
         deletedBy: currentUser.id,
