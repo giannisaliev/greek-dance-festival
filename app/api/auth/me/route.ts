@@ -14,17 +14,38 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        isAdmin: true,
-        participant: true,
-      },
-    });
+    let user: any;
+    let isAdmin = false;
+    
+    try {
+      // Try to fetch with isAdmin field
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          isAdmin: true,
+          participant: true,
+        },
+      });
+      isAdmin = Boolean(user?.isAdmin);
+    } catch (selectError: any) {
+      console.log("Error fetching with isAdmin, trying without:", selectError?.message);
+      // Fallback: fetch without isAdmin field
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          participant: true,
+        },
+      });
+      isAdmin = false;
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -39,7 +60,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        isAdmin: Boolean(user.isAdmin),
+        isAdmin: isAdmin,
         participant: user.participant,
       },
     });

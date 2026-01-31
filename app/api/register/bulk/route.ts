@@ -28,22 +28,30 @@ export async function POST(request: NextRequest) {
           select: { isAdmin: true }
         });
         isAdmin = Boolean(currentUser?.isAdmin);
-      } catch (adminCheckError) {
-        console.log("Could not check admin status, assuming not admin:", adminCheckError);
+      } catch (adminCheckError: any) {
+        console.log("Could not check admin status (column may not exist), assuming not admin:", adminCheckError?.message);
         isAdmin = false;
       }
     }
 
     // Check if registration is open (skip check for admins)
     if (!isAdmin) {
-      const settings = await prisma.settings.findUnique({
-        where: { id: "settings" },
-      });
+      try {
+        const settings = await prisma.settings.findUnique({
+          where: { id: "settings" },
+        });
 
-      if (!settings?.registrationOpen) {
+        if (!settings?.registrationOpen) {
+          return NextResponse.json(
+            { error: "Registration is currently closed" },
+            { status: 403 }
+          );
+        }
+      } catch (settingsError: any) {
+        console.error("Error checking settings:", settingsError?.message);
         return NextResponse.json(
-          { error: "Registration is currently closed" },
-          { status: 403 }
+          { error: "Could not verify registration status" },
+          { status: 500 }
         );
       }
     }
