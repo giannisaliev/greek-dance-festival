@@ -79,6 +79,7 @@ model Participant {
   totalPrice            Int      // Total price in euros
   checkedIn             Boolean  @default(false)
   registeredBy          String?  // ID of the teacher/studio owner who registered this participant
+  studioName            String?  // Dance studio name (for this specific registration)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

@@ -15,6 +15,7 @@ interface Participant {
   registrantFirstName: string | null;
   registrantLastName: string | null;
   registeredBy: string | null;
+  studioName: string | null;
   guinnessRecordAttempt: boolean;
   greekNight: boolean;
   totalPrice: number;
@@ -102,6 +103,8 @@ export default function AdminPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
   const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
@@ -270,7 +273,36 @@ export default function AdminPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     fetchParticipants(searchQuery);
+  };
+
+  // Generate search suggestions
+  const updateSearchSuggestions = (value: string) => {
+    setSearchQuery(value);
+    if (value.length < 2) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const suggestions = new Set<string>();
+    const lowerValue = value.toLowerCase();
+
+    participants.forEach(p => {
+      const firstName = (p.registrantFirstName || p.user.firstName || "").toLowerCase();
+      const lastName = (p.registrantLastName || p.user.lastName || "").toLowerCase();
+      const fullName = `${firstName} ${lastName}`.trim();
+      const email = p.user.email.toLowerCase();
+      const studio = (p.studioName || "").toLowerCase();
+
+      if (fullName.includes(lowerValue) && fullName) suggestions.add(`${p.registrantFirstName || p.user.firstName} ${p.registrantLastName || p.user.lastName}`);
+      if (email.includes(lowerValue) && email !== "-") suggestions.add(p.user.email);
+      if (studio.includes(lowerValue) && studio) suggestions.add(p.studioName!);
+    });
+
+    setSearchSuggestions(Array.from(suggestions).slice(0, 8));
+    setShowSuggestions(true);
   };
 
   const handleCheckIn = async (id: string, currentStatus: boolean) => {
@@ -557,13 +589,35 @@ export default function AdminPage() {
               {/* Search */}
               <form onSubmit={handleSearch} className="mb-6">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by name, email, or phone..."
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
-                  />
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => updateSearchSuggestions(e.target.value)}
+                      onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      placeholder="Search by name, email, studio, or phone..."
+                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
+                    />
+                    {showSuggestions && searchSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-xl border border-gray-200 max-h-64 overflow-y-auto">
+                        {searchSuggestions.map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(suggestion);
+                              setShowSuggestions(false);
+                              fetchParticipants(suggestion);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="submit"
                     className="px-6 sm:px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm sm:text-base"
@@ -654,8 +708,8 @@ export default function AdminPage() {
                                   {registeredByTeacher ? (
                                     <div className="flex flex-col gap-1">
                                       <span className="text-white font-medium">{registeredByTeacher.firstName} {registeredByTeacher.lastName}</span>
-                                      {registeredByTeacher.studioName && (
-                                        <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-1 rounded w-fit">🏢 {registeredByTeacher.studioName}</span>
+                                      {participant.studioName && (
+                                        <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-1 rounded w-fit">🏢 {participant.studioName}</span>
                                       )}
                                       <span className="text-xs text-blue-300">{registeredByTeacher.email}</span>
                                     </div>
@@ -850,6 +904,7 @@ export default function AdminPage() {
                                           <tr className="border-b border-white/20">
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Name</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Email</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Studio</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Package</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Add-ons</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Price</th>
@@ -864,6 +919,13 @@ export default function AdminPage() {
                                                 {student.registrantFirstName} {student.registrantLastName}
                                               </td>
                                               <td className="py-3 px-2 text-blue-100 text-sm">{student.user.email}</td>
+                                              <td className="py-3 px-2 text-sm">
+                                                {student.studioName ? (
+                                                  <span className="bg-purple-500/30 text-purple-200 px-2 py-1 rounded text-xs">🏢 {student.studioName}</span>
+                                                ) : (
+                                                  <span className="text-blue-200">—</span>
+                                                )}
+                                              </td>
                                               <td className="py-3 px-2 text-blue-100 text-sm">{student.packageType}</td>
                                               <td className="py-3 px-2 text-blue-100 text-sm">
                                                 {student.guinnessRecordAttempt && "🏆 "}

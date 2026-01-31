@@ -136,11 +136,9 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Generate unique email if not provided
+        // Set email to "-" for students registered by teachers
         if (!email) {
-          const timestamp = Date.now();
-          const random = Math.random().toString(36).substring(7);
-          email = `student.${firstName.toLowerCase()}.${lastName.toLowerCase()}.${timestamp}.${random}@greek-dance-festival.temp`;
+          email = "-";
         }
 
         // Check if user exists with this email
@@ -183,6 +181,7 @@ export async function POST(request: NextRequest) {
             greekNight: greekNight || false,
             totalPrice,
             registeredBy: teacher.id, // Track who registered this participant
+            studioName: registrantType === "studio" ? studioName : null, // Store studio per participant
           },
         });
 

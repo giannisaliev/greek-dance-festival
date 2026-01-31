@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Search by name, email, or phone
+    // Search by name, email, phone, or studio name
     const participants = await prisma.participant.findMany({
       where: {
         OR: [
@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
           { phone: { contains: query } },
           { registrantFirstName: { contains: query, mode: 'insensitive' } },
           { registrantLastName: { contains: query, mode: 'insensitive' } },
+          { studioName: { contains: query, mode: 'insensitive' } },
         ],
       },
       include: {
