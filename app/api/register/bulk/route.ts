@@ -7,18 +7,6 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if registration is open
-    const settings = await prisma.settings.findUnique({
-      where: { id: "settings" },
-    });
-
-    if (!settings?.registrationOpen) {
-      return NextResponse.json(
-        { error: "Registration is currently closed" },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
     const { students, registrantType, studioName, teacherEmail, teacherFirstName, teacherLastName } = body;
     
@@ -28,6 +16,32 @@ export async function POST(request: NextRequest) {
       studioName,
       teacherEmail
     });
+
+    // Get current session to check if user is admin
+    const session = await getServerSession(authOptions);
+    let isAdmin = false;
+    
+    if (session?.user) {
+      const currentUser = await prisma.user.findUnique({
+        where: { email: (session.user as any).email },
+        select: { isAdmin: true }
+      });
+      isAdmin = currentUser?.isAdmin || false;
+    }
+
+    // Check if registration is open (skip check for admins)
+    if (!isAdmin) {
+      const settings = await prisma.settings.findUnique({
+        where: { id: "settings" },
+      });
+
+      if (!settings?.registrationOpen) {
+        return NextResponse.json(
+          { error: "Registration is currently closed" },
+          { status: 403 }
+        );
+      }
+    }
 
     // Validate teacher information
     if (!teacherEmail || !teacherFirstName || !teacherLastName) {
@@ -84,13 +98,20 @@ export async function POST(request: NextRequest) {
     // Process each student
     for (const student of students) {
       try {
-        const { firstName, lastName, email, packageType, guinnessRecordAttempt, greekNight, totalPrice } = student;
+        let { firstName, lastName, email, packageType, guinnessRecordAttempt, greekNight, totalPrice } = student;
 
-        // Validate required fields
-        if (!firstName || !lastName || !email || !packageType || totalPrice === undefined || totalPrice === null) {
-          console.log("Validation failed for student:", { firstName, lastName, email, packageType, totalPrice });
-          errors.push({ email: email || "unknown", error: "Missing required fields", details: { firstName: !!firstName, lastName: !!lastName, email: !!email, packageType: !!packageType, totalPrice: totalPrice } });
+        // Validate required fields (email is now optional)
+        if (!firstName || !lastName || !packageType || totalPrice === undefined || totalPrice === null) {
+          console.log("Validation failed for student:", { firstName, lastName, packageType, totalPrice });
+          errors.push({ email: email || `${firstName} ${lastName}`, error: "Missing required fields", details: { firstName: !!firstName, lastName: !!lastName, packageType: !!packageType, totalPrice: totalPrice } });
           continue;
+        }
+
+        // Generate unique email if not provided
+        if (!email) {
+          const timestamp = Date.now();
+          const random = Math.random().toString(36).substring(7);
+          email = `student.${firstName.toLowerCase()}.${lastName.toLowerCase()}.${timestamp}.${random}@greek-dance-festival.temp`;
         }
 
         // Check if user exists with this email

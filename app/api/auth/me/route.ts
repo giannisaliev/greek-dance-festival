@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        isAdmin: user.isAdmin,
+        isAdmin: user.isAdmin || false,
         participant: user.participant,
       },
     });

@@ -9,7 +9,6 @@ interface Student {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
   packageType: string;
   guinnessRecordAttempt: boolean;
   greekNight: boolean;
@@ -49,7 +48,7 @@ export default function BulkRegisterPage() {
     id: crypto.randomUUID(),
     firstName: "",
     lastName: "",
-    email: "",
+
     packageType: packages[0].name,
     guinnessRecordAttempt: false,
     greekNight: false,
@@ -79,7 +78,6 @@ export default function BulkRegisterPage() {
       id: crypto.randomUUID(),
       firstName: "",
       lastName: "",
-      email: "",
       packageType: packages[0].name,
       guinnessRecordAttempt: false,
       greekNight: false,
@@ -153,9 +151,9 @@ export default function BulkRegisterPage() {
     }
 
     // Validate no empty fields
-    const hasEmptyFields = students.some(s => !s.firstName || !s.lastName || !s.email);
+    const hasEmptyFields = students.some(s => !s.firstName || !s.lastName);
     if (hasEmptyFields) {
-      setError("Please fill in all fields for each student (name and email)");
+      setError("Please fill in all fields for each student (first and last name)");
       setIsSubmitting(false);
       return;
     }
@@ -226,7 +224,7 @@ export default function BulkRegisterPage() {
             <div className="bg-white/10 rounded-2xl p-6 mb-8 border border-white/20">
               <p className="text-white font-bold text-2xl mb-2">Total: €{calculateTotalPrice()}</p>
               <p className="text-blue-100 text-sm">
-                Confirmation emails have been sent to all students
+                All students have been successfully registered
               </p>
             </div>
             
@@ -242,7 +240,6 @@ export default function BulkRegisterPage() {
                   id: crypto.randomUUID(),
                   firstName: "",
                   lastName: "",
-                  email: "",
                   packageType: packages[0].name,
                   guinnessRecordAttempt: false,
                   greekNight: false,
@@ -390,7 +387,7 @@ export default function BulkRegisterPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     value={student.firstName}
@@ -404,14 +401,6 @@ export default function BulkRegisterPage() {
                     value={student.lastName}
                     onChange={(e) => updateStudent(student.id, 'lastName', e.target.value)}
                     placeholder="Last Name *"
-                    className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-                    required
-                  />
-                  <input
-                    type="email"
-                    value={student.email}
-                    onChange={(e) => updateStudent(student.id, 'email', e.target.value)}
-                    placeholder="Email *"
                     className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
                     required
                   />
