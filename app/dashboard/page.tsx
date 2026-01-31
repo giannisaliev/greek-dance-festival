@@ -492,13 +492,15 @@ export default function DashboardPage() {
                       </div>
 
                       <div>
-                        <label className="block text-white text-sm font-semibold mb-2">Studio Name (Optional)</label>
+                        <label className="block text-white text-sm font-semibold mb-2">
+                          Studio Name (Optional) {editForm.studioName && <span className="text-blue-200 font-normal">- Currently: {editForm.studioName}</span>}
+                        </label>
                         <input
                           type="text"
                           value={editForm.studioName}
                           onChange={(e) => setEditForm({ ...editForm, studioName: e.target.value })}
-                          placeholder="Leave empty if not from a studio"
-                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200"
+                          placeholder={editForm.studioName ? editForm.studioName : "Enter studio name or leave empty"}
+                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-300"
                         />
                       </div>
 
