@@ -16,7 +16,12 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isAdmin: true,
         participant: true,
       },
     });
@@ -34,7 +39,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        isAdmin: user.isAdmin || false,
+        isAdmin: Boolean(user.isAdmin),
         participant: user.participant,
       },
     });

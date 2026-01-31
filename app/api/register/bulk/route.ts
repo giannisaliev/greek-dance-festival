@@ -22,11 +22,16 @@ export async function POST(request: NextRequest) {
     let isAdmin = false;
     
     if (session?.user) {
-      const currentUser = await prisma.user.findUnique({
-        where: { email: (session.user as any).email },
-        select: { isAdmin: true }
-      });
-      isAdmin = currentUser?.isAdmin || false;
+      try {
+        const currentUser = await prisma.user.findUnique({
+          where: { email: (session.user as any).email },
+          select: { isAdmin: true }
+        });
+        isAdmin = Boolean(currentUser?.isAdmin);
+      } catch (adminCheckError) {
+        console.log("Could not check admin status, assuming not admin:", adminCheckError);
+        isAdmin = false;
+      }
     }
 
     // Check if registration is open (skip check for admins)
