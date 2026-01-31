@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get("q") || "";
 
     if (!query) {
+      // Fetch participants
       const participants = await prisma.participant.findMany({
         include: {
           user: {
@@ -27,34 +28,39 @@ export async function GET(request: NextRequest) {
       // Fetch teacher information only if there are teacher IDs
       let teachers: any[] = [];
       if (teacherIds.length > 0) {
-        teachers = await prisma.user.findMany({
-          where: {
-            id: {
-              in: teacherIds as string[]
-            }
-          },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            isTeacher: true,
-            studioName: true,
-            participant: {
-              select: {
-                id: true,
-                packageType: true,
-                phone: true,
-                guinnessRecordAttempt: true,
-                greekNight: true,
-                totalPrice: true,
-                checkedIn: true,
-                registrantFirstName: true,
-                registrantLastName: true,
+        try {
+          teachers = await prisma.user.findMany({
+            where: {
+              id: {
+                in: teacherIds as string[]
+              }
+            },
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              isTeacher: true,
+              studioName: true,
+              participant: {
+                select: {
+                  id: true,
+                  packageType: true,
+                  phone: true,
+                  guinnessRecordAttempt: true,
+                  greekNight: true,
+                  totalPrice: true,
+                  checkedIn: true,
+                  registrantFirstName: true,
+                  registrantLastName: true,
+                }
               }
             }
-          }
-        });
+          });
+        } catch (teacherError) {
+          console.error("Error fetching teachers:", teacherError);
+          // Continue without teacher data if there's an error
+        }
       }
 
       return NextResponse.json({ 
@@ -94,34 +100,39 @@ export async function GET(request: NextRequest) {
     // Fetch teacher information only if there are teacher IDs
     let teachers: any[] = [];
     if (teacherIds.length > 0) {
-      teachers = await prisma.user.findMany({
-        where: {
-          id: {
-            in: teacherIds as string[]
-          }
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          isTeacher: true,
-          studioName: true,
-          participant: {
-            select: {
-              id: true,
-              packageType: true,
-              phone: true,
-              guinnessRecordAttempt: true,
-              greekNight: true,
-              totalPrice: true,
-              checkedIn: true,
-              registrantFirstName: true,
-              registrantLastName: true,
+      try {
+        teachers = await prisma.user.findMany({
+          where: {
+            id: {
+              in: teacherIds as string[]
+            }
+          },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            isTeacher: true,
+            studioName: true,
+            participant: {
+              select: {
+                id: true,
+                packageType: true,
+                phone: true,
+                guinnessRecordAttempt: true,
+                greekNight: true,
+                totalPrice: true,
+                checkedIn: true,
+                registrantFirstName: true,
+                registrantLastName: true,
+              }
             }
           }
-        }
-      });
+        });
+      } catch (teacherError) {
+        console.error("Error fetching teachers in search:", teacherError);
+        // Continue without teacher data if there's an error
+      }
     }
 
     return NextResponse.json({ 
