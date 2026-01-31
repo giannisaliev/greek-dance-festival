@@ -12,10 +12,15 @@ export async function GET(request: NextRequest) {
       // Search by name or email
       users = await prisma.user.findMany({
         where: {
-          OR: [
-            { email: { contains: query, mode: "insensitive" } },
-            { firstName: { contains: query, mode: "insensitive" } },
-            { lastName: { contains: query, mode: "insensitive" } },
+          AND: [
+            { email: { not: "-" } }, // Exclude student-only users
+            {
+              OR: [
+                { email: { contains: query, mode: "insensitive" } },
+                { firstName: { contains: query, mode: "insensitive" } },
+                { lastName: { contains: query, mode: "insensitive" } },
+              ],
+            },
           ],
         },
         select: {
@@ -35,6 +40,9 @@ export async function GET(request: NextRequest) {
     } else {
       // Get all users
       users = await prisma.user.findMany({
+        where: {
+          email: { not: "-" }, // Exclude student-only users
+        },
         select: {
           id: true,
           email: true,

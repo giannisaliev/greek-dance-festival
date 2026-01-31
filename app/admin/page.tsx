@@ -144,6 +144,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [usersSearchQuery, setUsersSearchQuery] = useState("");
   const [usersLoading, setUsersLoading] = useState(false);
+  const [deleteUserConfirm, setDeleteUserConfirm] = useState<string | null>(null);
 
   // Fetch participants
   const fetchParticipants = async (query = "") => {
@@ -262,6 +263,26 @@ export default function AdminPage() {
       setUsers([]);
     } finally {
       setUsersLoading(false);
+    }
+  };
+
+  // Delete user
+  const deleteUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchUsers(usersSearchQuery);
+        setDeleteUserConfirm(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Error deleting user");
     }
   };
 
@@ -1470,18 +1491,19 @@ export default function AdminPage() {
                           <th className="px-6 py-4 text-left text-white font-semibold">Status</th>
                           <th className="px-6 py-4 text-left text-white font-semibold">Verified</th>
                           <th className="px-6 py-4 text-left text-white font-semibold">Joined</th>
+                          <th className="px-6 py-4 text-left text-white font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/10">
                         {usersLoading ? (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-blue-100">
+                            <td colSpan={6} className="px-6 py-12 text-center text-blue-100">
                               Loading users...
                             </td>
                           </tr>
                         ) : users.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-blue-100">
+                            <td colSpan={6} className="px-6 py-12 text-center text-blue-100">
                               No users found
                             </td>
                           </tr>
@@ -1525,6 +1547,31 @@ export default function AdminPage() {
                               </td>
                               <td className="px-6 py-4 text-blue-100">
                                 {new Date(user.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4">
+                                {deleteUserConfirm === user.id ? (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => deleteUser(user.id)}
+                                      className="px-3 py-1 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors"
+                                    >
+                                      Confirm
+                                    </button>
+                                    <button
+                                      onClick={() => setDeleteUserConfirm(null)}
+                                      className="px-3 py-1 bg-white/20 text-white rounded text-sm font-semibold hover:bg-white/30 transition-colors"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => setDeleteUserConfirm(user.id)}
+                                    className="px-3 py-1 bg-red-500 text-white rounded text-sm font-semibold hover:bg-red-600 transition-colors"
+                                  >
+                                    Delete
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))
@@ -1589,6 +1636,34 @@ export default function AdminPage() {
                               </div>
                             </div>
                           </div>
+                          {deleteUserConfirm === user.id ? (
+                            <div className="mt-3 bg-red-500/20 border border-red-500 rounded-lg p-3">
+                              <p className="text-white text-sm font-semibold mb-2">
+                                Delete this user?
+                              </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => deleteUser(user.id)}
+                                  className="flex-1 px-3 py-2 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors"
+                                >
+                                  Confirm Delete
+                                </button>
+                                <button
+                                  onClick={() => setDeleteUserConfirm(null)}
+                                  className="flex-1 px-3 py-2 bg-white/20 text-white rounded text-sm font-semibold hover:bg-white/30 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteUserConfirm(user.id)}
+                              className="w-full mt-3 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+                            >
+                              Delete User
+                            </button>
+                          )}
                         </div>
                       ))
                     )}
