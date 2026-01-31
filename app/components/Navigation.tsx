@@ -83,7 +83,7 @@ export default function Navigation() {
                             className="block px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            📋 {isAdminPage ? "My Registrations" : t.nav.myRegistrations || "My Registrations"}
+                            📋 My Registrations
                           </Link>
                           {(session.user as any)?.isAdmin && (
                             <Link
@@ -245,7 +245,7 @@ export default function Navigation() {
                   onClick={() => setIsOpen(false)}
                   className="block bg-blue-400/25 border-2 border-blue-300/60 rounded-xl p-4 text-white hover:bg-blue-400/35 transition-all font-semibold"
                 >
-                  📋 {isAdminPage ? "My Registrations" : t.nav.myRegistrations || "My Registrations"}
+                  📋 My Registrations
                 </Link>
                 {(session.user as any)?.isAdmin && (
                   <Link
