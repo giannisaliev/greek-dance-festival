@@ -40,8 +40,6 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               email: true,
-              isTeacher: true,
-              studioName: true,
               participant: {
                 select: {
                   id: true,
@@ -112,8 +110,6 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             email: true,
-            isTeacher: true,
-            studioName: true,
             participant: {
               select: {
                 id: true,
