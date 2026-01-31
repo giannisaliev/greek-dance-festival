@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
       
       // Fetch teacher information only if there are teacher IDs
-      let teachers = [];
+      let teachers: any[] = [];
       if (teacherIds.length > 0) {
         teachers = await prisma.user.findMany({
           where: {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
     
     // Fetch teacher information only if there are teacher IDs
-    let teachers = [];
+    let teachers: any[] = [];
     if (teacherIds.length > 0) {
       teachers = await prisma.user.findMany({
         where: {
