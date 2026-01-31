@@ -48,6 +48,7 @@ export async function PATCH(
     const {
       registrantFirstName,
       registrantLastName,
+      studioName,
       packageType,
       guinnessRecordAttempt,
       greekNight,
@@ -60,6 +61,7 @@ export async function PATCH(
       updateData.registrantFirstName = registrantFirstName;
     if (registrantLastName !== undefined)
       updateData.registrantLastName = registrantLastName;
+    if (studioName !== undefined) updateData.studioName = studioName;
     if (packageType !== undefined) updateData.packageType = packageType;
     if (guinnessRecordAttempt !== undefined)
       updateData.guinnessRecordAttempt = guinnessRecordAttempt;

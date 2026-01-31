@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const [editForm, setEditForm] = useState({
     firstName: "",
     lastName: "",
+    studioName: "",
     packageType: "",
     guinnessRecordAttempt: false,
     greekNight: false,
@@ -121,6 +122,7 @@ export default function DashboardPage() {
     setEditForm({
       firstName: participant.registrantFirstName || user?.firstName || "",
       lastName: participant.registrantLastName || user?.lastName || "",
+      studioName: participant.studioName || "",
       packageType: participant.packageType,
       guinnessRecordAttempt: participant.guinnessRecordAttempt,
       greekNight: participant.greekNight,
@@ -184,6 +186,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           registrantFirstName: editForm.firstName,
           registrantLastName: editForm.lastName,
+          studioName: editForm.studioName || null,
           packageType: editForm.packageType,
           guinnessRecordAttempt: editForm.guinnessRecordAttempt,
           greekNight: editForm.greekNight,
@@ -489,6 +492,17 @@ export default function DashboardPage() {
                       </div>
 
                       <div>
+                        <label className="block text-white text-sm font-semibold mb-2">Studio Name (Optional)</label>
+                        <input
+                          type="text"
+                          value={editForm.studioName}
+                          onChange={(e) => setEditForm({ ...editForm, studioName: e.target.value })}
+                          placeholder="Leave empty if not from a studio"
+                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200"
+                        />
+                      </div>
+
+                      <div>
                         <label className="block text-white text-sm font-semibold mb-2">Package</label>
                         <select
                           value={editForm.packageType}
@@ -557,6 +571,9 @@ export default function DashboardPage() {
                         {student.participant.registrantFirstName} {student.participant.registrantLastName}
                       </h3>
                       <p className="text-blue-200 text-sm">{student.email}</p>
+                      {student.participant.studioName && (
+                        <p className="text-blue-300 text-sm">🎭 {student.participant.studioName}</p>
+                      )}
                     </div>
                   </div>
 
