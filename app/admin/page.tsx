@@ -314,12 +314,18 @@ export default function AdminPage() {
       const firstName = (p.registrantFirstName || p.user.firstName || "").toLowerCase();
       const lastName = (p.registrantLastName || p.user.lastName || "").toLowerCase();
       const fullName = `${firstName} ${lastName}`.trim();
-      const email = p.user.email.toLowerCase();
       const studio = (p.studioName || "").toLowerCase();
 
       if (fullName.includes(lowerValue) && fullName) suggestions.add(`${p.registrantFirstName || p.user.firstName} ${p.registrantLastName || p.user.lastName}`);
-      if (email.includes(lowerValue) && email !== "-") suggestions.add(p.user.email);
       if (studio.includes(lowerValue) && studio) suggestions.add(p.studioName!);
+    });
+
+    // Add teacher email suggestions
+    teachers.forEach(t => {
+      const email = t.email.toLowerCase();
+      if (email.includes(lowerValue) && !email.endsWith('@internal.local')) {
+        suggestions.add(t.email);
+      }
     });
 
     setSearchSuggestions(Array.from(suggestions).slice(0, 8));
@@ -617,7 +623,7 @@ export default function AdminPage() {
                       onChange={(e) => updateSearchSuggestions(e.target.value)}
                       onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      placeholder="Search by name, email, studio, or phone..."
+                      placeholder="Search by name, studio, phone, or teacher email..."
                       className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
                     />
                     {showSuggestions && searchSuggestions.length > 0 && (

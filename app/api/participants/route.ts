@@ -72,19 +72,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Search by name, email, phone, or studio name (exclude soft-deleted)
+    // Search by participant name, phone, studio name, or teacher email (exclude soft-deleted)
     const participants = await prisma.participant.findMany({
       where: {
         AND: [
           { deletedAt: null },
           {
             OR: [
-              { user: { firstName: { contains: query, mode: 'insensitive' } } },
-              { user: { lastName: { contains: query, mode: 'insensitive' } } },
-              { user: { email: { contains: query, mode: 'insensitive' } } },
-              { phone: { contains: query } },
               { registrantFirstName: { contains: query, mode: 'insensitive' } },
               { registrantLastName: { contains: query, mode: 'insensitive' } },
+              { phone: { contains: query } },
               { studioName: { contains: query, mode: 'insensitive' } },
             ],
           },
@@ -103,8 +100,47 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
+    // Also search by teacher email
+    const teachersByEmail = await prisma.user.findMany({
+      where: {
+        email: { contains: query, mode: 'insensitive' },
+        isTeacher: true,
+      },
+      select: { id: true },
+    });
+
+    // If teachers found by email, get their participants
+    let participantsByTeacher: any[] = [];
+    if (teachersByEmail.length > 0) {
+      participantsByTeacher = await prisma.participant.findMany({
+        where: {
+          AND: [
+            { deletedAt: null },
+            { registeredBy: { in: teachersByEmail.map(t => t.id) } },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    }
+
+    // Combine and deduplicate results
+    const allParticipants = [...participants, ...participantsByTeacher];
+    const uniqueParticipants = Array.from(
+      new Map(allParticipants.map(p => [p.id, p])).values()
+    );
+
     // Get all unique teacher IDs from search results
-    const teacherIds = [...new Set(participants.map(p => p.registeredBy).filter(Boolean))];
+    const teacherIds = [...new Set(uniqueParticipants.map(p => p.registeredBy).filter(Boolean))];
     
     // Fetch teacher information only if there are teacher IDs
     let teachers: any[] = [];
@@ -145,7 +181,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ 
-      participants: participants || [], 
+      participants: uniqueParticipants || [], 
       teachers: teachers || []
     });
   } catch (error) {
