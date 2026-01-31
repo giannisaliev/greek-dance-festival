@@ -463,6 +463,93 @@ export default function DashboardPage() {
                   key={student.id}
                   className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all"
                 >
+                  {editingId === student.participant.id ? (
+                    /* Edit Mode for Student */
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-bold text-white mb-4">Edit Student</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-white text-sm font-semibold mb-2">First Name</label>
+                          <input
+                            type="text"
+                            value={editForm.firstName}
+                            onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-white text-sm font-semibold mb-2">Last Name</label>
+                          <input
+                            type="text"
+                            value={editForm.lastName}
+                            onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-white text-sm font-semibold mb-2">Package</label>
+                        <select
+                          value={editForm.packageType}
+                          onChange={(e) => handlePackageChange(e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                        >
+                          {packages.map((pkg) => (
+                            <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                              {pkg.name} - €{pkg.price}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {editForm.packageType !== "Full Pass" &&
+                        editForm.packageType !== "Guinness Record Only" &&
+                        editForm.packageType !== "Greek Night Only" && (
+                          <div className="space-y-2">
+                            <label className="flex items-center gap-3 text-white">
+                              <input
+                                type="checkbox"
+                                checked={editForm.guinnessRecordAttempt}
+                                onChange={(e) => handleAddonChange("guinness", e.target.checked)}
+                                className="w-5 h-5"
+                              />
+                              <span>🏆 Guinness Record Attempt (+€30)</span>
+                            </label>
+                            <label className="flex items-center gap-3 text-white">
+                              <input
+                                type="checkbox"
+                                checked={editForm.greekNight}
+                                onChange={(e) => handleAddonChange("greek", e.target.checked)}
+                                className="w-5 h-5"
+                              />
+                              <span>🍷 Greek Night (+€40)</span>
+                            </label>
+                          </div>
+                        )}
+
+                      <div className="pt-4 border-t border-white/20">
+                        <p className="text-white text-xl font-bold">Total: €{editForm.totalPrice}</p>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => saveEdit(student.participant.id)}
+                          className="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="px-6 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* View Mode for Student */
+                    <>
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-3xl">{getPackageIcon(student.participant.packageType)}</span>
                     <div>
@@ -481,7 +568,7 @@ export default function DashboardPage() {
                   </div>
 
                   {(student.participant.guinnessRecordAttempt || student.participant.greekNight) && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mb-3">
                       {student.participant.guinnessRecordAttempt && (
                         <span className="bg-blue-500/20 text-blue-100 px-2 py-1 rounded text-xs">
                           🏆 Guinness
@@ -496,11 +583,53 @@ export default function DashboardPage() {
                   )}
 
                   {student.participant.checkedIn && (
-                    <div className="mt-3 pt-3 border-t border-white/20">
+                    <div className="mb-3 pb-3 border-b border-white/20">
                       <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                         ✓ Checked In
                       </span>
                     </div>
+                  )}
+
+                  {deleteConfirm === student.participant.id ? (
+                    <div className="bg-red-500/20 border border-red-500 rounded-lg p-4">
+                      <p className="text-white font-semibold mb-3">
+                        Delete {student.participant.registrantFirstName}'s registration?
+                      </p>
+                      <p className="text-red-200 text-sm mb-4">
+                        This will be stored for 7 days before permanent deletion.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => deleteRegistration(student.participant.id)}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm"
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="px-4 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startEdit(student.participant)}
+                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => confirmDelete(student.participant.id)}
+                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  </>
                   )}
                 </div>
               ))}
