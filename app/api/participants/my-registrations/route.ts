@@ -44,7 +44,8 @@ export async function GET() {
             greekNight: true,
             totalPrice: true,
             checkedIn: true,
-            createdAt: true
+            createdAt: true,
+            studioName: true
           }
         }
       }

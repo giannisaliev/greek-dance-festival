@@ -27,7 +27,21 @@ export async function GET(request: NextRequest) {
           firstName: true,
           lastName: true,
           isAdmin: true,
-          participant: true,
+          participant: {
+            select: {
+              id: true,
+              registrantFirstName: true,
+              registrantLastName: true,
+              phone: true,
+              packageType: true,
+              guinnessRecordAttempt: true,
+              greekNight: true,
+              totalPrice: true,
+              checkedIn: true,
+              createdAt: true,
+              studioName: true
+            }
+          },
         },
       });
       isAdmin = Boolean(user?.isAdmin);
@@ -41,7 +55,21 @@ export async function GET(request: NextRequest) {
           email: true,
           firstName: true,
           lastName: true,
-          participant: true,
+          participant: {
+            select: {
+              id: true,
+              registrantFirstName: true,
+              registrantLastName: true,
+              phone: true,
+              packageType: true,
+              guinnessRecordAttempt: true,
+              greekNight: true,
+              totalPrice: true,
+              checkedIn: true,
+              createdAt: true,
+              studioName: true
+            }
+          },
         },
       });
       isAdmin = false;
