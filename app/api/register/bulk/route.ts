@@ -164,26 +164,47 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if user already has a registration
-        if (user.participant) {
+        if (user.participant && !user.participant.deletedAt) {
           errors.push({ email, error: "Already registered" });
           continue;
         }
 
-        // Create participant
-        const participant = await prisma.participant.create({
-          data: {
-            userId: user.id,
-            registrantFirstName: firstName,
-            registrantLastName: lastName,
-            phone: "", // Empty phone for bulk registrations
-            packageType,
-            guinnessRecordAttempt: guinnessRecordAttempt || false,
-            greekNight: greekNight || false,
-            totalPrice,
-            registeredBy: teacher.id, // Track who registered this participant
-            studioName: registrantType === "studio" ? studioName : null, // Store studio per participant
-          },
-        });
+        // If user has a soft-deleted participant, restore it instead of creating new
+        let participant;
+        if (user.participant && user.participant.deletedAt) {
+          participant = await prisma.participant.update({
+            where: { id: user.participant.id },
+            data: {
+              registrantFirstName: firstName,
+              registrantLastName: lastName,
+              phone: "", // Empty phone for bulk registrations
+              packageType,
+              guinnessRecordAttempt: guinnessRecordAttempt || false,
+              greekNight: greekNight || false,
+              totalPrice,
+              registeredBy: teacher.id, // Track who registered this participant
+              studioName: registrantType === "studio" ? studioName : null, // Store studio per participant
+              deletedAt: null,
+              deletedBy: null,
+            },
+          });
+        } else {
+          // Create participant
+          participant = await prisma.participant.create({
+            data: {
+              userId: user.id,
+              registrantFirstName: firstName,
+              registrantLastName: lastName,
+              phone: "", // Empty phone for bulk registrations
+              packageType,
+              guinnessRecordAttempt: guinnessRecordAttempt || false,
+              greekNight: greekNight || false,
+              totalPrice,
+              registeredBy: teacher.id, // Track who registered this participant
+              studioName: registrantType === "studio" ? studioName : null, // Store studio per participant
+            },
+          });
+        }
 
         // Send email notification
         await sendRegistrationEmail({

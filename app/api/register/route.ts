@@ -55,26 +55,45 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has a registration
-    if (user.participant) {
+    if (user.participant && !user.participant.deletedAt) {
       return NextResponse.json(
         { error: "You already have an active registration" },
         { status: 400 }
       );
     }
 
-    // Create new participant
-    const participant = await prisma.participant.create({
-      data: {
-        userId: user.id,
-        registrantFirstName,
-        registrantLastName,
-        phone,
-        packageType,
-        guinnessRecordAttempt: guinnessRecordAttempt || false,
-        greekNight: greekNight || false,
-        totalPrice,
-      },
-    });
+    // If user has a soft-deleted participant, restore it instead of creating new
+    let participant;
+    if (user.participant && user.participant.deletedAt) {
+      participant = await prisma.participant.update({
+        where: { id: user.participant.id },
+        data: {
+          registrantFirstName,
+          registrantLastName,
+          phone,
+          packageType,
+          guinnessRecordAttempt: guinnessRecordAttempt || false,
+          greekNight: greekNight || false,
+          totalPrice,
+          deletedAt: null,
+          deletedBy: null,
+        },
+      });
+    } else {
+      // Create new participant
+      participant = await prisma.participant.create({
+        data: {
+          userId: user.id,
+          registrantFirstName,
+          registrantLastName,
+          phone,
+          packageType,
+          guinnessRecordAttempt: guinnessRecordAttempt || false,
+          greekNight: greekNight || false,
+          totalPrice,
+        },
+      });
+    }
 
     // Send email notification
     await sendRegistrationEmail({
