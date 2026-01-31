@@ -6,8 +6,11 @@ import { authOptions } from "@/lib/auth-config";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
+  console.log("=== BULK REGISTRATION START ===");
   try {
     const body = await request.json();
+    console.log("Body received:", JSON.stringify(body, null, 2));
+    
     const { students, registrantType, studioName, teacherEmail, teacherFirstName, teacherLastName } = body;
     
     console.log("Bulk registration request:", { 
@@ -75,27 +78,25 @@ export async function POST(request: NextRequest) {
       const randomPassword = crypto.randomUUID();
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       
-      teacher = await prisma.user.create({
-        data: {
-          email: teacherEmail,
-          firstName: teacherFirstName,
-          lastName: teacherLastName,
-          password: hashedPassword,
-          isTeacher: true,
-          studioName: registrantType === "studio" ? studioName : null
-        },
-        select: { id: true }
-      });
-    } else {
-      // Update existing teacher's profile
-      await prisma.user.update({
-        where: { id: teacher.id },
-        data: {
-          isTeacher: true,
-          studioName: registrantType === "studio" ? studioName : null
-        }
-      });
+      try {
+        teacher = await prisma.user.create({
+          data: {
+            email: teacherEmail,
+            firstName: teacherFirstName,
+            lastName: teacherLastName,
+            password: hashedPassword,
+          },
+          select: { id: true }
+        });
+      } catch (createError: any) {
+        console.error("Error creating teacher account:", createError);
+        return NextResponse.json(
+          { error: "Could not create teacher account", details: createError.message },
+          { status: 500 }
+        );
+      }
     }
+    // Note: Teacher account exists, no need to update with isTeacher/studioName fields
 
     // Validate that students array is provided
     if (!students || !Array.isArray(students) || students.length === 0) {
