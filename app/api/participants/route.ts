@@ -100,9 +100,6 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    console.log('Search query:', query);
-    console.log('Direct participants found:', participants.length);
-
     // Also search by teacher email (users who have registered students)
     const teachersByEmail = await prisma.user.findMany({
       where: {
@@ -140,9 +137,6 @@ export async function GET(request: NextRequest) {
     const uniqueParticipants = Array.from(
       new Map(allParticipants.map(p => [p.id, p])).values()
     );
-
-    console.log('Participants by teacher:', participantsByTeacher.length);
-    console.log('Total unique participants:', uniqueParticipants.length);
 
     // Get all unique teacher IDs from search results
     const teacherIds = [...new Set(uniqueParticipants.map(p => p.registeredBy).filter(Boolean))];
