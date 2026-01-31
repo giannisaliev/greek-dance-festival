@@ -16,7 +16,17 @@ interface Participant {
   totalPrice: number;
   checkedIn: boolean;
   createdAt: string;
+  studioName: string | null;
 }
+
+const packages = [
+  { name: "Guinness Record Only", price: 30 },
+  { name: "Greek Night Only", price: 40 },
+  { name: "Starter Pass", price: 70 },
+  { name: "Explorer Pass", price: 100 },
+  { name: "Enthusiast Pass", price: 160 },
+  { name: "Full Pass", price: 260 },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -24,6 +34,16 @@ export default function DashboardPage() {
   const [myRegistration, setMyRegistration] = useState<Participant | null>(null);
   const [registeredStudents, setRegisteredStudents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    packageType: "",
+    guinnessRecordAttempt: false,
+    greekNight: false,
+    totalPrice: 0,
+  });
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -80,6 +100,131 @@ export default function DashboardPage() {
     return "🎫";
   };
 
+  const calculatePrice = (
+    packageType: string,
+    guinness: boolean,
+    greek: boolean
+  ) => {
+    const pkg = packages.find((p) => p.name === packageType);
+    if (!pkg) return 0;
+
+    let price = pkg.price;
+    if (packageType !== "Full Pass" && packageType !== "Guinness Record Only" && packageType !== "Greek Night Only") {
+      if (guinness) price += 30;
+      if (greek) price += 40;
+    }
+    return price;
+  };
+
+  const startEdit = (participant: Participant) => {
+    setEditingId(participant.id);
+    setEditForm({
+      firstName: participant.registrantFirstName || user?.firstName || "",
+      lastName: participant.registrantLastName || user?.lastName || "",
+      packageType: participant.packageType,
+      guinnessRecordAttempt: participant.guinnessRecordAttempt,
+      greekNight: participant.greekNight,
+      totalPrice: participant.totalPrice,
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+  };
+
+  const handlePackageChange = (packageType: string) => {
+    const pkg = packages.find((p) => p.name === packageType);
+    if (!pkg) return;
+
+    let guinness = editForm.guinnessRecordAttempt;
+    let greek = editForm.greekNight;
+
+    if (packageType === "Full Pass") {
+      guinness = true;
+      greek = true;
+    } else if (packageType === "Guinness Record Only") {
+      guinness = true;
+      greek = false;
+    } else if (packageType === "Greek Night Only") {
+      guinness = false;
+      greek = true;
+    }
+
+    setEditForm({
+      ...editForm,
+      packageType,
+      guinnessRecordAttempt: guinness,
+      greekNight: greek,
+      totalPrice: calculatePrice(packageType, guinness, greek),
+    });
+  };
+
+  const handleAddonChange = (addon: "guinness" | "greek", checked: boolean) => {
+    const newForm = {
+      ...editForm,
+      guinnessRecordAttempt:
+        addon === "guinness" ? checked : editForm.guinnessRecordAttempt,
+      greekNight: addon === "greek" ? checked : editForm.greekNight,
+    };
+
+    newForm.totalPrice = calculatePrice(
+      editForm.packageType,
+      newForm.guinnessRecordAttempt,
+      newForm.greekNight
+    );
+
+    setEditForm(newForm);
+  };
+
+  const saveEdit = async (id: string) => {
+    try {
+      const response = await fetch(`/api/participants/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registrantFirstName: editForm.firstName,
+          registrantLastName: editForm.lastName,
+          packageType: editForm.packageType,
+          guinnessRecordAttempt: editForm.guinnessRecordAttempt,
+          greekNight: editForm.greekNight,
+          totalPrice: editForm.totalPrice,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchData();
+        cancelEdit();
+      } else {
+        alert("Failed to update registration");
+      }
+    } catch (error) {
+      console.error("Error updating registration:", error);
+      alert("Error updating registration");
+    }
+  };
+
+  const confirmDelete = (id: string) => {
+    setDeleteConfirm(id);
+  };
+
+  const deleteRegistration = async (id: string) => {
+    try {
+      const response = await fetch(`/api/participants/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchData();
+        setDeleteConfirm(null);
+      } else {
+        alert("Failed to delete registration");
+      }
+    } catch (error) {
+      console.error("Error deleting registration:", error);
+      alert("Error deleting registration");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
@@ -99,6 +244,94 @@ export default function DashboardPage() {
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">My Registration</h2>
           {myRegistration ? (
+            editingId === myRegistration.id ? (
+              /* Edit Mode for My Registration */
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                <h3 className="text-xl font-bold text-white mb-4">Edit My Registration</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-white text-sm font-semibold mb-2">First Name</label>
+                      <input
+                        type="text"
+                        value={editForm.firstName}
+                        onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-semibold mb-2">Last Name</label>
+                      <input
+                        type="text"
+                        value={editForm.lastName}
+                        onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-white text-sm font-semibold mb-2">Package</label>
+                    <select
+                      value={editForm.packageType}
+                      onChange={(e) => handlePackageChange(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                    >
+                      {packages.map((pkg) => (
+                        <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                          {pkg.name} - €{pkg.price}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {editForm.packageType !== "Full Pass" &&
+                    editForm.packageType !== "Guinness Record Only" &&
+                    editForm.packageType !== "Greek Night Only" && (
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-3 text-white">
+                          <input
+                            type="checkbox"
+                            checked={editForm.guinnessRecordAttempt}
+                            onChange={(e) => handleAddonChange("guinness", e.target.checked)}
+                            className="w-5 h-5"
+                          />
+                          <span>🏆 Guinness Record Attempt (+€30)</span>
+                        </label>
+                        <label className="flex items-center gap-3 text-white">
+                          <input
+                            type="checkbox"
+                            checked={editForm.greekNight}
+                            onChange={(e) => handleAddonChange("greek", e.target.checked)}
+                            className="w-5 h-5"
+                          />
+                          <span>🍷 Greek Night (+€40)</span>
+                        </label>
+                      </div>
+                    )}
+
+                  <div className="pt-4 border-t border-white/20">
+                    <p className="text-white text-xl font-bold">Total: €{editForm.totalPrice}</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => saveEdit(myRegistration.id)}
+                      className="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="px-6 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+            /* View Mode for My Registration */
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
@@ -150,7 +383,48 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+
+              {deleteConfirm === myRegistration.id ? (
+                <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mt-4">
+                  <p className="text-white font-semibold mb-3">
+                    Are you absolutely sure you want to delete your registration?
+                  </p>
+                  <p className="text-red-200 text-sm mb-4">
+                    This will be stored for 7 days before permanent deletion.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => deleteRegistration(myRegistration.id)}
+                      className="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                    >
+                      Yes, Delete
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(null)}
+                      className="px-6 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-3 mt-4 pt-4 border-t border-white/20">
+                  <button
+                    onClick={() => startEdit(myRegistration)}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                  >
+                    Edit Registration
+                  </button>
+                  <button
+                    onClick={() => confirmDelete(myRegistration.id)}
+                    className="px-6 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  >
+                    Delete Registration
+                  </button>
+                </div>
+              )}
             </div>
+            )
           ) : (
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20 text-center">
               <div className="text-6xl mb-4">🎫</div>

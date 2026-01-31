@@ -100,22 +100,36 @@ export default function BulkRegisterPage() {
         if (field === 'packageType') {
           const pkg = packages.find(p => p.name === value);
           if (pkg) {
-            updated.totalPrice = pkg.priceValue;
+            let price = pkg.priceValue;
             // Full Pass includes everything
             if (value === "Full Pass") {
               updated.guinnessRecordAttempt = true;
               updated.greekNight = true;
+            } else if (value === "Guinness Record Only") {
+              updated.guinnessRecordAttempt = true;
+              updated.greekNight = false;
+            } else if (value === "Greek Night Only") {
+              updated.guinnessRecordAttempt = false;
+              updated.greekNight = true;
+            } else {
+              // For regular passes, add addon prices if selected
+              if (s.guinnessRecordAttempt) price += 30;
+              if (s.greekNight) price += 40;
             }
+            updated.totalPrice = price;
           }
         }
         
         // Recalculate price when add-ons change
         if (field === 'guinnessRecordAttempt' || field === 'greekNight') {
           const pkg = packages.find(p => p.name === s.packageType);
-          if (pkg && pkg.name !== "Full Pass") {
+          if (pkg) {
             let price = pkg.priceValue;
-            if (field === 'guinnessRecordAttempt' ? value : s.guinnessRecordAttempt) price += 30;
-            if (field === 'greekNight' ? value : s.greekNight) price += 40;
+            // Don't add extra cost for standalone packages or Full Pass
+            if (pkg.name !== "Full Pass" && pkg.name !== "Guinness Record Only" && pkg.name !== "Greek Night Only") {
+              if (field === 'guinnessRecordAttempt' ? value : s.guinnessRecordAttempt) price += 30;
+              if (field === 'greekNight' ? value : s.greekNight) price += 40;
+            }
             updated.totalPrice = price;
           }
         }

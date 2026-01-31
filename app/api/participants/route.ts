@@ -7,8 +7,11 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get("q") || "";
 
     if (!query) {
-      // Fetch participants
+      // Fetch participants (exclude soft-deleted)
       const participants = await prisma.participant.findMany({
+        where: {
+          deletedAt: null,
+        },
         include: {
           user: {
             select: {
@@ -69,17 +72,22 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Search by name, email, phone, or studio name
+    // Search by name, email, phone, or studio name (exclude soft-deleted)
     const participants = await prisma.participant.findMany({
       where: {
-        OR: [
-          { user: { firstName: { contains: query, mode: 'insensitive' } } },
-          { user: { lastName: { contains: query, mode: 'insensitive' } } },
-          { user: { email: { contains: query, mode: 'insensitive' } } },
-          { phone: { contains: query } },
-          { registrantFirstName: { contains: query, mode: 'insensitive' } },
-          { registrantLastName: { contains: query, mode: 'insensitive' } },
-          { studioName: { contains: query, mode: 'insensitive' } },
+        AND: [
+          { deletedAt: null },
+          {
+            OR: [
+              { user: { firstName: { contains: query, mode: 'insensitive' } } },
+              { user: { lastName: { contains: query, mode: 'insensitive' } } },
+              { user: { email: { contains: query, mode: 'insensitive' } } },
+              { phone: { contains: query } },
+              { registrantFirstName: { contains: query, mode: 'insensitive' } },
+              { registrantLastName: { contains: query, mode: 'insensitive' } },
+              { studioName: { contains: query, mode: 'insensitive' } },
+            ],
+          },
         ],
       },
       include: {
