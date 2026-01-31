@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,7 +24,7 @@ export async function PATCH(
     }
 
     const participant = await prisma.participant.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { user: true },
     });
 
@@ -67,7 +68,7 @@ export async function PATCH(
     if (checkedIn !== undefined && isAdmin) updateData.checkedIn = checkedIn;
 
     const updated = await prisma.participant.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: { user: true },
     });
@@ -84,9 +85,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -102,7 +104,7 @@ export async function DELETE(
     }
 
     const participant = await prisma.participant.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { user: true },
     });
 
@@ -123,7 +125,7 @@ export async function DELETE(
     }
 
     // Soft delete
-    await prisma.participant.update({
+    await prisma..update({
       where: { id: params.id },
       data: {
         deletedAt: new Date(),
