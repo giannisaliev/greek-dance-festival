@@ -38,10 +38,15 @@ export async function GET(request: NextRequest) {
         participant: user.participant,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Get user error:", error);
+    console.error("Error details:", {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name
+    });
     return NextResponse.json(
-      { error: "Failed to get user" },
+      { error: "Failed to get user", details: error?.message },
       { status: 500 }
     );
   }

@@ -201,10 +201,16 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Bulk registration error:", error);
+    console.error("Error details:", {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+      code: error?.code
+    });
     return NextResponse.json(
-      { error: "Bulk registration failed" },
+      { error: "Bulk registration failed", details: error?.message },
       { status: 500 }
     );
   }
