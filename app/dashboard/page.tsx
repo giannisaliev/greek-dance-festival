@@ -393,7 +393,8 @@ export default function DashboardPage() {
                     Are you absolutely sure you want to delete your registration?
                   </p>
                   <p className="text-red-200 text-sm mb-4">
-                    This will be stored for 7 days before permanent deletion.
+                    This action cannot be easily undone.
+                    {user?.isAdmin && " Deleted registrations are stored for 7 days before permanent deletion."}
                   </p>
                   <div className="flex gap-3">
                     <button
@@ -615,7 +616,8 @@ export default function DashboardPage() {
                         Delete {student.participant.registrantFirstName}'s registration?
                       </p>
                       <p className="text-red-200 text-sm mb-4">
-                        This will be stored for 7 days before permanent deletion.
+                        This action cannot be easily undone.
+                        {user?.isAdmin && " Deleted registrations are stored for 7 days before permanent deletion."}
                       </p>
                       <div className="flex gap-3">
                         <button
