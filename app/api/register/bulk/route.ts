@@ -136,9 +136,10 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Set email to "-" for students registered by teachers
+        // Set email to unique value for students registered by teachers (not a real email)
+        // Use a unique identifier so each student gets their own User record
         if (!email) {
-          email = "-";
+          email = `student-${crypto.randomUUID()}@internal.local`;
         }
 
         // Check if user exists with this email
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
 
         // Check if user already has a registration
         if (user.participant && !user.participant.deletedAt) {
-          errors.push({ email, error: "Already registered" });
+          errors.push({ email: email.startsWith('student-') ? `${firstName} ${lastName}` : email, error: "Already registered" });
           continue;
         }
 

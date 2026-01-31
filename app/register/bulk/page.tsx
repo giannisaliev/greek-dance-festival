@@ -244,6 +244,12 @@ export default function BulkRegisterPage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
+                href="/dashboard"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg"
+              >
+                📋 View My Registrations
+              </Link>
+              <Link
                 href="/"
                 className="bg-white text-blue-900 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-all shadow-lg"
               >

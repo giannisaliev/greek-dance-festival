@@ -13,7 +13,12 @@ export async function GET(request: NextRequest) {
       users = await prisma.user.findMany({
         where: {
           AND: [
-            { email: { not: "-" } }, // Exclude student-only users
+            { 
+              AND: [
+                { email: { not: "-" } }, // Exclude old student-only users
+                { NOT: { email: { endsWith: "@internal.local" } } }, // Exclude new student-only users
+              ]
+            },
             {
               OR: [
                 { email: { contains: query, mode: "insensitive" } },
@@ -41,7 +46,10 @@ export async function GET(request: NextRequest) {
       // Get all users
       users = await prisma.user.findMany({
         where: {
-          email: { not: "-" }, // Exclude student-only users
+          AND: [
+            { email: { not: "-" } }, // Exclude old student-only users
+            { NOT: { email: { endsWith: "@internal.local" } } }, // Exclude new student-only users
+          ],
         },
         select: {
           id: true,
