@@ -628,6 +628,7 @@ export default function AdminPage() {
                               <th className="text-left text-white font-semibold py-4 px-4">Name</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Email</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Phone</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Registered By</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Package</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Add-ons</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Price</th>
@@ -636,7 +637,10 @@ export default function AdminPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {groupedParticipants().individualParticipants.map((participant) => (
+                            {groupedParticipants().individualParticipants.map((participant) => {
+                              const registeredByTeacher = participant.registeredBy ? teachers.find(t => t.id === participant.registeredBy) : null;
+                              
+                              return (
                               <tr
                                 key={participant.id}
                                 className="border-b border-white/10 hover:bg-white/5 transition-colors"
@@ -646,6 +650,19 @@ export default function AdminPage() {
                                 </td>
                                 <td className="py-4 px-4 text-blue-100">{participant.user.email}</td>
                                 <td className="py-4 px-4 text-blue-100">{participant.phone || "—"}</td>
+                                <td className="py-4 px-4">
+                                  {registeredByTeacher ? (
+                                    <div className="flex flex-col gap-1">
+                                      <span className="text-white font-medium">{registeredByTeacher.firstName} {registeredByTeacher.lastName}</span>
+                                      {registeredByTeacher.studioName && (
+                                        <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-1 rounded w-fit">🏢 {registeredByTeacher.studioName}</span>
+                                      )}
+                                      <span className="text-xs text-blue-300">{registeredByTeacher.email}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-blue-200 text-sm italic">Self-registered</span>
+                                  )}
+                                </td>
                                 <td className="py-4 px-4 text-blue-100">{participant.packageType}</td>
                                 <td className="py-4 px-4 text-blue-100">
                                   <div className="flex gap-1">
@@ -698,7 +715,7 @@ export default function AdminPage() {
                                   </div>
                                 </td>
                               </tr>
-                            ))}
+                            )})}
                           </tbody>
                         </table>
                       </div>
