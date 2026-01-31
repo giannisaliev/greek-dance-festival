@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
             firstName: teacherFirstName,
             lastName: teacherLastName,
             password: hashedPassword,
+            isTeacher: true,
+            studioName: registrantType === "studio" ? studioName : null
           },
           select: { id: true }
         });
@@ -95,8 +97,21 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
+    } else {
+      // Update existing teacher's profile
+      try {
+        await prisma.user.update({
+          where: { id: teacher.id },
+          data: {
+            isTeacher: true,
+            studioName: registrantType === "studio" ? studioName : null
+          }
+        });
+      } catch (updateError: any) {
+        console.error("Error updating teacher profile:", updateError);
+        // Continue even if update fails
+      }
     }
-    // Note: Teacher account exists, no need to update with isTeacher/studioName fields
 
     // Validate that students array is provided
     if (!students || !Array.isArray(students) || students.length === 0) {

@@ -54,8 +54,8 @@ interface Teacher {
   email: string;
   firstName: string;
   lastName: string;
-  isTeacher?: boolean;
-  studioName?: string | null;
+  isTeacher: boolean;
+  studioName: string | null;
   participant?: {
     id: string;
     packageType: string;
