@@ -99,7 +99,15 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account, profile }) {
-      // On sign in, fetch user from database
+      // On initial sign in, user object is available
+      if (user) {
+        token.id = user.id;
+        token.firstName = (user as any).firstName;
+        token.lastName = (user as any).lastName;
+        token.isAdmin = (user as any).isAdmin;
+      }
+      
+      // For Google OAuth, also fetch from database to ensure we have latest data
       if (account?.provider === "google" && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
