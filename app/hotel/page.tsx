@@ -152,18 +152,7 @@ export default function HotelPage() {
       }
 
       setBookingSuccess(true);
-      setBookingForm({
-        hotelId: "",
-        hotelName: "",
-        roomType: "",
-        guestNames: [""],
-        email: "",
-        countryCode: "+30",
-        phone: "",
-        checkIn: "",
-        checkOut: "",
-        specialRequests: "",
-      });
+      // Don't reset the form here - keep it so the success message can reference the hotel
     } catch (error: any) {
       setBookingError(error.message || "Failed to submit booking");
     } finally {
@@ -436,6 +425,19 @@ export default function HotelPage() {
                             setBookingSuccess(false);
                             setShowBookingForm(null);
                             setHotelTab(hotel.id, "gallery");
+                            // Reset form when closing success message
+                            setBookingForm({
+                              hotelId: "",
+                              hotelName: "",
+                              roomType: "",
+                              guestNames: [""],
+                              email: "",
+                              countryCode: "+30",
+                              phone: "",
+                              checkIn: "",
+                              checkOut: "",
+                              specialRequests: "",
+                            });
                           }}
                           className="bg-white text-blue-900 px-6 py-2 rounded-full font-semibold hover:bg-blue-50 transition-all"
                         >
