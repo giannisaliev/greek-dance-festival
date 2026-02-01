@@ -421,6 +421,11 @@ export default function HotelPage() {
                           roomType: prev.roomType || Object.keys(hotel.prices)[0] || ""
                         }));
                       }
+                      // Also ensure showBookingForm is set for this hotel
+                      if (showBookingForm !== hotel.id) {
+                        console.log("Setting showBookingForm to:", hotel.id);
+                        setShowBookingForm(hotel.id);
+                      }
                       return null;
                     })()}
                     {(() => {
