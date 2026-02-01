@@ -462,26 +462,33 @@ export default function BulkRegisterPage() {
                   </select>
                 </div>
 
-                {student.packageType !== "Full Pass" && student.packageType !== "Guinness Record Only" && student.packageType !== "Greek Night Only" && (
+                {student.packageType !== "Full Pass" && (
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-white cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={student.guinnessRecordAttempt}
-                        onChange={(e) => updateStudent(student.id, 'guinnessRecordAttempt', e.target.checked)}
-                        className="w-5 h-5"
-                      />
-                      <span>🏆 Guinness Record (+€30)</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-white cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={student.greekNight}
-                        onChange={(e) => updateStudent(student.id, 'greekNight', e.target.checked)}
-                        className="w-5 h-5"
-                      />
-                      <span>🍷 Greek Night (+€40)</span>
-                    </label>
+                    {/* Show Guinness Record addon for Greek Night Only and class passes */}
+                    {student.packageType !== "Guinness Record Only" && (
+                      <label className="flex items-center gap-2 text-white cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={student.guinnessRecordAttempt}
+                          onChange={(e) => updateStudent(student.id, 'guinnessRecordAttempt', e.target.checked)}
+                          className="w-5 h-5"
+                        />
+                        <span>🏆 Guinness Record (+€30)</span>
+                      </label>
+                    )}
+                    
+                    {/* Show Greek Night addon for Guinness Record Only and class passes */}
+                    {student.packageType !== "Greek Night Only" && (
+                      <label className="flex items-center gap-2 text-white cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={student.greekNight}
+                          onChange={(e) => updateStudent(student.id, 'greekNight', e.target.checked)}
+                          className="w-5 h-5"
+                        />
+                        <span>🍷 Greek Night (+€40)</span>
+                      </label>
+                    )}
                   </div>
                 )}
 
