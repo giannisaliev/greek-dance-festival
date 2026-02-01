@@ -479,6 +479,28 @@ export default function BulkRegisterPage() {
             ))}
           </div>
 
+          {/* Zeimpekiko Choreography Notice */}
+          <div className="mt-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 border-2 border-purple-400/50">
+            <div className="flex items-start gap-3">
+              <div className="text-3xl flex-shrink-0">🎬</div>
+              <div>
+                <h3 className="text-white font-bold text-lg mb-2">Zeimpekiko Choreography Video</h3>
+                <p className="text-blue-100 text-sm leading-relaxed mb-3">
+                  The choreography will be sent to the dance schools in February.
+                </p>
+                <p className="text-blue-100 text-sm leading-relaxed">
+                  If you do not belong to any dance school, you can request a video by sending an email to:{" "}
+                  <a href="mailto:greekdancefestival@gmail.com" className="text-white font-semibold hover:underline">
+                    greekdancefestival@gmail.com
+                  </a>
+                </p>
+                <p className="text-yellow-200 text-sm font-semibold mt-3">
+                  ⚠️ You must be registered in order to receive the video.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
             <button
               type="button"

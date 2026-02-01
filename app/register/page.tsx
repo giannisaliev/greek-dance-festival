@@ -410,6 +410,14 @@ export default function RegisterPage() {
           <p className="text-xl text-blue-100">
             {t.register.subtitle}
           </p>
+          {step > 0 && (
+            <Link
+              href="/register/bulk"
+              className="inline-block text-blue-200 hover:text-white underline mt-4"
+            >
+              ← Register as Dance Studio / Teacher instead
+            </Link>
+          )}
         </div>
 
         {/* Progress Steps - Only show if type selected */}
