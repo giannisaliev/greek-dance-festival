@@ -132,12 +132,16 @@ export default function HotelPage() {
     e.preventDefault();
     setSubmitting(true);
     setBookingError("");
+    console.log("=== BOOKING FORM SUBMIT START ===");
+    console.log("Form data:", bookingForm);
 
     try {
       // Combine country code with phone number
       const fullPhone = bookingForm.countryCode + bookingForm.phone;
       const submitData = { ...bookingForm, phone: fullPhone };
       delete (submitData as any).countryCode;
+      
+      console.log("Submitting data:", submitData);
       
       const response = await fetch("/api/hotel-bookings", {
         method: "POST",
@@ -146,17 +150,22 @@ export default function HotelPage() {
       });
 
       const data = await response.json();
+      console.log("API Response:", { ok: response.ok, status: response.status, data });
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to submit booking");
       }
 
+      console.log("Setting bookingSuccess to true");
       setBookingSuccess(true);
+      console.log("Booking success set, showBookingForm:", showBookingForm);
       // Don't reset the form here - keep it so the success message can reference the hotel
     } catch (error: any) {
+      console.error("Booking submission error:", error);
       setBookingError(error.message || "Failed to submit booking");
     } finally {
       setSubmitting(false);
+      console.log("=== BOOKING FORM SUBMIT END ===");
     }
   };
 
@@ -404,6 +413,7 @@ export default function HotelPage() {
                     {(() => {
                       // Ensure form has hotel info when tab is accessed
                       if (!bookingForm.hotelId || bookingForm.hotelId !== hotel.id) {
+                        console.log("Setting form hotel info:", hotel.id, hotel.name);
                         setBookingForm(prev => ({
                           ...prev,
                           hotelId: hotel.id,
@@ -411,6 +421,10 @@ export default function HotelPage() {
                           roomType: prev.roomType || Object.keys(hotel.prices)[0] || ""
                         }));
                       }
+                      return null;
+                    })()}
+                    {(() => {
+                      console.log("Render check - bookingSuccess:", bookingSuccess, "showBookingForm:", showBookingForm, "hotel.id:", hotel.id);
                       return null;
                     })()}
                     {bookingSuccess && showBookingForm === hotel.id ? (
@@ -422,6 +436,7 @@ export default function HotelPage() {
                         </p>
                         <button
                           onClick={() => {
+                            console.log("Closing success message");
                             setBookingSuccess(false);
                             setShowBookingForm(null);
                             setHotelTab(hotel.id, "gallery");
