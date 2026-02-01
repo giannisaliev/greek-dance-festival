@@ -108,7 +108,8 @@ export default function RegisterPage() {
   
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [closedMessage, setClosedMessage] = useState("");
-  const [step, setStep] = useState(1);
+  const [registrationType, setRegistrationType] = useState<"individual" | "bulk" | null>(null);
+  const [step, setStep] = useState(0); // 0 = choose type, 1 = package selection, 2 = details, 3 = confirm
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [user, setUser] = useState<{firstName: string; lastName: string; email: string; isAdmin?: boolean} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -409,52 +410,97 @@ export default function RegisterPage() {
           <p className="text-xl text-blue-100">
             {t.register.subtitle}
           </p>
-          
-          {/* Dance Studio Registration Link */}
-          <div className="mt-6">
-            <Link
-              href="/register/bulk"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Click here for Dance Studio / Teacher registering their students
-            </Link>
-          </div>
         </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-white' : 'text-blue-300'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                step >= 1 ? 'bg-white text-blue-900' : 'bg-white/20'
-              }`}>
-                {step > 1 ? '✓' : '1'}
+        {/* Progress Steps - Only show if type selected */}
+        {step > 0 && (
+          <div className="flex items-center justify-center mb-12">
+            <div className="flex items-center gap-4">
+              <div className={`flex items-center gap-2 ${step >= 1 ? 'text-white' : 'text-blue-300'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  step >= 1 ? 'bg-white text-blue-900' : 'bg-white/20'
+                }`}>
+                  {step > 1 ? '✓' : '1'}
+                </div>
+                <span className="font-semibold hidden sm:inline">{t.register.step1}</span>
               </div>
-              <span className="font-semibold hidden sm:inline">{t.register.step1}</span>
-            </div>
-            <div className={`w-16 h-1 rounded ${step >= 2 ? 'bg-white' : 'bg-white/20'}`} />
-            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-white' : 'text-blue-300'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                step >= 2 ? 'bg-white text-blue-900' : 'bg-white/20'
-              }`}>
-                {step > 2 ? '✓' : '2'}
+              <div className={`w-16 h-1 rounded ${step >= 2 ? 'bg-white' : 'bg-white/20'}`} />
+              <div className={`flex items-center gap-2 ${step >= 2 ? 'text-white' : 'text-blue-300'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  step >= 2 ? 'bg-white text-blue-900' : 'bg-white/20'
+                }`}>
+                  {step > 2 ? '✓' : '2'}
+                </div>
+                <span className="font-semibold hidden sm:inline">Your Details</span>
               </div>
-              <span className="font-semibold hidden sm:inline">Your Details</span>
-            </div>
-            <div className={`w-16 h-1 rounded ${step >= 3 ? 'bg-white' : 'bg-white/20'}`} />
-            <div className={`flex items-center gap-2 ${step >= 3 ? 'text-white' : 'text-blue-300'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                step >= 3 ? 'bg-white text-blue-900' : 'bg-white/20'
-              }`}>
-                {step > 3 ? '✓' : '3'}
+              <div className={`w-16 h-1 rounded ${step >= 3 ? 'bg-white' : 'bg-white/20'}`} />
+              <div className={`flex items-center gap-2 ${step >= 3 ? 'text-white' : 'text-blue-300'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  step >= 3 ? 'bg-white text-blue-900' : 'bg-white/20'
+                }`}>
+                  {step > 3 ? '✓' : '3'}
+                </div>
+                <span className="font-semibold hidden sm:inline">Confirm</span>
               </div>
-              <span className="font-semibold hidden sm:inline">Confirm</span>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Step 0: Choose Registration Type */}
+        {step === 0 && (
+          <div className="animate-fadeIn max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-white text-center mb-12">
+              Choose Your Registration Type
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Individual Registration */}
+              <button
+                onClick={() => {
+                  setRegistrationType("individual");
+                  setStep(1);
+                }}
+                className="group relative bg-gradient-to-br from-blue-500/20 to-blue-600/30 backdrop-blur-md rounded-3xl p-8 border-2 border-white/30 hover:border-white hover:shadow-2xl hover:shadow-white/30 transition-all transform hover:scale-105"
+              >
+                <div className="text-center">
+                  <div className="text-6xl mb-6">🕺</div>
+                  <h3 className="text-2xl font-bold text-white mb-4">Individual Registration</h3>
+                  <p className="text-blue-100 text-lg leading-relaxed">
+                    Register yourself for the Greek Dance Festival. Choose your package and complete your registration.
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 text-white font-semibold">
+                    <span>Continue</span>
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+
+              {/* Dance Studio / Teacher Registration */}
+              <button
+                onClick={() => {
+                  window.location.href = "/register/bulk";
+                }}
+                className="group relative bg-gradient-to-br from-purple-500/20 to-pink-500/30 backdrop-blur-md rounded-3xl p-8 border-2 border-purple-400/50 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-400/30 transition-all transform hover:scale-105"
+              >
+                <div className="text-center">
+                  <div className="text-6xl mb-6">👥</div>
+                  <h3 className="text-2xl font-bold text-white mb-4">Dance Studio / Teacher</h3>
+                  <p className="text-blue-100 text-lg leading-relaxed">
+                    Register multiple students from your dance studio or as a teacher. Bulk registration for groups.
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 text-white font-semibold">
+                    <span>Continue</span>
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Step 1: Package Selection */}
         {step === 1 && (
@@ -525,8 +571,8 @@ export default function RegisterPage() {
                   </p>
                   <p className="text-blue-100 text-sm leading-relaxed">
                     If you do not belong to any dance school, you can request a video by sending an email to:{" "}
-                    <a href="mailto:info@greekdancefestival.gr" className="text-white font-semibold hover:underline">
-                      info@greekdancefestival.gr
+                    <a href="mailto:greekdancefestival@gmail.com" className="text-white font-semibold hover:underline">
+                      greekdancefestival@gmail.com
                     </a>
                   </p>
                   <p className="text-yellow-200 text-sm font-semibold mt-3">
@@ -902,8 +948,8 @@ export default function RegisterPage() {
                       </p>
                       <p className="text-blue-100 text-sm leading-relaxed">
                         If you do not belong to any dance school, you can request a video by sending an email to:{" "}
-                        <a href="mailto:info@greekdancefestival.gr" className="text-white font-semibold hover:underline">
-                          info@greekdancefestival.gr
+                        <a href="mailto:greekdancefestival@gmail.com" className="text-white font-semibold hover:underline">
+                          greekdancefestival@gmail.com
                         </a>
                       </p>
                       <p className="text-yellow-200 text-sm font-semibold mt-3">
