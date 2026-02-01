@@ -710,13 +710,9 @@ export default function AdminPage() {
               {/* Participants List */}
               {isLoading ? (
                 <div className="text-center text-white text-xl py-12">Loading...</div>
-              ) : participants.length === 0 && teachers.length === 0 ? (
+              ) : participants.length === 0 ? (
                 <div className="text-center text-blue-100 text-xl py-12">
-                  No participants found
-                </div>
-              ) : (participants.length === 0 && teachers.length > 0) ? (
-                <div className="text-center text-blue-100 text-xl py-12">
-                  No matching participants found for this search
+                  {searchQuery ? "No matching participants found for this search" : "No participants found"}
                 </div>
               ) : (
                 <div className="space-y-6">
