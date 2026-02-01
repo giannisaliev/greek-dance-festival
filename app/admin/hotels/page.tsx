@@ -124,6 +124,27 @@ export default function AdminHotelsPage() {
     }
   };
 
+  const sendConfirmationEmail = async (bookingId: string) => {
+    if (!confirm("Send confirmation email to the guest?")) return;
+
+    try {
+      const response = await fetch(`/api/hotel-bookings/${bookingId}/confirm`, {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        await fetchBookings();
+        alert("Confirmation email sent successfully!");
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error sending confirmation:", error);
+      alert("Failed to send confirmation email");
+    }
+  };
+
   const handleDeleteBooking = async (bookingId: string, guestName: string, hotelName: string) => {
     // First confirmation
     if (!confirm(`Are you sure you want to delete the booking for ${guestName} at ${hotelName}?\n\nThis action cannot be undone!`)) {
@@ -640,13 +661,17 @@ export default function AdminHotelsPage() {
                 </label>
                 <div className="space-y-2 mb-3">
                   <div className="grid md:grid-cols-3 gap-2">
-                    <input
-                      type="text"
+                    <select
                       value={roomType}
                       onChange={(e) => setRoomType(e.target.value)}
                       className="px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
-                      placeholder="Room type (e.g., Single)"
-                    />
+                    >
+                      <option value="" className="bg-blue-900">Select room type</option>
+                      <option value="Single Room" className="bg-blue-900">Single Room</option>
+                      <option value="Double Room" className="bg-blue-900">Double Room</option>
+                      <option value="Triple Room" className="bg-blue-900">Triple Room</option>
+                      <option value="Quadruple Room" className="bg-blue-900">Quadruple Room</option>
+                    </select>
                     <input
                       type="number"
                       step="0.01"
@@ -920,6 +945,14 @@ export default function AdminHotelsPage() {
                         <option value="confirmed">Confirmed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
+                      {booking.status === "pending" && (
+                        <button
+                          onClick={() => sendConfirmationEmail(booking.id)}
+                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+                        >
+                          📧 Send Confirmation
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeleteBooking(
                           booking.id,

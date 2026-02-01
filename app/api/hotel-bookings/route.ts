@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
+import { sendHotelBookingConfirmation, sendHotelBookingAdminConfirmation } from "@/lib/email";
 
 // GET - Fetch all hotel bookings (admin only)
 export async function GET(request: NextRequest) {
@@ -116,6 +117,23 @@ export async function POST(request: NextRequest) {
         status: "pending",
       },
     });
+
+    // Send confirmation email to guest
+    try {
+      await sendHotelBookingConfirmation({
+        hotelName,
+        roomType,
+        guestNames,
+        email,
+        phone,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        specialRequests,
+      });
+    } catch (emailError) {
+      console.error("Failed to send booking confirmation email:", emailError);
+      // Don't fail the booking if email fails
+    }
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {

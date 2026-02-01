@@ -310,11 +310,10 @@ export default function HotelPage() {
                       📍 Location
                     </h3>
                     {hotel.location && hotel.location.includes('google.com/maps/embed') ? (
-                      <div className="w-full h-64 rounded-lg overflow-hidden mb-4">
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                         <iframe
                           src={hotel.location}
-                          width="100%"
-                          height="100%"
+                          className="absolute top-0 left-0 w-full h-full rounded-lg"
                           style={{ border: 0 }}
                           allowFullScreen
                           loading="lazy"
