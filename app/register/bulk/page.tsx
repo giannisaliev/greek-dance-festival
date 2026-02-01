@@ -38,6 +38,7 @@ export default function BulkRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState("");
   const [success, setSuccess] = useState(false);
   const [registrantType, setRegistrantType] = useState<"teacher" | "studio">("teacher");
   const [studioName, setStudioName] = useState("");
@@ -210,6 +211,8 @@ export default function BulkRegisterPage() {
       if (!response.ok) {
         console.error("Bulk registration failed:", data);
         
+        setErrorDetails(data.details || "");
+        
         // Show which students failed and why
         if (data.details && Array.isArray(data.details)) {
           const errorSummary = data.details.map((d: any) => `${d.email}: ${d.error}`).join('\n');
@@ -322,6 +325,11 @@ export default function BulkRegisterPage() {
           <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 text-red-200 max-w-2xl mx-auto">
             <div className="font-bold text-red-100 mb-2">⚠️ Registration Error</div>
             <pre className="whitespace-pre-wrap text-sm">{error}</pre>
+            {errorDetails && (
+              <div className="mt-3 pt-3 border-t border-red-400/30 text-xs font-mono">
+                Error: {errorDetails}
+              </div>
+            )}
           </div>
         )}
 

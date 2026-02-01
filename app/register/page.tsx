@@ -115,6 +115,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState("");
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     phone: "",
@@ -230,6 +231,7 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        setErrorDetails(data.details || "");
         throw new Error(data.error || "Registration failed");
       }
 
@@ -907,6 +909,11 @@ export default function RegisterPage() {
               {error && (
                 <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 text-red-200 text-center">
                   {error}
+                  {errorDetails && (
+                    <div className="mt-2 pt-2 border-t border-red-400/30 text-xs font-mono">
+                      Error: {errorDetails}
+                    </div>
+                  )}
                 </div>
               )}
               
