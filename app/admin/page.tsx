@@ -408,6 +408,36 @@ export default function AdminPage() {
     });
   };
 
+  const handleDeleteParticipant = async (id: string, name: string) => {
+    // First confirmation
+    if (!confirm(`Are you sure you want to delete ${name}?\n\nThis action cannot be undone!`)) {
+      return;
+    }
+
+    // Second confirmation
+    if (!confirm(`⚠️ FINAL CONFIRMATION ⚠️\n\nYou are about to permanently delete ${name}.\n\nThis will remove all registration data. Are you absolutely sure?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/participants?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Participant deleted successfully");
+        fetchParticipants(searchQuery);
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to delete participant"}`);
+      }
+    } catch (error) {
+      console.error("Error deleting participant:", error);
+      alert("Failed to delete participant");
+    }
+  };
+
+
   // Group participants by registeredBy
   const groupedParticipants = () => {
     let individualParticipants = participants.filter(p => !p.registeredBy);
@@ -811,6 +841,15 @@ export default function AdminPage() {
                                         📥 QR
                                       </button>
                                     )}
+                                    <button
+                                      onClick={() => handleDeleteParticipant(
+                                        participant.id,
+                                        `${participant.user.firstName} ${participant.user.lastName}`
+                                      )}
+                                      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                    >
+                                      🗑️ Delete
+                                    </button>
                                   </div>
                                 </td>
                               </tr>
@@ -1014,6 +1053,15 @@ export default function AdminPage() {
                                                       📥
                                                     </button>
                                                   )}
+                                                  <button
+                                                    onClick={() => handleDeleteParticipant(
+                                                      student.id,
+                                                      `${student.registrantFirstName} ${student.registrantLastName}`
+                                                    )}
+                                                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-xs"
+                                                  >
+                                                    🗑️
+                                                  </button>
                                                 </div>
                                               </td>
                                             </tr>

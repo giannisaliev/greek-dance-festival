@@ -424,9 +424,9 @@ export default function HotelPage() {
                     {bookingSuccess && showBookingForm === hotel.id ? (
                       <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-6 text-center">
                         <div className="text-5xl mb-4">✅</div>
-                        <h3 className="text-xl font-bold text-white mb-2">Booking Request Submitted!</h3>
+                        <h3 className="text-xl font-bold text-white mb-2">Booking Request Successfully Sent!</h3>
                         <p className="text-green-100 mb-4">
-                          Thank you for your booking request. We'll contact you shortly at {bookingForm.email} to confirm your reservation.
+                          Your booking request has been successfully sent. We will inform you by email for the next steps.
                         </p>
                         <button
                           onClick={() => {

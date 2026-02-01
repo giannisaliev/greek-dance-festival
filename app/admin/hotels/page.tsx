@@ -126,6 +126,35 @@ export default function AdminHotelsPage() {
     }
   };
 
+  const handleDeleteBooking = async (bookingId: string, guestName: string, hotelName: string) => {
+    // First confirmation
+    if (!confirm(`Are you sure you want to delete the booking for ${guestName} at ${hotelName}?\n\nThis action cannot be undone!`)) {
+      return;
+    }
+
+    // Second confirmation
+    if (!confirm(`⚠️ FINAL CONFIRMATION ⚠️\n\nYou are about to permanently delete this booking request.\n\nThis will remove all booking data. Are you absolutely sure?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/hotel-bookings?id=${bookingId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Booking deleted successfully");
+        await fetchBookings();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to delete booking"}`);
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      alert("Failed to delete booking");
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -893,6 +922,16 @@ export default function AdminHotelsPage() {
                         <option value="confirmed">Confirmed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
+                      <button
+                        onClick={() => handleDeleteBooking(
+                          booking.id,
+                          `${booking.firstName} ${booking.lastName}`,
+                          booking.hotelName
+                        )}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
+                      >
+                        🗑️ Delete
+                      </button>
                     </div>
                   </div>
 
