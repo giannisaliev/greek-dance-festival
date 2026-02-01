@@ -77,35 +77,38 @@ export async function GET(request: NextRequest) {
     const queryParts = query.trim().split(/\s+/);
     const hasMultipleParts = queryParts.length > 1;
     
+    const searchConditions: any[] = [
+      { registrantFirstName: { contains: query, mode: 'insensitive' as const } },
+      { registrantLastName: { contains: query, mode: 'insensitive' as const } },
+      { phone: { contains: query } },
+      { studioName: { contains: query, mode: 'insensitive' as const } },
+      // Search in user firstName and lastName for self-registered participants
+      { user: { firstName: { contains: query, mode: 'insensitive' as const } } },
+      { user: { lastName: { contains: query, mode: 'insensitive' as const } } },
+    ];
+
+    // If query has multiple parts, also search for first + last name combinations
+    if (hasMultipleParts) {
+      searchConditions.push({
+        AND: [
+          { registrantFirstName: { contains: queryParts[0], mode: 'insensitive' as const } },
+          { registrantLastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' as const } },
+        ]
+      });
+      searchConditions.push({
+        AND: [
+          { user: { firstName: { contains: queryParts[0], mode: 'insensitive' as const } } },
+          { user: { lastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' as const } } },
+        ]
+      });
+    }
+    
     let participants = await prisma.participant.findMany({
       where: {
         AND: [
           { deletedAt: null },
           {
-            OR: [
-              { registrantFirstName: { contains: query, mode: 'insensitive' } },
-              { registrantLastName: { contains: query, mode: 'insensitive' } },
-              { phone: { contains: query } },
-              { studioName: { contains: query, mode: 'insensitive' } },
-              // Search in user firstName and lastName for self-registered participants
-              { user: { firstName: { contains: query, mode: 'insensitive' } } },
-              { user: { lastName: { contains: query, mode: 'insensitive' } } },
-              // If query has multiple parts, also search for first + last name combinations
-              ...(hasMultipleParts ? [
-                {
-                  AND: [
-                    { registrantFirstName: { contains: queryParts[0], mode: 'insensitive' } },
-                    { registrantLastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' } },
-                  ]
-                },
-                {
-                  AND: [
-                    { user: { firstName: { contains: queryParts[0], mode: 'insensitive' } } },
-                    { user: { lastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' } } },
-                  ]
-                }
-              ] : []),
-            ],
+            OR: searchConditions,
           },
         ],
       },
