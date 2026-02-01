@@ -123,8 +123,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {
     console.error("Error creating hotel booking:", error);
+    console.error("Error details:", error instanceof Error ? error.message : String(error));
     return NextResponse.json(
-      { error: "Failed to create hotel booking" },
+      { error: "Failed to create hotel booking", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

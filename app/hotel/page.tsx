@@ -539,7 +539,7 @@ export default function HotelPage() {
                         {/* Dates */}
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">Check-in (June 10-17, 2026)</label>
+                            <label className="block text-white font-semibold mb-2 text-sm">Check-in</label>
                             <input
                               type="date"
                               value={bookingForm.checkIn}
@@ -551,7 +551,7 @@ export default function HotelPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">Check-out (June 10-17, 2026)</label>
+                            <label className="block text-white font-semibold mb-2 text-sm">Check-out</label>
                             <input
                               type="date"
                               value={bookingForm.checkOut}
