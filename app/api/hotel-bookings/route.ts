@@ -44,13 +44,11 @@ export async function POST(request: NextRequest) {
       hotelId,
       hotelName,
       roomType,
-      firstName,
-      lastName,
+      guestNames,
       email,
       phone,
       checkIn,
       checkOut,
-      guests,
       specialRequests,
     } = body;
 
@@ -59,13 +57,14 @@ export async function POST(request: NextRequest) {
       !hotelId ||
       !hotelName ||
       !roomType ||
-      !firstName ||
-      !lastName ||
+      !guestNames ||
+      !Array.isArray(guestNames) ||
+      guestNames.length === 0 ||
+      guestNames.some((name: string) => !name || name.trim() === "") ||
       !email ||
       !phone ||
       !checkIn ||
-      !checkOut ||
-      !guests
+      !checkOut
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -108,13 +107,11 @@ export async function POST(request: NextRequest) {
         hotelId,
         hotelName,
         roomType,
-        firstName,
-        lastName,
+        guestNames,
         email,
         phone,
         checkIn: checkInDate,
         checkOut: checkOutDate,
-        guests: parseInt(guests),
         specialRequests: specialRequests || null,
         status: "pending",
       },

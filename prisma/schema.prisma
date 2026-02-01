@@ -178,13 +178,11 @@ model HotelBooking {
   hotelId     String   // ID of the hotel being booked
   hotelName   String   // Hotel name (denormalized for easier access)
   roomType    String   // Type of room (e.g., "Single Room", "Double Room")
-  firstName   String   // Guest first name
-  lastName    String   // Guest last name
-  email       String   // Guest email
-  phone       String   // Guest phone number
+  guestNames  String[] // Array of guest full names
+  email       String   // Contact email
+  phone       String   // Contact phone number
   checkIn     DateTime // Check-in date
   checkOut    DateTime // Check-out date
-  guests      Int      // Number of guests
   specialRequests String? // Optional special requests
   status      String   @default("pending") // "pending", "confirmed", "cancelled"
   createdAt   DateTime @default(now())

@@ -24,13 +24,11 @@ interface HotelBooking {
   hotelId: string;
   hotelName: string;
   roomType: string;
-  firstName: string;
-  lastName: string;
+  guestNames: string[];
   email: string;
   phone: string;
   checkIn: string;
   checkOut: string;
-  guests: number;
   specialRequests?: string;
   status: string;
   createdAt: string;
@@ -925,7 +923,7 @@ export default function AdminHotelsPage() {
                       <button
                         onClick={() => handleDeleteBooking(
                           booking.id,
-                          `${booking.firstName} ${booking.lastName}`,
+                          booking.guestNames[0] || "Guest",
                           booking.hotelName
                         )}
                         className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
@@ -937,10 +935,12 @@ export default function AdminHotelsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-white/10 rounded-lg p-4">
-                      <p className="text-blue-200 text-sm mb-1">Guest</p>
-                      <p className="text-white font-semibold">
-                        {booking.firstName} {booking.lastName}
-                      </p>
+                      <p className="text-blue-200 text-sm mb-1">Guest{booking.guestNames.length > 1 ? 's' : ''}</p>
+                      {booking.guestNames.map((name, idx) => (
+                        <p key={idx} className="text-white font-semibold">
+                          {booking.guestNames.length > 1 && `${idx + 1}. `}{name}
+                        </p>
+                      ))}
                       <p className="text-blue-100 text-sm mt-2">
                         <a href={`mailto:${booking.email}`} className="hover:underline">
                           📧 {booking.email}
@@ -968,7 +968,7 @@ export default function AdminHotelsPage() {
                         nights
                       </p>
                       <p className="text-blue-100 text-sm">
-                        {booking.guests} guest{booking.guests > 1 ? "s" : ""}
+                        {booking.guestNames.length} guest{booking.guestNames.length > 1 ? "s" : ""}
                       </p>
                     </div>
 

@@ -23,14 +23,12 @@ interface BookingFormData {
   hotelId: string;
   hotelName: string;
   roomType: string;
-  firstName: string;
-  lastName: string;
+  guestNames: string[];
   email: string;
   countryCode: string;
   phone: string;
   checkIn: string;
   checkOut: string;
-  guests: string;
   specialRequests: string;
 }
 
@@ -49,14 +47,12 @@ export default function HotelPage() {
     hotelId: "",
     hotelName: "",
     roomType: "",
-    firstName: "",
-    lastName: "",
+    guestNames: [""],
     email: "",
     countryCode: "+30",
     phone: "",
     checkIn: "",
     checkOut: "",
-    guests: "1",
     specialRequests: "",
   });
 
@@ -103,24 +99,33 @@ export default function HotelPage() {
   };
 
   const openBookingForm = (hotel: Hotel, roomType?: string) => {
+    const selectedRoomType = roomType || Object.keys(hotel.prices)[0] || "";
+    const guestCount = getGuestCount(selectedRoomType);
+    
     setBookingForm({
       hotelId: hotel.id,
       hotelName: hotel.name,
-      roomType: roomType || Object.keys(hotel.prices)[0] || "",
-      firstName: "",
-      lastName: "",
+      roomType: selectedRoomType,
+      guestNames: Array(guestCount).fill(""),
       email: "",
       countryCode: "+30",
       phone: "",
       checkIn: "",
       checkOut: "",
-      guests: "1",
       specialRequests: "",
     });
     setShowBookingForm(hotel.id);
     setHotelTab(hotel.id, "booking");
     setBookingSuccess(false);
     setBookingError("");
+  };
+
+  const getGuestCount = (roomType: string): number => {
+    const type = roomType.toLowerCase();
+    if (type.includes("single")) return 1;
+    if (type.includes("double")) return 2;
+    if (type.includes("triple")) return 3;
+    return 1; // default
   };
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
@@ -151,14 +156,12 @@ export default function HotelPage() {
         hotelId: "",
         hotelName: "",
         roomType: "",
-        firstName: "",
-        lastName: "",
+        guestNames: [""],
         email: "",
         countryCode: "+30",
         phone: "",
         checkIn: "",
         checkOut: "",
-        guests: "1",
         specialRequests: "",
       });
     } catch (error: any) {
@@ -454,7 +457,15 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Room Type</label>
                           <select
                             value={bookingForm.roomType}
-                            onChange={(e) => setBookingForm({ ...bookingForm, roomType: e.target.value })}
+                            onChange={(e) => {
+                              const newRoomType = e.target.value;
+                              const guestCount = getGuestCount(newRoomType);
+                              setBookingForm({ 
+                                ...bookingForm, 
+                                roomType: newRoomType,
+                                guestNames: Array(guestCount).fill("").map((_, i) => bookingForm.guestNames[i] || "")
+                              });
+                            }}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                           >
@@ -467,29 +478,26 @@ export default function HotelPage() {
                           </select>
                         </div>
 
-                        {/* Personal Information */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">First Name</label>
+                        {/* Guest Names - Dynamic based on room type */}
+                        {bookingForm.guestNames.map((name, index) => (
+                          <div key={index}>
+                            <label className="block text-white font-semibold mb-2 text-sm">
+                              Guest {index + 1} Full Name
+                            </label>
                             <input
                               type="text"
-                              value={bookingForm.firstName}
-                              onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
+                              value={name}
+                              onChange={(e) => {
+                                const newNames = [...bookingForm.guestNames];
+                                newNames[index] = e.target.value;
+                                setBookingForm({ ...bookingForm, guestNames: newNames });
+                              }}
+                              placeholder="Enter full name"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                               required
                             />
                           </div>
-                          <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">Last Name</label>
-                            <input
-                              type="text"
-                              value={bookingForm.lastName}
-                              onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
-                              className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                              required
-                            />
-                          </div>
-                        </div>
+                        ))}
 
                         <div>
                           <label className="block text-white font-semibold mb-2 text-sm">Email</label>
@@ -590,19 +598,6 @@ export default function HotelPage() {
                               required
                             />
                           </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-white font-semibold mb-2 text-sm">Number of Guests</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={bookingForm.guests}
-                            onChange={(e) => setBookingForm({ ...bookingForm, guests: e.target.value })}
-                            className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                          />
                         </div>
 
                         <div>
