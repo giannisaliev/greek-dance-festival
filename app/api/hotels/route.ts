@@ -94,6 +94,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const roomOrder = prices ? Object.keys(prices) : [];
+    
     const hotel = await prisma.hotel.create({
       data: {
         name,
@@ -103,6 +105,7 @@ export async function POST(request: Request) {
         description: description || "",
         images: images || [],
         prices: prices || {},
+        roomOrder: roomOrder,
         amenities: amenities || [],
         breakfastIncluded: breakfastIncluded !== undefined ? breakfastIncluded : false,
         cityTax: cityTax || null,
@@ -213,7 +216,7 @@ export async function PUT(request: Request) {
         ...(location && { location }),
         ...(description !== undefined && { description }),
         ...(images && { images }),
-        ...(prices && { prices }),
+        ...(prices && { prices, roomOrder: Object.keys(prices) }),
         ...(amenities && { amenities }),
         ...(breakfastIncluded !== undefined && { breakfastIncluded }),
         ...(cityTax !== undefined && { cityTax }),

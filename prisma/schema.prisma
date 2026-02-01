@@ -133,6 +133,7 @@ model Hotel {
   description      String?
   images           String[] // Array of image paths
   prices           Json     // JSON object for different room types, prices, and additional info
+  roomOrder        String[] @default([]) // Array of room type keys to maintain order
   amenities        String[] // Array of amenities
   breakfastIncluded Boolean? @default(false) // Whether breakfast is included
   cityTax          Float?   // City tax per night per room (optional)

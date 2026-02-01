@@ -13,6 +13,7 @@ interface Hotel {
   description?: string;
   images: string[];
   prices: Record<string, { price: number; additionalInfo?: string }>;
+  roomOrder: string[];
   amenities: string[];
   breakfastIncluded: boolean;
   cityTax?: number;
@@ -99,7 +100,8 @@ export default function HotelPage() {
   };
 
   const openBookingForm = (hotel: Hotel, roomType?: string) => {
-    const selectedRoomType = roomType || Object.keys(hotel.prices)[0] || "";
+    const roomTypes = hotel.roomOrder && hotel.roomOrder.length > 0 ? hotel.roomOrder : Object.keys(hotel.prices);
+    const selectedRoomType = roomType || roomTypes[0] || "";
     const guestCount = getGuestCount(selectedRoomType);
     
     setBookingForm({
@@ -362,8 +364,11 @@ export default function HotelPage() {
                     
                     {Object.keys(hotel.prices).length > 0 ? (
                       <div className="space-y-3">
-                        {Object.entries(hotel.prices).map(
-                          ([roomType, priceData]) => (
+                        {(hotel.roomOrder && hotel.roomOrder.length > 0 ? hotel.roomOrder : Object.keys(hotel.prices))
+                          .filter(roomType => hotel.prices[roomType])
+                          .map((roomType) => {
+                          const priceData = hotel.prices[roomType];
+                          return (
                             <div
                               key={roomType}
                               className="bg-gradient-to-br from-white/20 to-white/10 rounded-lg p-3 border border-white/30"
@@ -387,8 +392,8 @@ export default function HotelPage() {
                                 Book This Room
                               </button>
                             </div>
-                          )
-                        )}
+                          );
+                        })}
                         
                         {hotel.cityTax && (
                           <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-3 mt-4">
@@ -491,7 +496,9 @@ export default function HotelPage() {
                             required
                           >
                             <option value="">Select a room type</option>
-                            {Object.keys(hotel.prices).map((roomType) => (
+                            {(hotel.roomOrder && hotel.roomOrder.length > 0 ? hotel.roomOrder : Object.keys(hotel.prices))
+                              .filter(roomType => hotel.prices[roomType])
+                              .map((roomType) => (
                               <option key={roomType} value={roomType} className="bg-blue-900">
                                 {roomType} - €{hotel.prices[roomType].price}/night
                               </option>

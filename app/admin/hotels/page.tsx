@@ -13,6 +13,7 @@ interface Hotel {
   description?: string;
   images: string[];
   prices: Record<string, { price: number; additionalInfo?: string }>;
+  roomOrder: string[];
   amenities: string[];
   breakfastIncluded: boolean;
   cityTax?: number;
