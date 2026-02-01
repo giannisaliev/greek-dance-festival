@@ -26,6 +26,7 @@ interface BookingFormData {
   firstName: string;
   lastName: string;
   email: string;
+  countryCode: string;
   phone: string;
   checkIn: string;
   checkOut: string;
@@ -51,6 +52,7 @@ export default function HotelPage() {
     firstName: "",
     lastName: "",
     email: "",
+    countryCode: "+30",
     phone: "",
     checkIn: "",
     checkOut: "",
@@ -108,6 +110,7 @@ export default function HotelPage() {
       firstName: "",
       lastName: "",
       email: "",
+      countryCode: "+30",
       phone: "",
       checkIn: "",
       checkOut: "",
@@ -126,10 +129,15 @@ export default function HotelPage() {
     setBookingError("");
 
     try {
+      // Combine country code with phone number
+      const fullPhone = bookingForm.countryCode + bookingForm.phone;
+      const submitData = { ...bookingForm, phone: fullPhone };
+      delete (submitData as any).countryCode;
+      
       const response = await fetch("/api/hotel-bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingForm),
+        body: JSON.stringify(submitData),
       });
 
       const data = await response.json();
@@ -146,6 +154,7 @@ export default function HotelPage() {
         firstName: "",
         lastName: "",
         email: "",
+        countryCode: "+30",
         phone: "",
         checkIn: "",
         checkOut: "",
@@ -400,6 +409,18 @@ export default function HotelPage() {
                 {/* Booking Tab */}
                 {activeTab[hotel.id] === "booking" && (
                   <div>
+                    {(() => {
+                      // Ensure form has hotel info when tab is accessed
+                      if (!bookingForm.hotelId || bookingForm.hotelId !== hotel.id) {
+                        setBookingForm(prev => ({
+                          ...prev,
+                          hotelId: hotel.id,
+                          hotelName: hotel.name,
+                          roomType: prev.roomType || Object.keys(hotel.prices)[0] || ""
+                        }));
+                      }
+                      return null;
+                    })()}
                     {bookingSuccess && showBookingForm === hotel.id ? (
                       <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-6 text-center">
                         <div className="text-5xl mb-4">✅</div>
@@ -482,36 +503,61 @@ export default function HotelPage() {
                         </div>
 
                         <div>
-                          <label className="block text-white font-semibold mb-2 text-sm">Phone</label>
-                          <input
-                            type="tel"
-                            value={bookingForm.phone}
-                            onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
-                            className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                          />
+                          <label className="block text-white font-semibold mb-2 text-sm">Phone Number</label>
+                          <div className="flex gap-2">
+                            <select
+                              value={bookingForm.countryCode}
+                              onChange={(e) => setBookingForm({ ...bookingForm, countryCode: e.target.value })}
+                              className="bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 w-24"
+                              required
+                            >
+                              <option value="+30" className="bg-blue-900">🇬🇷 +30</option>
+                              <option value="+1" className="bg-blue-900">🇺🇸 +1</option>
+                              <option value="+44" className="bg-blue-900">🇬🇧 +44</option>
+                              <option value="+49" className="bg-blue-900">🇩🇪 +49</option>
+                              <option value="+33" className="bg-blue-900">🇫🇷 +33</option>
+                              <option value="+39" className="bg-blue-900">🇮🇹 +39</option>
+                              <option value="+34" className="bg-blue-900">🇪🇸 +34</option>
+                              <option value="+31" className="bg-blue-900">🇳🇱 +31</option>
+                              <option value="+41" className="bg-blue-900">🇨🇭 +41</option>
+                              <option value="+43" className="bg-blue-900">🇦🇹 +43</option>
+                            </select>
+                            <input
+                              type="tel"
+                              value={bookingForm.phone}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                setBookingForm({ ...bookingForm, phone: value });
+                              }}
+                              placeholder="6912345678"
+                              className="flex-1 bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              required
+                            />
+                          </div>
                         </div>
 
                         {/* Dates */}
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">Check-in</label>
+                            <label className="block text-white font-semibold mb-2 text-sm">Check-in (June 10-17, 2026)</label>
                             <input
                               type="date"
                               value={bookingForm.checkIn}
                               onChange={(e) => setBookingForm({ ...bookingForm, checkIn: e.target.value })}
-                              min={new Date().toISOString().split('T')[0]}
+                              min="2026-06-10"
+                              max="2026-06-17"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-white font-semibold mb-2 text-sm">Check-out</label>
+                            <label className="block text-white font-semibold mb-2 text-sm">Check-out (June 10-17, 2026)</label>
                             <input
                               type="date"
                               value={bookingForm.checkOut}
                               onChange={(e) => setBookingForm({ ...bookingForm, checkOut: e.target.value })}
-                              min={bookingForm.checkIn || new Date().toISOString().split('T')[0]}
+                              min={bookingForm.checkIn || "2026-06-10"}
+                              max="2026-06-17"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                               required
                             />
