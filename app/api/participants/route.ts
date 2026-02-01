@@ -73,7 +73,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Search by participant name, phone, studio name, or teacher email (exclude soft-deleted)
-    const participants = await prisma.participant.findMany({
+    // Split query to handle full name searches (e.g., "Anna Avrami")
+    const queryParts = query.trim().split(/\s+/);
+    const hasMultipleParts = queryParts.length > 1;
+    
+    let participants = await prisma.participant.findMany({
       where: {
         AND: [
           { deletedAt: null },
@@ -83,6 +87,24 @@ export async function GET(request: NextRequest) {
               { registrantLastName: { contains: query, mode: 'insensitive' } },
               { phone: { contains: query } },
               { studioName: { contains: query, mode: 'insensitive' } },
+              // Search in user firstName and lastName for self-registered participants
+              { user: { firstName: { contains: query, mode: 'insensitive' } } },
+              { user: { lastName: { contains: query, mode: 'insensitive' } } },
+              // If query has multiple parts, also search for first + last name combinations
+              ...(hasMultipleParts ? [
+                {
+                  AND: [
+                    { registrantFirstName: { contains: queryParts[0], mode: 'insensitive' } },
+                    { registrantLastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' } },
+                  ]
+                },
+                {
+                  AND: [
+                    { user: { firstName: { contains: queryParts[0], mode: 'insensitive' } } },
+                    { user: { lastName: { contains: queryParts[queryParts.length - 1], mode: 'insensitive' } } },
+                  ]
+                }
+              ] : []),
             ],
           },
         ],
