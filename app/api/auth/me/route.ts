@@ -56,6 +56,9 @@ export async function GET(request: NextRequest) {
           firstName: true,
           lastName: true,
           participant: {
+            where: {
+              deletedAt: null
+            },
             select: {
               id: true,
               registrantFirstName: true,
