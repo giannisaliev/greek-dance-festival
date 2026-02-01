@@ -295,10 +295,24 @@ export default function AdminPage() {
     fetchSettings();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Auto-expand teacher sections when searching
+  useEffect(() => {
+    if (searchQuery.trim() && participants.length > 0) {
+      // Expand all teachers that have matching students
+      const teacherIds = new Set<string>();
+      participants.forEach(p => {
+        if (p.registeredBy) {
+          teacherIds.add(p.registeredBy);
+        }
+      });
+      setExpandedTeachers(teacherIds);
+    }
+  }, [participants, searchQuery]);
+
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    fetchParticipants(searchQuery);
+    await fetchParticipants(searchQuery);
   };
 
   // Generate search suggestions
@@ -659,6 +673,7 @@ export default function AdminPage() {
                     onClick={() => {
                       setSearchQuery("");
                       setShowDuplicates(false);
+                      setExpandedTeachers(new Set());
                       fetchParticipants();
                     }}
                     className="px-6 sm:px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm sm:text-base"

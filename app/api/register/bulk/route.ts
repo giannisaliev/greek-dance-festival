@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendRegistrationEmail } from "@/lib/email";
+import { sendRegistrationEmail, sendBulkRegistrationConfirmation } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
 import bcrypt from "bcryptjs";
@@ -241,6 +241,30 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Send confirmation email to teacher
+    try {
+      const totalPrice = students.reduce((sum, s) => sum + s.totalPrice, 0);
+      await sendBulkRegistrationConfirmation({
+        teacherEmail,
+        teacherFirstName,
+        teacherLastName,
+        studioName: registrantType === "studio" ? studioName : undefined,
+        students: students.map(s => ({
+          firstName: s.firstName,
+          lastName: s.lastName,
+          packageType: s.packageType,
+          guinnessRecordAttempt: s.guinnessRecordAttempt || false,
+          greekNight: s.greekNight || false,
+          totalPrice: s.totalPrice,
+        })),
+        totalPrice,
+        registeredCount: registeredStudents.length,
+      });
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+      // Don't fail the registration if email fails
     }
 
     return NextResponse.json(
