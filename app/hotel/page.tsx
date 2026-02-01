@@ -544,9 +544,23 @@ export default function HotelPage() {
                               type="date"
                               value={bookingForm.checkIn}
                               onChange={(e) => setBookingForm({ ...bookingForm, checkIn: e.target.value })}
+                              onFocus={(e) => {
+                                try {
+                                  e.target.showPicker?.();
+                                } catch (err) {
+                                  // Ignore if showPicker is not supported
+                                }
+                              }}
+                              onClick={(e) => {
+                                try {
+                                  (e.target as HTMLInputElement).showPicker?.();
+                                } catch (err) {
+                                  // Ignore if showPicker is not supported
+                                }
+                              }}
                               min="2026-06-10"
                               max="2026-06-17"
-                              className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
                               required
                             />
                           </div>
@@ -556,9 +570,23 @@ export default function HotelPage() {
                               type="date"
                               value={bookingForm.checkOut}
                               onChange={(e) => setBookingForm({ ...bookingForm, checkOut: e.target.value })}
+                              onFocus={(e) => {
+                                try {
+                                  e.target.showPicker?.();
+                                } catch (err) {
+                                  // Ignore if showPicker is not supported
+                                }
+                              }}
+                              onClick={(e) => {
+                                try {
+                                  (e.target as HTMLInputElement).showPicker?.();
+                                } catch (err) {
+                                  // Ignore if showPicker is not supported
+                                }
+                              }}
                               min={bookingForm.checkIn || "2026-06-10"}
                               max="2026-06-17"
-                              className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
                               required
                             />
                           </div>
