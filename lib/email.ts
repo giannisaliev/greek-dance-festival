@@ -109,9 +109,14 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
                   
                   <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; text-align: center;">
-                      <img src="${process.env.NEXTAUTH_URL || 'https://www.greekdancefestival.gr'}/flyer.jpg" alt="Greek Dance Festival" style="max-width: 200px; height: auto; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" />
-                      <p style="margin: 15px 0 0 0; color: #e0f2fe; font-size: 18px; font-weight: 600;">
+                    <td style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 40px 30px; text-align: center;">
+                      <div style="margin-bottom: 15px;">
+                        <img src="${process.env.NEXTAUTH_URL || 'https://www.greekdancefestival.gr'}/GUINESS.png" alt="Greek Dance Festival" style="max-width: 80px; height: auto;" />
+                      </div>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        Greek Dance Festival
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: #e0f2fe; font-size: 16px;">
                         Registration Confirmation
                       </p>
                     </td>
@@ -208,9 +213,10 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
                         🎉 Festival Information
                       </h3>
                       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0;">
-                        <p style="margin: 0 0 10px 0; color: #475569; line-height: 1.6;">
+                        <p style="margin: 0 0 10px 0; color: #475569; line-height: 1.8;">
                           <strong style="color: #1e293b;">📅 Date:</strong> June 12-14, 2026<br>
-                          <strong style="color: #1e293b;">📍 Location:</strong> Thessaloniki (venue to be announced soon)<br>
+                          <strong style="color: #1e293b;">📍 Location Guinness Record:</strong> <a href="https://maps.app.goo.gl/oHQ7z9DjKt9YTNXV9" style="color: #3b82f6; text-decoration: none;">Aristotle Square</a><br>
+                          <strong style="color: #1e293b;">📍 Location Workshops:</strong> Venue to be announced soon on the website<br>
                           <strong style="color: #1e293b;">🕐 Time:</strong> Details will be announced on the website soon
                         </p>
                       </div>
