@@ -109,11 +109,9 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
                   
                   <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 40px 30px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        🎭 Greek Dance Festival
-                      </h1>
-                      <p style="margin: 10px 0 0 0; color: #e0f2fe; font-size: 16px;">
+                    <td style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; text-align: center;">
+                      <img src="${process.env.NEXTAUTH_URL || 'https://www.greekdancefestival.gr'}/flyer.jpg" alt="Greek Dance Festival" style="max-width: 200px; height: auto; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" />
+                      <p style="margin: 15px 0 0 0; color: #e0f2fe; font-size: 18px; font-weight: 600;">
                         Registration Confirmation
                       </p>
                     </td>
@@ -198,7 +196,6 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
                           <li>Check your <strong>Dashboard</strong> to view all registered participants</li>
                           <li>You can manage your registrations and check-in status online</li>
                           <li>Payment details will be sent separately</li>
-                          <li>Bring your confirmation on the festival day</li>
                         </ul>
                       </div>
                     </td>
@@ -213,20 +210,34 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
                       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0;">
                         <p style="margin: 0 0 10px 0; color: #475569; line-height: 1.6;">
                           <strong style="color: #1e293b;">📅 Date:</strong> June 12-14, 2026<br>
-                          <strong style="color: #1e293b;">📍 Location:</strong> [Festival Venue]<br>
-                          <strong style="color: #1e293b;">🕐 Time:</strong> Details will be sent closer to the date
+                          <strong style="color: #1e293b;">📍 Location:</strong> Thessaloniki (venue to be announced soon)<br>
+                          <strong style="color: #1e293b;">🕐 Time:</strong> Details will be announced on the website soon
                         </p>
                       </div>
                     </td>
                   </tr>
 
-                  <!-- CTA Button -->
+                  <!-- CTA Buttons -->
                   <tr>
                     <td style="padding: 0 30px 40px 30px; text-align: center;">
-                      <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" 
-                         style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s;">
-                        📋 View My Dashboard
-                      </a>
+                      <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                        <tr>
+                          <td style="padding: 0 5px 10px 5px;">
+                            <a href="https://drive.google.com/drive/folders/1M4zh_JgF0wpacRK3eOXJh2weX-QuwTG-?usp=sharing" 
+                               style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);">
+                              📥 Download Guinness Choreography
+                            </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0 5px;">
+                            <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" 
+                               style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);">
+                              📋 View My Dashboard
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
 
