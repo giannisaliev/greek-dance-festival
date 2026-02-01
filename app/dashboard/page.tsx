@@ -56,29 +56,33 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const [userRes, studentsRes, deletedRes] = await Promise.all([
-        fetch("/api/auth/me"),
-        fetch("/api/participants/my-registrations"),
-        fetch("/api/participants/my-registrations?deleted=true")
-      ]);
+      const userRes = await fetch("/api/auth/me");
 
       if (userRes.ok) {
         const userData = await userRes.json();
         setUser(userData.user);
         setMyRegistration(userData.user.participant);
+        
+        // Fetch active students for all users
+        const studentsRes = await fetch("/api/participants/my-registrations");
+        if (studentsRes.ok) {
+          const studentsData = await studentsRes.json();
+          setRegisteredStudents(studentsData.students || []);
+        }
+        
+        // Only fetch deleted students if user is admin
+        if (userData.user.isAdmin) {
+          const deletedRes = await fetch("/api/participants/my-registrations?deleted=true");
+          if (deletedRes.ok) {
+            const deletedData = await deletedRes.json();
+            setDeletedStudents(deletedData.students || []);
+          }
+        } else {
+          setDeletedStudents([]);
+        }
       } else {
         router.push("/login");
         return;
-      }
-
-      if (studentsRes.ok) {
-        const studentsData = await studentsRes.json();
-        setRegisteredStudents(studentsData.students || []);
-      }
-
-      if (deletedRes.ok) {
-        const deletedData = await deletedRes.json();
-        setDeletedStudents(deletedData.students || []);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -475,7 +479,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Students I Registered */}
-        {(registeredStudents.length > 0 || deletedStudents.length > 0) && (
+        {(registeredStudents.length > 0 || (user?.isAdmin && deletedStudents.length > 0)) && (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-3xl font-bold text-white">
@@ -489,7 +493,8 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Tabs */}
+            {/* Tabs - Only show for admins */}
+            {user?.isAdmin && (
             <div className="flex gap-4 mb-6">
               <button
                 onClick={() => setActiveTab("active")}
@@ -512,6 +517,7 @@ export default function DashboardPage() {
                 Deleted ({deletedStudents.length})
               </button>
             </div>
+            )}
 
             {/* Active Students */}
             {activeTab === "active" && (
