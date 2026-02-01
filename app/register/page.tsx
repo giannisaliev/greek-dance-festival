@@ -129,13 +129,26 @@ export default function RegisterPage() {
     if (!selectedPackage) return 0;
     let total = selectedPackage.priceValue;
     
-    // Full Pass and standalone packages already include what they offer
-    if (selectedPackage.name !== "Full Pass" && 
-        selectedPackage.name !== "Guinness Record Only" && 
-        selectedPackage.name !== "Greek Night Only") {
-      if (formData.guinnessRecordAttempt) total += 30;
-      if (formData.greekNight) total += 40;
+    // Full Pass already includes everything
+    if (selectedPackage.name === "Full Pass") {
+      return total;
     }
+    
+    // For Guinness Record Only, add Greek Night if selected
+    if (selectedPackage.name === "Guinness Record Only") {
+      if (formData.greekNight) total += 40;
+      return total;
+    }
+    
+    // For Greek Night Only, add Guinness Record if selected
+    if (selectedPackage.name === "Greek Night Only") {
+      if (formData.guinnessRecordAttempt) total += 30;
+      return total;
+    }
+    
+    // For class passes, add both addons if selected
+    if (formData.guinnessRecordAttempt) total += 30;
+    if (formData.greekNight) total += 40;
     
     return total;
   };

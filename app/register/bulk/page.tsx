@@ -107,10 +107,12 @@ export default function BulkRegisterPage() {
               updated.greekNight = true;
             } else if (value === "Guinness Record Only") {
               updated.guinnessRecordAttempt = true;
-              updated.greekNight = false;
+              // Keep greekNight as addon if it was selected
+              if (s.greekNight) price += 40;
             } else if (value === "Greek Night Only") {
-              updated.guinnessRecordAttempt = false;
               updated.greekNight = true;
+              // Keep guinnessRecordAttempt as addon if it was selected
+              if (s.guinnessRecordAttempt) price += 30;
             } else {
               // For regular passes, add addon prices if selected
               if (s.guinnessRecordAttempt) price += 30;
@@ -125,12 +127,26 @@ export default function BulkRegisterPage() {
           const pkg = packages.find(p => p.name === s.packageType);
           if (pkg) {
             let price = pkg.priceValue;
-            // Don't add extra cost for standalone packages or Full Pass
-            if (pkg.name !== "Full Pass" && pkg.name !== "Guinness Record Only" && pkg.name !== "Greek Night Only") {
+            // Full Pass includes everything, no extra cost
+            if (pkg.name === "Full Pass") {
+              updated.totalPrice = price;
+            }
+            // Guinness Record Only: add Greek Night if selected
+            else if (pkg.name === "Guinness Record Only") {
+              if (field === 'greekNight' ? value : s.greekNight) price += 40;
+              updated.totalPrice = price;
+            }
+            // Greek Night Only: add Guinness Record if selected
+            else if (pkg.name === "Greek Night Only") {
+              if (field === 'guinnessRecordAttempt' ? value : s.guinnessRecordAttempt) price += 30;
+              updated.totalPrice = price;
+            }
+            // Class passes: add both addons if selected
+            else {
               if (field === 'guinnessRecordAttempt' ? value : s.guinnessRecordAttempt) price += 30;
               if (field === 'greekNight' ? value : s.greekNight) price += 40;
+              updated.totalPrice = price;
             }
-            updated.totalPrice = price;
           }
         }
         
