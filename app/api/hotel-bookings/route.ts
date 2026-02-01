@@ -1,0 +1,182 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-config";
+
+// GET - Fetch all hotel bookings (admin only)
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email! },
+      select: { isAdmin: true },
+    });
+
+    if (!user?.isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const bookings = await prisma.hotelBooking.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json({ bookings });
+  } catch (error) {
+    console.error("Error fetching hotel bookings:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch hotel bookings" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Create a new hotel booking
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const {
+      hotelId,
+      hotelName,
+      roomType,
+      firstName,
+      lastName,
+      email,
+      phone,
+      checkIn,
+      checkOut,
+      guests,
+      specialRequests,
+    } = body;
+
+    // Validate required fields
+    if (
+      !hotelId ||
+      !hotelName ||
+      !roomType ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phone ||
+      !checkIn ||
+      !checkOut ||
+      !guests
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate dates
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (checkInDate < now) {
+      return NextResponse.json(
+        { error: "Check-in date cannot be in the past" },
+        { status: 400 }
+      );
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return NextResponse.json(
+        { error: "Check-out date must be after check-in date" },
+        { status: 400 }
+      );
+    }
+
+    // Create booking
+    const booking = await prisma.hotelBooking.create({
+      data: {
+        hotelId,
+        hotelName,
+        roomType,
+        firstName,
+        lastName,
+        email,
+        phone,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests: parseInt(guests),
+        specialRequests: specialRequests || null,
+        status: "pending",
+      },
+    });
+
+    return NextResponse.json({ booking }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating hotel booking:", error);
+    return NextResponse.json(
+      { error: "Failed to create hotel booking" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH - Update booking status (admin only)
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email! },
+      select: { isAdmin: true },
+    });
+
+    if (!user?.isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { error: "Missing booking ID or status" },
+        { status: 400 }
+      );
+    }
+
+    if (!["pending", "confirmed", "cancelled"].includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status" },
+        { status: 400 }
+      );
+    }
+
+    const booking = await prisma.hotelBooking.update({
+      where: { id },
+      data: { status },
+    });
+
+    return NextResponse.json({ booking });
+  } catch (error) {
+    console.error("Error updating hotel booking:", error);
+    return NextResponse.json(
+      { error: "Failed to update hotel booking" },
+      { status: 500 }
+    );
+  }
+}

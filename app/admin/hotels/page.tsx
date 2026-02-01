@@ -19,15 +19,34 @@ interface Hotel {
   order: number;
 }
 
+interface HotelBooking {
+  id: string;
+  hotelId: string;
+  hotelName: string;
+  roomType: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  specialRequests?: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminHotelsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [bookings, setBookings] = useState<HotelBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeView, setActiveView] = useState<"hotels" | "bookings">("hotels");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -60,6 +79,7 @@ export default function AdminHotelsPage() {
   useEffect(() => {
     if (status === "authenticated") {
       fetchHotels();
+      fetchBookings();
     }
   }, [status]);
 
@@ -72,6 +92,37 @@ export default function AdminHotelsPage() {
       console.error("Error fetching hotels:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBookings = async () => {
+    try {
+      const response = await fetch("/api/hotel-bookings");
+      const data = await response.json();
+      setBookings(data.bookings || []);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    try {
+      const response = await fetch("/api/hotel-bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: bookingId, status: newStatus }),
+      });
+
+      if (response.ok) {
+        await fetchBookings();
+        alert("Booking status updated!");
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      alert("Failed to update booking status");
     }
   };
 
@@ -324,9 +375,9 @@ export default function AdminHotelsPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">
-              🏨 Manage Hotels
+              🏨 Manage Hotels & Bookings
             </h1>
-            <p className="text-blue-100">Add and manage festival partner hotels</p>
+            <p className="text-blue-100">Add and manage festival partner hotels and booking requests</p>
           </div>
           <button
             onClick={() => router.push("/admin")}
@@ -336,15 +387,42 @@ export default function AdminHotelsPage() {
           </button>
         </div>
 
-        {/* Add Hotel Button */}
-        {!showForm && (
+        {/* View Toggle */}
+        <div className="flex gap-4 mb-8">
           <button
-            onClick={() => setShowForm(true)}
-            className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors mb-8"
+            onClick={() => setActiveView("hotels")}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeView === "hotels"
+                ? "bg-white text-blue-900"
+                : "bg-white/20 text-white hover:bg-white/30"
+            }`}
           >
-            ➕ Add New Hotel
+            🏨 Hotels ({hotels.length})
           </button>
-        )}
+          <button
+            onClick={() => setActiveView("bookings")}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeView === "bookings"
+                ? "bg-white text-blue-900"
+                : "bg-white/20 text-white hover:bg-white/30"
+            }`}
+          >
+            📅 Booking Requests ({bookings.length})
+          </button>
+        </div>
+
+        {/* Hotels View */}
+        {activeView === "hotels" && (
+          <>
+            {/* Add Hotel Button */}
+            {!showForm && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors mb-8"
+              >
+                ➕ Add New Hotel
+              </button>
+            )}
 
         {/* Hotel Form */}
         {showForm && (
@@ -773,6 +851,108 @@ export default function AdminHotelsPage() {
           <div className="text-center py-12">
             <p className="text-white text-xl">No hotels added yet.</p>
             <p className="text-blue-100 mt-2">Click "Add New Hotel" to get started.</p>
+          </div>
+        )}
+          </>
+        )}
+
+        {/* Bookings View */}
+        {activeView === "bookings" && (
+          <div className="space-y-6">
+            {bookings.length === 0 ? (
+              <div className="text-center py-12 bg-white/10 rounded-2xl border border-white/20">
+                <p className="text-white text-xl">No booking requests yet.</p>
+                <p className="text-blue-100 mt-2">Bookings will appear here when guests submit requests.</p>
+              </div>
+            ) : (
+              bookings.map((booking) => (
+                <div
+                  key={booking.id}
+                  className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">
+                        {booking.hotelName}
+                      </h3>
+                      <p className="text-blue-100">{booking.roomType}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <select
+                        value={booking.status}
+                        onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
+                        className={`px-4 py-2 rounded-lg font-semibold ${
+                          booking.status === "confirmed"
+                            ? "bg-green-500 text-white"
+                            : booking.status === "cancelled"
+                            ? "bg-red-500 text-white"
+                            : "bg-yellow-500 text-white"
+                        }`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <p className="text-blue-200 text-sm mb-1">Guest</p>
+                      <p className="text-white font-semibold">
+                        {booking.firstName} {booking.lastName}
+                      </p>
+                      <p className="text-blue-100 text-sm mt-2">
+                        <a href={`mailto:${booking.email}`} className="hover:underline">
+                          📧 {booking.email}
+                        </a>
+                      </p>
+                      <p className="text-blue-100 text-sm">
+                        <a href={`tel:${booking.phone}`} className="hover:underline">
+                          📞 {booking.phone}
+                        </a>
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <p className="text-blue-200 text-sm mb-1">Stay Details</p>
+                      <p className="text-white font-semibold">
+                        {new Date(booking.checkIn).toLocaleDateString()} →{" "}
+                        {new Date(booking.checkOut).toLocaleDateString()}
+                      </p>
+                      <p className="text-blue-100 text-sm mt-2">
+                        {Math.ceil(
+                          (new Date(booking.checkOut).getTime() -
+                            new Date(booking.checkIn).getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )}{" "}
+                        nights
+                      </p>
+                      <p className="text-blue-100 text-sm">
+                        {booking.guests} guest{booking.guests > 1 ? "s" : ""}
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <p className="text-blue-200 text-sm mb-1">Booking Info</p>
+                      <p className="text-white text-sm">
+                        Submitted: {new Date(booking.createdAt).toLocaleString()}
+                      </p>
+                      <p className="text-blue-100 text-sm mt-2">
+                        ID: {booking.id.slice(0, 8)}...
+                      </p>
+                    </div>
+                  </div>
+
+                  {booking.specialRequests && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <p className="text-blue-200 text-sm mb-2">Special Requests:</p>
+                      <p className="text-white text-sm">{booking.specialRequests}</p>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>

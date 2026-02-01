@@ -172,3 +172,26 @@ model Analytics {
   @@index([createdAt])
   @@index([isAdmin])
 }
+
+model HotelBooking {
+  id          String   @id @default(cuid())
+  hotelId     String   // ID of the hotel being booked
+  hotelName   String   // Hotel name (denormalized for easier access)
+  roomType    String   // Type of room (e.g., "Single Room", "Double Room")
+  firstName   String   // Guest first name
+  lastName    String   // Guest last name
+  email       String   // Guest email
+  phone       String   // Guest phone number
+  checkIn     DateTime // Check-in date
+  checkOut    DateTime // Check-out date
+  guests      Int      // Number of guests
+  specialRequests String? // Optional special requests
+  status      String   @default("pending") // "pending", "confirmed", "cancelled"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([hotelId])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}
