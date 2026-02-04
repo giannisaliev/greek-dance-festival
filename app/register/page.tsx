@@ -6,6 +6,7 @@ import Navigation from "../components/Navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Package {
+  key: string;
   name: string;
   price: string;
   priceValue: number;
@@ -20,6 +21,7 @@ export default function RegisterPage() {
   
   const packages: Package[] = [
   {
+    key: "guinness-only",
     name: t.pricing.guinnessOnly,
     price: "€30",
     priceValue: 30,
@@ -34,6 +36,7 @@ export default function RegisterPage() {
     icon: "🏆"
   },
   {
+    key: "greek-night-only",
     name: t.pricing.greekNightOnly,
     price: "€40",
     priceValue: 40,
@@ -47,6 +50,7 @@ export default function RegisterPage() {
     icon: "🍷"
   },
   {
+    key: "starter-pass",
     name: t.pricing.starterPass,
     price: "€70",
     priceValue: 70,
@@ -60,6 +64,7 @@ export default function RegisterPage() {
     icon: "🌟"
   },
   {
+    key: "explorer-pass",
     name: t.pricing.explorerPass,
     price: "€100",
     priceValue: 100,
@@ -73,6 +78,7 @@ export default function RegisterPage() {
     icon: "🎭"
   },
   {
+    key: "enthusiast-pass",
     name: t.pricing.enthusiastPass,
     price: "€160",
     priceValue: 160,
@@ -87,6 +93,7 @@ export default function RegisterPage() {
     icon: "⭐"
   },
   {
+    key: "full-pass",
     name: t.pricing.fullPass,
     price: "€260",
     priceValue: 260,
@@ -131,18 +138,18 @@ export default function RegisterPage() {
     let total = selectedPackage.priceValue;
     
     // Full Pass already includes everything
-    if (selectedPackage.name === "Full Pass") {
+    if (selectedPackage.key === "full-pass") {
       return total;
     }
     
     // For Guinness Record Only, add Greek Night if selected
-    if (selectedPackage.name === "Guinness Record Only") {
+    if (selectedPackage.key === "guinness-only") {
       if (formData.greekNight) total += 40;
       return total;
     }
     
     // For Greek Night Only, add Guinness Record if selected
-    if (selectedPackage.name === "Greek Night Only") {
+    if (selectedPackage.key === "greek-night-only") {
       if (formData.guinnessRecordAttempt) total += 30;
       return total;
     }
@@ -199,12 +206,12 @@ export default function RegisterPage() {
       let includesGreekNight = false;
       let includesGuinness = false;
 
-      if (selectedPackage.name === "Full Pass") {
+      if (selectedPackage.key === "full-pass") {
         includesGreekNight = true;
         includesGuinness = true;
-      } else if (selectedPackage.name === "Greek Night Only") {
+      } else if (selectedPackage.key === "greek-night-only") {
         includesGreekNight = true;
-      } else if (selectedPackage.name === "Guinness Record Only") {
+      } else if (selectedPackage.key === "guinness-only") {
         includesGuinness = true;
       } else {
         // Class passes - check add-ons
@@ -221,7 +228,7 @@ export default function RegisterPage() {
           phone: formData.phone,
           registrantFirstName: formData.firstName,
           registrantLastName: formData.lastName,
-          packageType: selectedPackage.name,
+          packageType: selectedPackage.key,
           guinnessRecordAttempt: includesGuinness,
           greekNight: includesGreekNight,
           totalPrice: calculateTotalPrice(),
@@ -796,7 +803,7 @@ export default function RegisterPage() {
                   )}
                   
                   {/* Full Pass Notice */}
-                  {selectedPackage && selectedPackage.name === "Full Pass" && (
+                  {selectedPackage && selectedPackage.key === "full-pass" && (
                     <div className="mb-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl p-6 border-2 border-green-400/50">
                       <div className="text-center">
                         <p className="text-white font-bold text-lg mb-2">🎉 All-Inclusive Package! 🎉</p>
@@ -808,7 +815,7 @@ export default function RegisterPage() {
                   )}
 
                   {/* Guinness Record Only Notice */}
-                  {selectedPackage && selectedPackage.name === "Guinness Record Only" && (
+                  {selectedPackage && selectedPackage.key === "guinness-only" && (
                     <div className="mb-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border-2 border-yellow-400/50">
                       <div className="text-center">
                         <p className="text-white font-bold text-lg mb-2">🏆 Guinness Record Attempt</p>
@@ -820,7 +827,7 @@ export default function RegisterPage() {
                   )}
 
                   {/* Greek Night Only Notice */}
-                  {selectedPackage && selectedPackage.name === "Greek Night Only" && (
+                  {selectedPackage && selectedPackage.key === "greek-night-only" && (
                     <div className="mb-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 border-2 border-purple-400/50">
                       <div className="text-center">
                         <p className="text-white font-bold text-lg mb-2">🍷 Greek Night Experience</p>
@@ -990,7 +997,7 @@ export default function RegisterPage() {
               </div>
               
               {/* Zeimpekiko Choreography Notice */}
-              {(formData.guinnessRecordAttempt || selectedPackage?.name === "Full Pass") && (
+              {(formData.guinnessRecordAttempt || selectedPackage?.key === "full-pass") && (
                 <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 mb-8 border-2 border-purple-400/50">
                   <div className="flex items-start gap-3">
                     <div className="text-3xl flex-shrink-0">🎬</div>

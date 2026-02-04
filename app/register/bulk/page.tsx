@@ -16,6 +16,7 @@ interface Student {
 }
 
 interface Package {
+  key: string;
   name: string;
   price: string;
   priceValue: number;
@@ -26,12 +27,12 @@ export default function BulkRegisterPage() {
   const { t } = useLanguage();
   
   const packages: Package[] = [
-    { name: t.pricing.guinnessOnly, price: "€30", priceValue: 30, icon: "🏆" },
-    { name: t.pricing.greekNightOnly, price: "€40", priceValue: 40, icon: "🍷" },
-    { name: t.pricing.starterPass, price: "€70", priceValue: 70, icon: "🌟" },
-    { name: t.pricing.explorerPass, price: "€100", priceValue: 100, icon: "🎭" },
-    { name: t.pricing.enthusiastPass, price: "€160", priceValue: 160, icon: "⭐" },
-    { name: t.pricing.fullPass, price: "€260", priceValue: 260, icon: "👑" }
+    { key: "guinness-only", name: t.pricing.guinnessOnly, price: "€30", priceValue: 30, icon: "🏆" },
+    { key: "greek-night-only", name: t.pricing.greekNightOnly, price: "€40", priceValue: 40, icon: "🍷" },
+    { key: "starter-pass", name: t.pricing.starterPass, price: "€70", priceValue: 70, icon: "🌟" },
+    { key: "explorer-pass", name: t.pricing.explorerPass, price: "€100", priceValue: 100, icon: "🎭" },
+    { key: "enthusiast-pass", name: t.pricing.enthusiastPass, price: "€160", priceValue: 160, icon: "⭐" },
+    { key: "full-pass", name: t.pricing.fullPass, price: "€260", priceValue: 260, icon: "👑" }
   ];
 
   const [user, setUser] = useState<{firstName: string; lastName: string; email: string} | null>(null);
@@ -50,7 +51,7 @@ export default function BulkRegisterPage() {
     firstName: "",
     lastName: "",
 
-    packageType: packages[0].name,
+    packageType: packages[0].key,
     guinnessRecordAttempt: false,
     greekNight: false,
     totalPrice: packages[0].priceValue,
@@ -79,7 +80,7 @@ export default function BulkRegisterPage() {
       id: crypto.randomUUID(),
       firstName: "",
       lastName: "",
-      packageType: packages[0].name,
+      packageType: packages[0].key,
       guinnessRecordAttempt: false,
       greekNight: false,
       totalPrice: packages[0].priceValue,
@@ -99,19 +100,19 @@ export default function BulkRegisterPage() {
         
         // Recalculate price when package changes
         if (field === 'packageType') {
-          const pkg = packages.find(p => p.name === value);
+          const pkg = packages.find(p => p.key === value);
           if (pkg) {
             let price = pkg.priceValue;
             // Full Pass includes everything
-            if (value === "Full Pass") {
+            if (value === "full-pass") {
               updated.guinnessRecordAttempt = true;
               updated.greekNight = true;
-            } else if (value === "Guinness Record Only") {
+            } else if (value === "guinness-only") {
               updated.guinnessRecordAttempt = true;
               updated.greekNight = false; // Reset greekNight
               // Only add Greek Night if it's being selected as an addon
               // Price already includes Guinness Record
-            } else if (value === "Greek Night Only") {
+            } else if (value === "greek-night-only") {
               updated.greekNight = true;
               updated.guinnessRecordAttempt = false; // Reset guinnessRecordAttempt
               // Only add Guinness Record if it's being selected as an addon
@@ -127,20 +128,20 @@ export default function BulkRegisterPage() {
         
         // Recalculate price when add-ons change
         if (field === 'guinnessRecordAttempt' || field === 'greekNight') {
-          const pkg = packages.find(p => p.name === s.packageType);
+          const pkg = packages.find(p => p.key === s.packageType);
           if (pkg) {
             let price = pkg.priceValue;
             // Full Pass includes everything, no extra cost
-            if (pkg.name === "Full Pass") {
+            if (pkg.key === "full-pass") {
               updated.totalPrice = price;
             }
             // Guinness Record Only: add Greek Night if selected
-            else if (pkg.name === "Guinness Record Only") {
+            else if (pkg.key === "guinness-only") {
               if (field === 'greekNight' ? value : s.greekNight) price += 40;
               updated.totalPrice = price;
             }
             // Greek Night Only: add Guinness Record if selected
-            else if (pkg.name === "Greek Night Only") {
+            else if (pkg.key === "greek-night-only") {
               if (field === 'guinnessRecordAttempt' ? value : s.guinnessRecordAttempt) price += 30;
               updated.totalPrice = price;
             }
@@ -287,7 +288,7 @@ export default function BulkRegisterPage() {
                   id: crypto.randomUUID(),
                   firstName: "",
                   lastName: "",
-                  packageType: packages[0].name,
+                  packageType: packages[0].key,
                   guinnessRecordAttempt: false,
                   greekNight: false,
                   totalPrice: packages[0].priceValue,
@@ -467,15 +468,15 @@ export default function BulkRegisterPage() {
                     style={{ color: 'white' }}
                   >
                     {packages.map(pkg => (
-                      <option key={pkg.name} value={pkg.name} style={{ color: 'white', backgroundColor: '#1e40af' }}>{pkg.icon} {pkg.name} - {pkg.price}</option>
+                      <option key={pkg.key} value={pkg.key} style={{ color: 'white', backgroundColor: '#1e40af' }}>{pkg.icon} {pkg.name} - {pkg.price}</option>
                     ))}
                   </select>
                 </div>
 
-                {student.packageType !== "Full Pass" && (
+                {student.packageType !== "full-pass" && (
                   <div className="space-y-2">
                     {/* Show Guinness Record addon for Greek Night Only and class passes */}
-                    {student.packageType !== "Guinness Record Only" && (
+                    {student.packageType !== "guinness-only" && (
                       <label className="flex items-center gap-2 text-white cursor-pointer">
                         <input
                           type="checkbox"
@@ -488,7 +489,7 @@ export default function BulkRegisterPage() {
                     )}
                     
                     {/* Show Greek Night addon for Guinness Record Only and class passes */}
-                    {student.packageType !== "Greek Night Only" && (
+                    {student.packageType !== "greek-night-only" && (
                       <label className="flex items-center gap-2 text-white cursor-pointer">
                         <input
                           type="checkbox"

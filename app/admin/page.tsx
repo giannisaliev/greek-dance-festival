@@ -98,6 +98,20 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  // Package key to name mapping
+  const packageNames: { [key: string]: string } = {
+    "guinness-only": "Guinness Record Only",
+    "greek-night-only": "Greek Night Only",
+    "starter-pass": "Starter Pass",
+    "explorer-pass": "Explorer Pass",
+    "enthusiast-pass": "Enthusiast Pass",
+    "full-pass": "Full Pass",
+  };
+
+  const getPackageName = (packageType: string) => {
+    return packageNames[packageType] || packageType;
+  };
   
   // Participants state
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -791,7 +805,7 @@ export default function AdminPage() {
                                     <span className="text-blue-200 text-xs italic">Self</span>
                                   )}
                                 </td>
-                                <td className="py-2 px-3 text-blue-100 text-xs">{participant.packageType}</td>
+                                <td className="py-2 px-3 text-blue-100 text-xs">{getPackageName(participant.packageType)}</td>
                                 <td className="py-2 px-3 text-blue-100">
                                   <div className="flex gap-1">
                                     {participant.guinnessRecordAttempt && (
@@ -905,7 +919,7 @@ export default function AdminPage() {
                                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                                         <div>
                                           <div className="text-blue-200">Package</div>
-                                          <div className="text-white">{teacher.participant.packageType}</div>
+                                          <div className="text-white">{getPackageName(teacher.participant.packageType)}</div>
                                         </div>
                                         <div>
                                           <div className="text-blue-200">Phone</div>
@@ -992,7 +1006,7 @@ export default function AdminPage() {
                                                   <span className="text-blue-200">—</span>
                                                 )}
                                               </td>
-                                              <td className="py-2 px-2 text-blue-100 text-xs">{student.packageType}</td>
+                                              <td className="py-2 px-2 text-blue-100 text-xs">{getPackageName(student.packageType)}</td>
                                               <td className="py-2 px-2 text-blue-100 text-xs">
                                                 {student.guinnessRecordAttempt && "🏆"}
                                                 {student.greekNight && "🍷"}

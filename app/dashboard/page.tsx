@@ -22,12 +22,12 @@ interface Participant {
 }
 
 const packages = [
-  { name: "Guinness Record Only", price: 30 },
-  { name: "Greek Night Only", price: 40 },
-  { name: "Starter Pass", price: 70 },
-  { name: "Explorer Pass", price: 100 },
-  { name: "Enthusiast Pass", price: 160 },
-  { name: "Full Pass", price: 260 },
+  { key: "guinness-only", name: "Guinness Record Only", price: 30 },
+  { key: "greek-night-only", name: "Greek Night Only", price: 40 },
+  { key: "starter-pass", name: "Starter Pass", price: 70 },
+  { key: "explorer-pass", name: "Explorer Pass", price: 100 },
+  { key: "enthusiast-pass", name: "Enthusiast Pass", price: 160 },
+  { key: "full-pass", name: "Full Pass", price: 260 },
 ];
 
 export default function DashboardPage() {
@@ -130,13 +130,18 @@ export default function DashboardPage() {
   }
 
   const getPackageIcon = (packageType: string) => {
-    if (packageType.includes("Full")) return "👑";
-    if (packageType.includes("Enthusiast")) return "⭐";
-    if (packageType.includes("Explorer")) return "🎭";
-    if (packageType.includes("Starter")) return "🌟";
-    if (packageType.includes("Guinness")) return "🏆";
-    if (packageType.includes("Greek Night")) return "🍷";
+    if (packageType.includes("full")) return "👑";
+    if (packageType.includes("enthusiast")) return "⭐";
+    if (packageType.includes("explorer")) return "🎭";
+    if (packageType.includes("starter")) return "🌟";
+    if (packageType.includes("guinness")) return "🏆";
+    if (packageType.includes("greek")) return "🍷";
     return "🎫";
+  };
+
+  const getPackageName = (packageType: string) => {
+    const pkg = packages.find((p) => p.key === packageType);
+    return pkg ? pkg.name : packageType;
   };
 
   const calculatePrice = (
@@ -144,11 +149,11 @@ export default function DashboardPage() {
     guinness: boolean,
     greek: boolean
   ) => {
-    const pkg = packages.find((p) => p.name === packageType);
+    const pkg = packages.find((p) => p.key === packageType);
     if (!pkg) return 0;
 
     let price = pkg.price;
-    if (packageType !== "Full Pass" && packageType !== "Guinness Record Only" && packageType !== "Greek Night Only") {
+    if (packageType !== "full-pass" && packageType !== "guinness-only" && packageType !== "greek-night-only") {
       if (guinness) price += 30;
       if (greek) price += 40;
     }
@@ -173,19 +178,19 @@ export default function DashboardPage() {
   };
 
   const handlePackageChange = (packageType: string) => {
-    const pkg = packages.find((p) => p.name === packageType);
+    const pkg = packages.find((p) => p.key === packageType);
     if (!pkg) return;
 
     let guinness = editForm.guinnessRecordAttempt;
     let greek = editForm.greekNight;
 
-    if (packageType === "Full Pass") {
+    if (packageType === "full-pass") {
       guinness = true;
       greek = true;
-    } else if (packageType === "Guinness Record Only") {
+    } else if (packageType === "guinness-only") {
       guinness = true;
       greek = false;
-    } else if (packageType === "Greek Night Only") {
+    } else if (packageType === "greek-night-only") {
       guinness = false;
       greek = true;
     }
@@ -337,16 +342,16 @@ export default function DashboardPage() {
                       className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
                     >
                       {packages.map((pkg) => (
-                        <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                        <option key={pkg.key} value={pkg.key} className="bg-blue-900">
                           {pkg.name} - €{pkg.price}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  {editForm.packageType !== "Full Pass" &&
-                    editForm.packageType !== "Guinness Record Only" &&
-                    editForm.packageType !== "Greek Night Only" && (
+                  {editForm.packageType !== "full-pass" &&
+                    editForm.packageType !== "guinness-only" &&
+                    editForm.packageType !== "greek-night-only" && (
                       <div className="space-y-2">
                         <label className="flex items-center gap-3 text-white">
                           <input
@@ -399,7 +404,7 @@ export default function DashboardPage() {
                     <h3 className="text-2xl font-bold text-white">
                       {myRegistration.registrantFirstName || user?.firstName} {myRegistration.registrantLastName || user?.lastName}
                     </h3>
-                    <p className="text-blue-100">{myRegistration.packageType}</p>
+                    <p className="text-blue-100">{getPackageName(myRegistration.packageType)}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -566,7 +571,7 @@ export default function DashboardPage() {
                       >
                         <option value="" className="bg-blue-900">All Packages</option>
                         {packages.map((pkg) => (
-                          <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                          <option key={pkg.key} value={pkg.key} className="bg-blue-900">
                             {pkg.name}
                           </option>
                         ))}
@@ -612,7 +617,7 @@ export default function DashboardPage() {
                             <td className="px-3 py-2 text-center">
                               {student.participant.studioName ? "🎭" : "—"}
                             </td>
-                            <td className="px-3 py-2 text-blue-100 text-xs">{student.participant.packageType}</td>
+                            <td className="px-3 py-2 text-blue-100 text-xs">{getPackageName(student.participant.packageType)}</td>
                             <td className="px-3 py-2 text-center">
                               {student.participant.guinnessRecordAttempt && student.participant.greekNight ? "🏆🍷" :
                                student.participant.guinnessRecordAttempt ? "🏆" :
@@ -690,7 +695,7 @@ export default function DashboardPage() {
 
                       <div className="bg-white/5 rounded-lg p-3 mb-3 opacity-70">
                         <div className="flex justify-between items-center">
-                          <span className="text-blue-100 text-sm">{student.participant.packageType}</span>
+                          <span className="text-blue-100 text-sm">{getPackageName(student.participant.packageType)}</span>
                           <span className="text-white font-bold">€{student.participant.totalPrice}</span>
                         </div>
                       </div>
@@ -823,16 +828,16 @@ export default function DashboardPage() {
                     className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
                   >
                     {packages.map((pkg) => (
-                      <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                      <option key={pkg.key} value={pkg.key} className="bg-blue-900">
                         {pkg.name} - €{pkg.price}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {editForm.packageType !== "Full Pass" &&
-                  editForm.packageType !== "Guinness Record Only" &&
-                  editForm.packageType !== "Greek Night Only" && (
+                {editForm.packageType !== "full-pass" &&
+                  editForm.packageType !== "guinness-only" &&
+                  editForm.packageType !== "greek-night-only" && (
                     <div className="space-y-2">
                       <label className="flex items-center gap-3 text-white">
                         <input
