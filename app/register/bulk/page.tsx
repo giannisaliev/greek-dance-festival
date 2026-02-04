@@ -108,12 +108,14 @@ export default function BulkRegisterPage() {
               updated.greekNight = true;
             } else if (value === "Guinness Record Only") {
               updated.guinnessRecordAttempt = true;
-              // Keep greekNight as addon if it was selected
-              if (s.greekNight) price += 40;
+              updated.greekNight = false; // Reset greekNight
+              // Only add Greek Night if it's being selected as an addon
+              // Price already includes Guinness Record
             } else if (value === "Greek Night Only") {
               updated.greekNight = true;
-              // Keep guinnessRecordAttempt as addon if it was selected
-              if (s.guinnessRecordAttempt) price += 30;
+              updated.guinnessRecordAttempt = false; // Reset guinnessRecordAttempt
+              // Only add Guinness Record if it's being selected as an addon
+              // Price already includes Greek Night
             } else {
               // For regular passes, add addon prices if selected
               if (s.guinnessRecordAttempt) price += 30;
