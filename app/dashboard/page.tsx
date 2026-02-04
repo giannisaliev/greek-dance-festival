@@ -592,53 +592,55 @@ export default function DashboardPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="bg-white/10 border-b border-white/20">
-                          <th className="px-4 py-3 text-left text-white font-semibold">Name</th>
-                          <th className="px-4 py-3 text-left text-white font-semibold">Email</th>
-                          <th className="px-4 py-3 text-center text-white font-semibold">Studio</th>
-                          <th className="px-4 py-3 text-left text-white font-semibold">Package</th>
-                          <th className="px-4 py-3 text-center text-white font-semibold">Add-ons</th>
-                          <th className="px-4 py-3 text-right text-white font-semibold">Price</th>
-                          <th className="px-4 py-3 text-center text-white font-semibold">Status</th>
-                          <th className="px-4 py-3 text-center text-white font-semibold">Actions</th>
+                          <th className="px-3 py-2 text-left text-white font-semibold text-sm">Name</th>
+                          <th className="px-3 py-2 text-left text-white font-semibold text-sm">Email</th>
+                          <th className="px-3 py-2 text-center text-white font-semibold text-sm">Studio</th>
+                          <th className="px-3 py-2 text-left text-white font-semibold text-sm">Package</th>
+                          <th className="px-3 py-2 text-center text-white font-semibold text-sm">Add-ons</th>
+                          <th className="px-3 py-2 text-right text-white font-semibold text-sm">Price</th>
+                          <th className="px-3 py-2 text-center text-white font-semibold text-sm">Status</th>
+                          <th className="px-3 py-2 text-center text-white font-semibold text-sm">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getFilteredStudents().map((student) => (
                           <tr key={student.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                            <td className="px-4 py-3 text-white">
+                            <td className="px-3 py-2 text-white text-sm">
                               {student.participant.registrantFirstName} {student.participant.registrantLastName}
                             </td>
-                            <td className="px-4 py-3 text-blue-200 text-sm">{student.email}</td>
-                            <td className="px-4 py-3 text-center text-lg">
+                            <td className="px-3 py-2 text-blue-200 text-xs">{student.email}</td>
+                            <td className="px-3 py-2 text-center">
                               {student.participant.studioName ? "🎭" : "—"}
                             </td>
-                            <td className="px-4 py-3 text-blue-100 text-sm">{student.participant.packageType}</td>
-                            <td className="px-4 py-3 text-center text-lg">
+                            <td className="px-3 py-2 text-blue-100 text-xs">{student.participant.packageType}</td>
+                            <td className="px-3 py-2 text-center">
                               {student.participant.guinnessRecordAttempt && student.participant.greekNight ? "🏆🍷" :
                                student.participant.guinnessRecordAttempt ? "🏆" :
                                student.participant.greekNight ? "🍷" : "—"}
                             </td>
-                            <td className="px-4 py-3 text-right text-white font-semibold">€{student.participant.totalPrice}</td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-3 py-2 text-right text-white font-semibold text-sm">€{student.participant.totalPrice}</td>
+                            <td className="px-3 py-2 text-center">
                               {student.participant.checkedIn ? (
-                                <span className="text-green-400 text-sm">✓ Checked In</span>
+                                <span className="text-green-400 text-xs">✓</span>
                               ) : (
-                                <span className="text-yellow-400 text-sm">Pending</span>
+                                <span className="text-yellow-400 text-xs">•</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-3 py-2 text-center">
                               <div className="flex gap-1 justify-center">
                                 <button
                                   onClick={() => startEdit(student.participant)}
-                                  className="px-3 py-1 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600 transition-colors"
+                                  className="w-6 h-6 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors flex items-center justify-center"
+                                  title="Edit"
                                 >
-                                  Edit
+                                  ✏️
                                 </button>
                                 <button
                                   onClick={() => confirmDelete(student.participant.id)}
-                                  className="px-3 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600 transition-colors"
+                                  className="w-6 h-6 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center justify-center"
+                                  title="Delete"
                                 >
-                                  Delete
+                                  ×
                                 </button>
                               </div>
                             </td>

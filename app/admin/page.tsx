@@ -774,81 +774,63 @@ export default function AdminPage() {
                                 key={participant.id}
                                 className="border-b border-white/10 hover:bg-white/5 transition-colors"
                               >
-                                <td className="py-4 px-4 text-white">
+                                <td className="py-2 px-3 text-white text-sm">
                                   {participant.registrantFirstName || participant.user.firstName} {participant.registrantLastName || participant.user.lastName}
                                 </td>
-                                <td className="py-4 px-4 text-blue-100">{participant.user.email}</td>
-                                <td className="py-4 px-4 text-blue-100">{participant.phone || "—"}</td>
-                                <td className="py-4 px-4">
+                                <td className="py-2 px-3 text-blue-100 text-xs">{participant.user.email}</td>
+                                <td className="py-2 px-3 text-blue-100 text-xs">{participant.phone || "—"}</td>
+                                <td className="py-2 px-3">
                                   {registeredByTeacher ? (
-                                    <div className="flex flex-col gap-1">
-                                      <span className="text-white font-medium">{registeredByTeacher.firstName} {registeredByTeacher.lastName}</span>
+                                    <div className="flex flex-col">
+                                      <span className="text-white text-xs">{registeredByTeacher.firstName} {registeredByTeacher.lastName}</span>
                                       {participant.studioName && (
-                                        <span className="text-xs bg-purple-500/30 text-purple-200 px-2 py-1 rounded w-fit">\ud83c\udfad {participant.studioName}</span>
+                                        <span className="text-xs text-purple-200">🎭 {participant.studioName}</span>
                                       )}
-                                      <span className="text-xs text-blue-300">{registeredByTeacher.email}</span>
                                     </div>
                                   ) : (
-                                    <span className="text-blue-200 text-sm italic">Self-registered</span>
+                                    <span className="text-blue-200 text-xs italic">Self</span>
                                   )}
                                 </td>
-                                <td className="py-4 px-4 text-blue-100">{participant.packageType}</td>
-                                <td className="py-4 px-4 text-blue-100">
+                                <td className="py-2 px-3 text-blue-100 text-xs">{participant.packageType}</td>
+                                <td className="py-2 px-3 text-blue-100">
                                   <div className="flex gap-1">
                                     {participant.guinnessRecordAttempt && (
-                                      <span className="text-xs bg-blue-500/30 px-2 py-1 rounded">🏆</span>
+                                      <span className="text-xs">🏆</span>
                                     )}
                                     {participant.greekNight && (
-                                      <span className="text-xs bg-purple-500/30 px-2 py-1 rounded">🍷</span>
+                                      <span className="text-xs">🍷</span>
                                     )}
-                                    {!participant.guinnessRecordAttempt && !participant.greekNight && "\u2014"}
+                                    {!participant.guinnessRecordAttempt && !participant.greekNight && "—"}
                                   </div>
                                 </td>
-                                <td className="py-4 px-4 text-blue-100">€{participant.totalPrice}</td>
-                                <td className="py-4 px-4">
-                                  <span
-                                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                      participant.checkedIn
-                                        ? "bg-green-500 text-white"
-                                        : "bg-yellow-500 text-white"
-                                    }`}
-                                  >
-                                    {participant.checkedIn ? "\u2713 Checked In" : "Pending"}
+                                <td className="py-2 px-3 text-blue-100 text-sm">€{participant.totalPrice}</td>
+                                <td className="py-2 px-3">
+                                  <span className={`text-xs ${participant.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
+                                    {participant.checkedIn ? "✓" : "•"}
                                   </span>
                                 </td>
-                                <td className="py-4 px-4">
-                                  <div className="flex flex-col gap-2">
+                                <td className="py-2 px-3">
+                                  <div className="flex gap-1">
                                     <button
                                       onClick={() => handleCheckIn(participant.id, participant.checkedIn)}
-                                      className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                                      className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
                                         participant.checkedIn
-                                          ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                                          : "bg-green-500 hover:bg-green-600 text-white"
+                                          ? "bg-yellow-500 hover:bg-yellow-600"
+                                          : "bg-green-500 hover:bg-green-600"
                                       }`}
+                                      title={participant.checkedIn ? "Undo Check-in" : "Check In"}
                                     >
-                                      {participant.checkedIn ? "Undo" : "Check In"}
+                                      <span className="text-white text-xs">{participant.checkedIn ? "↩" : "✓"}</span>
                                     </button>
-                                    {participant.checkedIn && qrCodes[participant.id] && (
-                                      <button
-                                        onClick={() => {
-                                          const link = document.createElement('a');
-                                          link.download = `qr-${participant.user.firstName}-${participant.user.lastName}.png`;
-                                          link.href = qrCodes[participant.id];
-                                          link.click();
-                                        }}
-                                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
-                                      >
-                                        \ud83d\udcf1 QR
-                                      </button>
-                                    )}
                                     <button
                                       onClick={() => handleDeleteParticipant(
                                         participant.id,
                                         `${participant.user.firstName} ${participant.user.lastName}`
                                       )}
-                                      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                      className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded flex items-center justify-center transition-colors"
+                                      title="Delete"
                                     >
-                                      \ud83d\uddd1\ufe0f Delete
+                                      <span className="text-white text-xs">×</span>
                                     </button>
                                   </div>
                                 </td>
@@ -999,68 +981,51 @@ export default function AdminPage() {
                                         <tbody>
                                           {students.map((student) => (
                                             <tr key={student.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                                              <td className="py-3 px-2 text-white text-sm">
+                                              <td className="py-2 px-2 text-white text-xs">
                                                 {student.registrantFirstName} {student.registrantLastName}
                                               </td>
-                                              <td className="py-3 px-2 text-blue-100 text-sm">{student.user.email}</td>
-                                              <td className="py-3 px-2 text-sm">
+                                              <td className="py-2 px-2 text-blue-100 text-xs">{student.user.email}</td>
+                                              <td className="py-2 px-2 text-xs">
                                                 {student.studioName ? (
-                                                  <span className="bg-purple-500/30 text-purple-200 px-2 py-1 rounded text-xs">🎭 {student.studioName}</span>
+                                                  <span className="text-purple-200">🎭</span>
                                                 ) : (
                                                   <span className="text-blue-200">—</span>
                                                 )}
                                               </td>
-                                              <td className="py-3 px-2 text-blue-100 text-sm">{student.packageType}</td>
-                                              <td className="py-3 px-2 text-blue-100 text-sm">
-                                                {student.guinnessRecordAttempt && "🏆 "}
-                                                {student.greekNight && "🍷 "}
+                                              <td className="py-2 px-2 text-blue-100 text-xs">{student.packageType}</td>
+                                              <td className="py-2 px-2 text-blue-100 text-xs">
+                                                {student.guinnessRecordAttempt && "🏆"}
+                                                {student.greekNight && "🍷"}
                                                 {!student.guinnessRecordAttempt && !student.greekNight && "—"}
                                               </td>
-                                              <td className="py-3 px-2 text-blue-100 text-sm">\u20ac{student.totalPrice}</td>
-                                              <td className="py-3 px-2">
-                                                <span
-                                                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                    student.checkedIn
-                                                      ? "bg-green-500 text-white"
-                                                      : "bg-yellow-500 text-white"
-                                                  }`}
-                                                >
-                                                  {student.checkedIn ? "\u2713" : "Pending"}
+                                              <td className="py-2 px-2 text-blue-100 text-xs">€{student.totalPrice}</td>
+                                              <td className="py-2 px-2">
+                                                <span className={`text-xs ${student.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
+                                                  {student.checkedIn ? "✓" : "•"}
                                                 </span>
                                               </td>
-                                              <td className="py-3 px-2">
+                                              <td className="py-2 px-2">
                                                 <div className="flex gap-1">
                                                   <button
                                                     onClick={() => handleCheckIn(student.id, student.checkedIn)}
-                                                    className={`px-3 py-1 rounded-lg font-semibold transition-colors text-xs ${
+                                                    className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
                                                       student.checkedIn
-                                                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                                                        : "bg-green-500 hover:bg-green-600 text-white"
+                                                        ? "bg-yellow-500 hover:bg-yellow-600"
+                                                        : "bg-green-500 hover:bg-green-600"
                                                     }`}
+                                                    title={student.checkedIn ? "Undo Check-in" : "Check In"}
                                                   >
-                                                    {student.checkedIn ? "Undo" : "Check In"}
+                                                    <span className="text-white text-xs">{student.checkedIn ? "↩" : "✓"}</span>
                                                   </button>
-                                                  {student.checkedIn && qrCodes[student.id] && (
-                                                    <button
-                                                      onClick={() => {
-                                                        const link = document.createElement('a');
-                                                        link.download = `qr-${student.registrantFirstName}-${student.registrantLastName}.png`;
-                                                        link.href = qrCodes[student.id];
-                                                        link.click();
-                                                      }}
-                                                      className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-xs"
-                                                    >
-                                                      \ud83d\udcf1
-                                                    </button>
-                                                  )}
                                                   <button
                                                     onClick={() => handleDeleteParticipant(
                                                       student.id,
                                                       `${student.registrantFirstName} ${student.registrantLastName}`
                                                     )}
-                                                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-xs"
+                                                    className="w-5 h-5 bg-red-500 hover:bg-red-600 rounded flex items-center justify-center transition-colors"
+                                                    title="Delete"
                                                   >
-                                                    \ud83d\uddd1\ufe0f
+                                                    <span className="text-white text-xs">×</span>
                                                   </button>
                                                 </div>
                                               </td>
