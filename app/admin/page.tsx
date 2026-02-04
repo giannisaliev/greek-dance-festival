@@ -103,10 +103,12 @@ export default function AdminPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [packageFilter, setPackageFilter] = useState<string>("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
+  const [expandedRegistrants, setExpandedRegistrants] = useState<Set<string>>(new Set());
   const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [stats, setStats] = useState({
@@ -438,8 +440,36 @@ export default function AdminPage() {
   };
 
 
-  // Group participants by registeredBy
+  // Group participants by registrant (user email)
   const groupedParticipants = () => {
+    // Apply package filter first
+    let filteredParticipants = participants;
+    if (packageFilter) {
+      filteredParticipants = filteredParticipants.filter(p => p.packageType === packageFilter);
+    }
+
+    // Group by user email (registrant email)
+    const registrantGroups: { [key: string]: Participant[] } = {};
+    
+    filteredParticipants.forEach(p => {
+      const key = p.user.email;
+      if (!registrantGroups[key]) {
+        registrantGroups[key] = [];
+      }
+      registrantGroups[key].push(p);
+    });
+
+    // Filter duplicates if enabled (not needed anymore with new layout)
+    if (showDuplicates) {
+      const duplicateEmails = getDuplicateEmails();
+      Object.keys(registrantGroups).forEach(email => {
+        if (!duplicateEmails.has(email)) {
+          delete registrantGroups[email];
+        }
+      });
+    }
+
+    // Legacy code for backward compatibility (teachers section)
     let individualParticipants = participants.filter(p => !p.registeredBy);
     const teacherGroups: { [key: string]: Participant[] } = {};
     
@@ -452,7 +482,6 @@ export default function AdminPage() {
       }
     });
 
-    // Filter duplicates if enabled
     if (showDuplicates) {
       const duplicateEmails = getDuplicateEmails();
       individualParticipants = individualParticipants.filter(p => duplicateEmails.has(p.user.email));
@@ -466,7 +495,19 @@ export default function AdminPage() {
       });
     }
 
-    return { individualParticipants, teacherGroups };
+    return { registrantGroups, individualParticipants, teacherGroups };
+  };
+
+  const toggleRegistrantExpansion = (email: string) => {
+    setExpandedRegistrants(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(email)) {
+        newSet.delete(email);
+      } else {
+        newSet.add(email);
+      }
+      return newSet;
+    });
   };
 
   // Find duplicate emails
@@ -692,6 +733,16 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                  <select
+                    value={packageFilter}
+                    onChange={(e) => setPackageFilter(e.target.value)}
+                    className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
+                  >
+                    <option value="" className="bg-blue-900">All Packages</option>
+                    <option value="Day Pass" className="bg-blue-900">Day Pass</option>
+                    <option value="Weekend Pass" className="bg-blue-900">Weekend Pass</option>
+                    <option value="VIP Pass" className="bg-blue-900">VIP Pass</option>
+                  </select>
                   <button
                     type="submit"
                     className="px-6 sm:px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm sm:text-base"
@@ -702,8 +753,10 @@ export default function AdminPage() {
                     type="button"
                     onClick={() => {
                       setSearchQuery("");
+                      setPackageFilter("");
                       setShowDuplicates(false);
                       setExpandedTeachers(new Set());
+                      setExpandedRegistrants(new Set());
                       fetchParticipants();
                     }}
                     className="px-6 sm:px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm sm:text-base"
@@ -746,8 +799,182 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Individual Participants */}
-                  {groupedParticipants().individualParticipants.length > 0 && (
+                  {/* All Registrants - Grouped by Email */}
+                  {Object.keys(groupedParticipants().registrantGroups).length > 0 && (
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-4">All Registrations ({Object.keys(groupedParticipants().registrantGroups).length} Registrant{Object.keys(groupedParticipants().registrantGroups).length !== 1 ? 's' : ''})</h3>
+                      <div className="space-y-4">
+                        {Object.entries(groupedParticipants().registrantGroups).map(([email, registrations]) => {
+                          const firstReg = registrations[0];
+                          const registrantName = `${firstReg.registrantFirstName || firstReg.user.firstName} ${firstReg.registrantLastName || firstReg.user.lastName}`;
+                          const isExpanded = expandedRegistrants.has(email);
+                          const totalPrice = registrations.reduce((sum, r) => sum + r.totalPrice, 0);
+                          const allCheckedIn = registrations.every(r => r.checkedIn);
+                          const someCheckedIn = registrations.some(r => r.checkedIn);
+                          const registeredByTeacher = firstReg.registeredBy ? teachers.find(t => t.id === firstReg.registeredBy) : null;
+
+                          return (
+                            <div key={email} className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden hover:border-white/20 transition-all">
+                              {/* Card Header - All info in one row */}
+                              <div className="p-6">
+                                <div className="flex flex-wrap items-center gap-4">
+                                  {/* Name and Email */}
+                                  <div className="flex-1 min-w-[200px]">
+                                    <div className="text-white font-bold text-lg">{registrantName}</div>
+                                    <div className="text-blue-200 text-sm">{email}</div>
+                                    {firstReg.phone && (
+                                      <div className="text-blue-300 text-xs mt-1">📞 {firstReg.phone}</div>
+                                    )}
+                                  </div>
+
+                                  {/* Registrations Summary */}
+                                  <div className="flex flex-wrap gap-2">
+                                    {registrations.map((reg, idx) => (
+                                      <div key={reg.id} className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
+                                        <div className="text-white font-semibold text-sm">{reg.packageType}</div>
+                                        <div className="text-blue-200 text-xs flex items-center gap-1 mt-1">
+                                          €{reg.totalPrice}
+                                          {reg.guinnessRecordAttempt && <span>🏆</span>}
+                                          {reg.greekNight && <span>🍷</span>}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Total Price */}
+                                  <div className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-lg px-4 py-2 border border-blue-400/30">
+                                    <div className="text-blue-100 text-xs">Total</div>
+                                    <div className="text-white font-bold text-lg">€{totalPrice}</div>
+                                  </div>
+
+                                  {/* Status Badge */}
+                                  <div>
+                                    <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                                      allCheckedIn 
+                                        ? "bg-green-500 text-white" 
+                                        : someCheckedIn 
+                                        ? "bg-yellow-500 text-white"
+                                        : "bg-gray-500 text-white"
+                                    }`}>
+                                      {allCheckedIn 
+                                        ? `✓ All Checked In (${registrations.length})`
+                                        : someCheckedIn
+                                        ? `${registrations.filter(r => r.checkedIn).length}/${registrations.length} Checked In`
+                                        : `${registrations.length} Pending`
+                                      }
+                                    </span>
+                                  </div>
+
+                                  {/* Expand/Collapse Button */}
+                                  {registrations.length > 1 && (
+                                    <button
+                                      onClick={() => toggleRegistrantExpansion(email)}
+                                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-colors text-sm"
+                                    >
+                                      {isExpanded ? "▼ Hide Details" : "▶ Show Details"}
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Registered By Info */}
+                                {registeredByTeacher && (
+                                  <div className="mt-3 pt-3 border-t border-white/10">
+                                    <div className="text-blue-200 text-sm">
+                                      Registered by: <span className="text-white font-medium">{registeredByTeacher.firstName} {registeredByTeacher.lastName}</span>
+                                      {firstReg.studioName && (
+                                        <span className="ml-2 bg-purple-500/30 text-purple-200 px-2 py-1 rounded text-xs">🏢 {firstReg.studioName}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Expanded Details */}
+                              {(isExpanded || registrations.length === 1) && (
+                                <div className="border-t border-white/10 bg-white/5">
+                                  <div className="p-6 space-y-3">
+                                    {registrations.map((reg, idx) => (
+                                      <div key={reg.id} className="bg-white/10 rounded-lg p-4 border border-white/20">
+                                        <div className="flex items-center justify-between mb-3">
+                                          <div>
+                                            <div className="text-white font-semibold">Registration #{idx + 1}</div>
+                                            <div className="text-blue-200 text-sm">{reg.packageType}</div>
+                                          </div>
+                                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                            reg.checkedIn ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                                          }`}>
+                                            {reg.checkedIn ? "✓ Checked In" : "Pending"}
+                                          </span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm">
+                                          <div>
+                                            <div className="text-blue-200">Price</div>
+                                            <div className="text-white font-semibold">€{reg.totalPrice}</div>
+                                          </div>
+                                          <div>
+                                            <div className="text-blue-200">Add-ons</div>
+                                            <div className="text-white">
+                                              {reg.guinnessRecordAttempt && <span className="mr-1">🏆</span>}
+                                              {reg.greekNight && <span>🍷</span>}
+                                              {!reg.guinnessRecordAttempt && !reg.greekNight && "—"}
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <div className="text-blue-200">Registered</div>
+                                            <div className="text-white text-xs">{new Date(reg.createdAt).toLocaleDateString()}</div>
+                                          </div>
+                                          <div>
+                                            <div className="text-blue-200">ID</div>
+                                            <div className="text-white text-xs font-mono">{reg.id.slice(0, 8)}...</div>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2">
+                                          <button
+                                            onClick={() => handleCheckIn(reg.id, reg.checkedIn)}
+                                            className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${
+                                              reg.checkedIn
+                                                ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                                : "bg-green-500 hover:bg-green-600 text-white"
+                                            }`}
+                                          >
+                                            {reg.checkedIn ? "Undo Check-in" : "Check In"}
+                                          </button>
+                                          {reg.checkedIn && qrCodes[reg.id] && (
+                                            <button
+                                              onClick={() => {
+                                                const link = document.createElement('a');
+                                                link.download = `qr-${registrantName.replace(/\s+/g, '-')}-${idx + 1}.png`;
+                                                link.href = qrCodes[reg.id];
+                                                link.click();
+                                              }}
+                                              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                            >
+                                              📥 Download QR
+                                            </button>
+                                          )}
+                                          <button
+                                            onClick={() => handleDeleteParticipant(reg.id, `${registrantName} - ${reg.packageType}`)}
+                                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                          >
+                                            🗑️ Delete
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Individual Participants (Legacy - kept for backward compatibility) */}
+                  {groupedParticipants().individualParticipants.length > 0 && Object.keys(groupedParticipants().registrantGroups).length === 0 && (
                     <div>
                       <h3 className="text-2xl font-bold text-white mb-4">Individual Registrations</h3>
                       <div className="overflow-x-auto bg-white/5 rounded-xl border border-white/10">

@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const [deletedStudents, setDeletedStudents] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"active" | "deleted">("active");
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [packageFilter, setPackageFilter] = useState<string>("");
+  const [expandedRegistrants, setExpandedRegistrants] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     firstName: "",
@@ -53,6 +56,52 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Group students by email
+  const groupStudentsByEmail = () => {
+    let filteredStudents = registeredStudents;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredStudents = filteredStudents.filter(student => {
+        const firstName = (student.participant.registrantFirstName || student.firstName || "").toLowerCase();
+        const lastName = (student.participant.registrantLastName || student.lastName || "").toLowerCase();
+        const email = (student.email || "").toLowerCase();
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        return firstName.includes(query) || lastName.includes(query) || fullName.includes(query) || email.includes(query);
+      });
+    }
+
+    // Apply package filter
+    if (packageFilter) {
+      filteredStudents = filteredStudents.filter(student => student.participant.packageType === packageFilter);
+    }
+
+    // Group by email
+    const groups: { [key: string]: any[] } = {};
+    filteredStudents.forEach(student => {
+      const key = student.email;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(student);
+    });
+
+    return groups;
+  };
+
+  const toggleRegistrantExpansion = (email: string) => {
+    setExpandedRegistrants(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(email)) {
+        newSet.delete(email);
+      } else {
+        newSet.add(email);
+      }
+      return newSet;
+    });
+  };
 
   const fetchData = async () => {
     try {
@@ -492,6 +541,37 @@ export default function DashboardPage() {
                 + Add More Students
               </Link>
             </div>
+            {/* Search and Filter */}
+            <div className="mb-6 flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name or email..."
+                className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+              />
+              <select
+                value={packageFilter}
+                onChange={(e) => setPackageFilter(e.target.value)}
+                className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <option value="" className="bg-blue-900">All Packages</option>
+                {packages.map((pkg) => (
+                  <option key={pkg.name} value={pkg.name} className="bg-blue-900">{pkg.name}</option>
+                ))}
+              </select>
+              {(searchQuery || packageFilter) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPackageFilter("");
+                  }}
+                  className="px-4 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors whitespace-nowrap"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
             {/* Tabs - Only show for admins */}
             {user?.isAdmin && (
@@ -521,200 +601,277 @@ export default function DashboardPage() {
 
             {/* Active Students */}
             {activeTab === "active" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {registeredStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all"
-                >
-                  {editingId === student.participant.id ? (
-                    /* Edit Mode for Student */
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-bold text-white mb-4">Edit Student</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-white text-sm font-semibold mb-2">First Name</label>
-                          <input
-                            type="text"
-                            value={editForm.firstName}
-                            onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
-                          />
+              <div className="space-y-4">
+                {Object.keys(groupStudentsByEmail()).length === 0 ? (
+                  <div className="text-center text-blue-100 py-12">
+                    {searchQuery || packageFilter ? "No students found matching your filters" : "No students registered yet"}
+                  </div>
+                ) : (
+                  Object.entries(groupStudentsByEmail()).map(([email, students]) => {
+                    const firstStudent = students[0];
+                    const registrantName = `${firstStudent.participant.registrantFirstName || firstStudent.firstName} ${firstStudent.participant.registrantLastName || firstStudent.lastName}`;
+                    const isExpanded = expandedRegistrants.has(email);
+                    const totalPrice = students.reduce((sum, s) => sum + s.participant.totalPrice, 0);
+                    const allCheckedIn = students.every(s => s.participant.checkedIn);
+                    const someCheckedIn = students.some(s => s.participant.checkedIn);
+
+                    return (
+                      <div key={email} className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden hover:border-white/40 transition-all">
+                        {/* Card Header */}
+                        <div className="p-6">
+                          <div className="flex flex-wrap items-center gap-4">
+                            {/* Name and Email */}
+                            <div className="flex-1 min-w-[200px]">
+                              <div className="text-white font-bold text-lg">{registrantName}</div>
+                              <div className="text-blue-200 text-sm">{email}</div>
+                              {firstStudent.participant.studioName && (
+                                <div className="text-blue-300 text-xs mt-1">🎭 {firstStudent.participant.studioName}</div>
+                              )}
+                            </div>
+
+                            {/* Registration Pills */}
+                            <div className="flex flex-wrap gap-2">
+                              {students.map((student, idx) => (
+                                <div key={student.participant.id} className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
+                                  <div className="text-white font-semibold text-sm">{student.participant.packageType}</div>
+                                  <div className="text-blue-200 text-xs flex items-center gap-1 mt-1">
+                                    €{student.participant.totalPrice}
+                                    {student.participant.guinnessRecordAttempt && <span>🏆</span>}
+                                    {student.participant.greekNight && <span>🍷</span>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Total Price */}
+                            <div className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-lg px-4 py-2 border border-blue-400/30">
+                              <div className="text-blue-100 text-xs">Total</div>
+                              <div className="text-white font-bold text-lg">€{totalPrice}</div>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div>
+                              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                                allCheckedIn 
+                                  ? "bg-green-500 text-white" 
+                                  : someCheckedIn 
+                                  ? "bg-yellow-500 text-white"
+                                  : "bg-gray-500 text-white"
+                              }`}>
+                                {allCheckedIn 
+                                  ? `✓ All Checked In (${students.length})`
+                                  : someCheckedIn
+                                  ? `${students.filter(s => s.participant.checkedIn).length}/${students.length} Checked In`
+                                  : `${students.length} Pending`
+                                }
+                              </span>
+                            </div>
+
+                            {/* Expand/Collapse Button */}
+                            {students.length > 1 && (
+                              <button
+                                onClick={() => toggleRegistrantExpansion(email)}
+                                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-colors text-sm"
+                              >
+                                {isExpanded ? "▼ Hide Details" : "▶ Show Details"}
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-white text-sm font-semibold mb-2">Last Name</label>
-                          <input
-                            type="text"
-                            value={editForm.lastName}
-                            onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
-                          />
-                        </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-white text-sm font-semibold mb-2">
-                          Studio Name (Optional) {editForm.studioName && <span className="text-blue-200 font-normal">- Currently: {editForm.studioName}</span>}
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.studioName}
-                          onChange={(e) => setEditForm({ ...editForm, studioName: e.target.value })}
-                          placeholder={editForm.studioName ? editForm.studioName : "Enter studio name or leave empty"}
-                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-300"
-                        />
-                      </div>
+                        {/* Expanded Details */}
+                        {(isExpanded || students.length === 1) && (
+                          <div className="border-t border-white/10 bg-white/5">
+                            <div className="p-6 space-y-3">
+                              {students.map((student, idx) => (
+                                <div key={student.participant.id} className="bg-white/10 rounded-lg p-4 border border-white/20">
+                                  {editingId === student.participant.id ? (
+                                    /* Edit Mode */
+                                    <div className="space-y-4">
+                                      <h3 className="text-xl font-bold text-white mb-4">Edit Registration #{idx + 1}</h3>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                          <label className="block text-white text-sm font-semibold mb-2">First Name</label>
+                                          <input
+                                            type="text"
+                                            value={editForm.firstName}
+                                            onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-white text-sm font-semibold mb-2">Last Name</label>
+                                          <input
+                                            type="text"
+                                            value={editForm.lastName}
+                                            onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                                            className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                                          />
+                                        </div>
+                                      </div>
 
-                      <div>
-                        <label className="block text-white text-sm font-semibold mb-2">Package</label>
-                        <select
-                          value={editForm.packageType}
-                          onChange={(e) => handlePackageChange(e.target.value)}
-                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
-                        >
-                          {packages.map((pkg) => (
-                            <option key={pkg.name} value={pkg.name} className="bg-blue-900">
-                              {pkg.name} - €{pkg.price}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                                      <div>
+                                        <label className="block text-white text-sm font-semibold mb-2">
+                                          Studio Name (Optional)
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={editForm.studioName}
+                                          onChange={(e) => setEditForm({ ...editForm, studioName: e.target.value })}
+                                          placeholder="Enter studio name or leave empty"
+                                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-300"
+                                        />
+                                      </div>
 
-                      {editForm.packageType !== "Full Pass" &&
-                        editForm.packageType !== "Guinness Record Only" &&
-                        editForm.packageType !== "Greek Night Only" && (
-                          <div className="space-y-2">
-                            <label className="flex items-center gap-3 text-white">
-                              <input
-                                type="checkbox"
-                                checked={editForm.guinnessRecordAttempt}
-                                onChange={(e) => handleAddonChange("guinness", e.target.checked)}
-                                className="w-5 h-5"
-                              />
-                              <span>🏆 Guinness Record Attempt (+€30)</span>
-                            </label>
-                            <label className="flex items-center gap-3 text-white">
-                              <input
-                                type="checkbox"
-                                checked={editForm.greekNight}
-                                onChange={(e) => handleAddonChange("greek", e.target.checked)}
-                                className="w-5 h-5"
-                              />
-                              <span>🍷 Greek Night (+€40)</span>
-                            </label>
+                                      <div>
+                                        <label className="block text-white text-sm font-semibold mb-2">Package</label>
+                                        <select
+                                          value={editForm.packageType}
+                                          onChange={(e) => handlePackageChange(e.target.value)}
+                                          className="w-full px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white"
+                                        >
+                                          {packages.map((pkg) => (
+                                            <option key={pkg.name} value={pkg.name} className="bg-blue-900">
+                                              {pkg.name} - €{pkg.price}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+
+                                      {editForm.packageType !== "Full Pass" &&
+                                        editForm.packageType !== "Guinness Record Only" &&
+                                        editForm.packageType !== "Greek Night Only" && (
+                                          <div className="space-y-2">
+                                            <label className="flex items-center gap-3 text-white">
+                                              <input
+                                                type="checkbox"
+                                                checked={editForm.guinnessRecordAttempt}
+                                                onChange={(e) => handleAddonChange("guinness", e.target.checked)}
+                                                className="w-5 h-5"
+                                              />
+                                              <span>🏆 Guinness Record Attempt (+€30)</span>
+                                            </label>
+                                            <label className="flex items-center gap-3 text-white">
+                                              <input
+                                                type="checkbox"
+                                                checked={editForm.greekNight}
+                                                onChange={(e) => handleAddonChange("greek", e.target.checked)}
+                                                className="w-5 h-5"
+                                              />
+                                              <span>🍷 Greek Night (+€40)</span>
+                                            </label>
+                                          </div>
+                                        )}
+
+                                      <div className="pt-4 border-t border-white/20">
+                                        <p className="text-white text-xl font-bold">Total: €{editForm.totalPrice}</p>
+                                      </div>
+
+                                      <div className="flex gap-3">
+                                        <button
+                                          onClick={() => saveEdit(student.participant.id)}
+                                          className="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                                        >
+                                          Save Changes
+                                        </button>
+                                        <button
+                                          onClick={cancelEdit}
+                                          className="px-6 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* View Mode */
+                                    <>
+                                      <div className="flex items-center justify-between mb-3">
+                                        <div>
+                                          <div className="text-white font-semibold">Registration #{idx + 1}</div>
+                                          <div className="text-blue-200 text-sm">{student.participant.packageType}</div>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                          student.participant.checkedIn ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                                        }`}>
+                                          {student.participant.checkedIn ? "✓ Checked In" : "Pending"}
+                                        </span>
+                                      </div>
+
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm">
+                                        <div>
+                                          <div className="text-blue-200">Price</div>
+                                          <div className="text-white font-semibold">€{student.participant.totalPrice}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">Add-ons</div>
+                                          <div className="text-white">
+                                            {student.participant.guinnessRecordAttempt && <span className="mr-1">🏆</span>}
+                                            {student.participant.greekNight && <span>🍷</span>}
+                                            {!student.participant.guinnessRecordAttempt && !student.participant.greekNight && "—"}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">Registered</div>
+                                          <div className="text-white text-xs">{new Date(student.participant.createdAt).toLocaleDateString()}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-blue-200">ID</div>
+                                          <div className="text-white text-xs font-mono">{student.participant.id.slice(0, 8)}...</div>
+                                        </div>
+                                      </div>
+
+                                      {deleteConfirm === student.participant.id ? (
+                                        <div className="bg-red-500/20 border border-red-500 rounded-lg p-4">
+                                          <p className="text-white font-semibold mb-3">
+                                            Delete this registration?
+                                          </p>
+                                          <p className="text-red-200 text-sm mb-4">
+                                            This action cannot be easily undone.
+                                            {user?.isAdmin && " Deleted registrations are stored for 7 days."}
+                                          </p>
+                                          <div className="flex gap-3">
+                                            <button
+                                              onClick={() => deleteRegistration(student.participant.id)}
+                                              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm"
+                                            >
+                                              Yes, Delete
+                                            </button>
+                                            <button
+                                              onClick={() => setDeleteConfirm(null)}
+                                              className="px-4 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                          <button
+                                            onClick={() => startEdit(student.participant)}
+                                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                          >
+                                            Edit
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirm(student.participant.id)}
+                                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-sm"
+                                          >
+                                            Delete
+                                          </button>
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
-
-                      <div className="pt-4 border-t border-white/20">
-                        <p className="text-white text-xl font-bold">Total: €{editForm.totalPrice}</p>
                       </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => saveEdit(student.participant.id)}
-                          className="px-6 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
-                        >
-                          Save Changes
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="px-6 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* View Mode for Student */
-                    <>
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">{getPackageIcon(student.participant.packageType)}</span>
-                    <div>
-                      <h3 className="text-xl font-bold text-white">
-                        {student.participant.registrantFirstName} {student.participant.registrantLastName}
-                      </h3>
-                      <p className="text-blue-200 text-sm">{student.email}</p>
-                      {student.participant.studioName && (
-                        <p className="text-blue-300 text-sm">🎭 {student.participant.studioName}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-white/5 rounded-lg p-3 mb-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-100 text-sm">{student.participant.packageType}</span>
-                      <span className="text-white font-bold">€{student.participant.totalPrice}</span>
-                    </div>
-                  </div>
-
-                  {(student.participant.guinnessRecordAttempt || student.participant.greekNight) && (
-                    <div className="flex gap-2 mb-3">
-                      {student.participant.guinnessRecordAttempt && (
-                        <span className="bg-blue-500/20 text-blue-100 px-2 py-1 rounded text-xs">
-                          🏆 Guinness
-                        </span>
-                      )}
-                      {student.participant.greekNight && (
-                        <span className="bg-purple-500/20 text-purple-100 px-2 py-1 rounded text-xs">
-                          🍷 Greek Night
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {student.participant.checkedIn && (
-                    <div className="mb-3 pb-3 border-b border-white/20">
-                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                        ✓ Checked In
-                      </span>
-                    </div>
-                  )}
-
-                  {deleteConfirm === student.participant.id ? (
-                    <div className="bg-red-500/20 border border-red-500 rounded-lg p-4">
-                      <p className="text-white font-semibold mb-3">
-                        Delete {student.participant.registrantFirstName}'s registration?
-                      </p>
-                      <p className="text-red-200 text-sm mb-4">
-                        This action cannot be easily undone.
-                        {user?.isAdmin && " Deleted registrations are stored for 7 days before permanent deletion."}
-                      </p>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => deleteRegistration(student.participant.id)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm"
-                        >
-                          Yes, Delete
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="px-4 py-2 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => startEdit(student.participant)}
-                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => confirmDelete(student.participant.id)}
-                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                  </>
-                  )}
-                </div>
-              ))}
-            </div>
+                    );
+                  })
+                )}
+              </div>
             )}
 
             {/* Deleted Students */}
