@@ -10,6 +10,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showDashboardMobile, setShowDashboardMobile] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { t } = useLanguage();
@@ -152,30 +153,70 @@ export default function Navigation() {
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 shadow-2xl z-50 transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-72 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 shadow-2xl z-50 transform transition-transform duration-300 ease-out md:hidden overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="p-8">
+        <div className="p-6 pb-24">
           {/* Close Button */}
           <button
             onClick={() => setIsOpen(false)}
-            className="absolute top-6 right-6 text-white hover:text-blue-200 transition-colors"
+            className="absolute top-4 right-4 text-white hover:text-blue-200 transition-colors"
             aria-label="Close menu"
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
           {/* Menu Title */}
-          <h2 className="text-2xl font-bold text-white mb-6 mt-4">Menu</h2>
+          <h2 className="text-xl font-bold text-white mb-4 mt-2">Menu</h2>
+
+          {/* Dashboard Link - Show at top for logged in users */}
+          {!isLoading && isAuthenticated && (
+            <div className="mb-4">
+              <button
+                onClick={() => setShowDashboardMobile(!showDashboardMobile)}
+                className="w-full bg-white/20 border border-white/40 rounded-lg p-3 text-white hover:bg-white/30 transition-all flex items-center justify-between"
+              >
+                <span className="font-semibold text-sm">📋 My Registrations</span>
+                <svg 
+                  className={`w-4 h-4 transition-transform ${
+                    showDashboardMobile ? "rotate-180" : ""
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showDashboardMobile && (
+                <div className="mt-2 bg-white/10 rounded-lg p-2 space-y-1">
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-white/90 hover:bg-white/20 rounded text-sm transition-colors"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    href="/register/bulk"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-white/90 hover:bg-white/20 rounded text-sm transition-colors"
+                  >
+                    Register Students
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Language Switcher for Mobile - Hide on admin pages */}
           {!isAdminPage && (
-            <div className="mb-8 pb-6 border-b border-white/30">
-              <div className="text-center mb-4">
-                <p className="text-white/80 text-sm font-semibold mb-3">🌍 Language / Γλώσσα</p>
+            <div className="mb-4 pb-4 border-b border-white/30">
+              <div className="text-center mb-2">
+                <p className="text-white/80 text-xs font-semibold mb-2">🌍 Language</p>
               </div>
               <div className="flex justify-center">
                 <LanguageSwitcher />
@@ -183,51 +224,37 @@ export default function Navigation() {
             </div>
           )}
 
-          {/* Menu Items with Beautiful Continuous Animations */}
-          <div className="space-y-3">
+          {/* Menu Items - Compact Version */}
+          <div className="space-y-2">
             {menuItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="block group relative overflow-hidden rounded-xl transition-all duration-500"
+                className="block group relative overflow-hidden rounded-lg transition-all duration-300"
                 style={{
-                  animation: `floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards ${index * 80}ms, float 3s ease-in-out infinite ${index * 0.5}s`,
+                  animation: `floatIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards ${index * 50}ms`,
                 }}
               >
-                {/* Animated gradient border */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 animate-gradientRotate opacity-75 blur-sm"></div>
-                
-                <div className="relative bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/15 backdrop-blur-md border border-white/40 hover:border-white/60 rounded-xl px-6 py-5 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl">
-                  {/* Continuous shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer rounded-xl"></div>
-                  
-                  {/* Animated orbs */}
-                  <div className="absolute top-2 right-4 w-3 h-3 bg-yellow-300 rounded-full animate-pulse opacity-70"></div>
-                  <div className="absolute bottom-2 left-4 w-2 h-2 bg-pink-300 rounded-full animate-ping opacity-50"></div>
+                <div className="relative bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/15 backdrop-blur-md border border-white/40 hover:border-white/60 rounded-lg px-4 py-3 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer rounded-lg"></div>
                   
                   <div className="relative flex items-center justify-between">
-                    <span className={`text-xl font-bold tracking-wide ${
-                      pathname === item.href ? "text-yellow-200 animate-pulse" : "text-white"
-                    } group-hover:text-yellow-100 transition-all duration-300 transform group-hover:scale-110`}>
+                    <span className={`text-base font-semibold ${
+                      pathname === item.href ? "text-yellow-200" : "text-white"
+                    } group-hover:text-yellow-100 transition-colors`}>
                       {item.label}
                     </span>
-                    <div className="relative">
-                      {/* Pulsing circle background */}
-                      <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 group-hover:opacity-30"></div>
-                      <svg 
-                        className="relative w-6 h-6 text-white/70 group-hover:text-white group-hover:translate-x-2 group-hover:scale-125 transition-all duration-500 animate-bounce-subtle" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
+                    <svg 
+                      className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
-                  
-                  {/* Animated bottom line */}
-                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 animate-expandContract rounded-full"></div>
                 </div>
               </Link>
             ))}
@@ -235,23 +262,16 @@ export default function Navigation() {
 
           {/* User Menu for Mobile */}
           {!isLoading && isAuthenticated && (
-            <div className="mt-8 pt-6 border-t border-white/30">
-              <div className="space-y-3">
-                <div className="text-white/90 text-sm mb-3">
-                  Signed in as: <span className="text-yellow-200 font-semibold">{session.user?.email}</span>
+            <div className="mt-4 pt-4 border-t border-white/30">
+              <div className="space-y-2">
+                <div className="text-white/90 text-xs mb-2 truncate">
+                  <span className="text-yellow-200 font-semibold">{session.user?.email}</span>
                 </div>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="block bg-blue-400/25 border-2 border-blue-300/60 rounded-xl p-4 text-white hover:bg-blue-400/35 transition-all font-semibold"
-                >
-                  📋 My Registrations
-                </Link>
                 {(session.user as any)?.isAdmin && (
                   <Link
                     href="/admin"
                     onClick={() => setIsOpen(false)}
-                    className="block bg-yellow-400/25 border-2 border-yellow-300/60 rounded-xl p-4 text-white hover:bg-yellow-400/35 transition-all font-semibold"
+                    className="block bg-yellow-400/25 border border-yellow-300/60 rounded-lg p-3 text-white hover:bg-yellow-400/35 transition-all font-semibold text-sm"
                   >
                     🛡️ {isAdminPage ? "Admin Panel" : t.nav.adminPanel}
                   </Link>
@@ -261,7 +281,7 @@ export default function Navigation() {
                     setIsOpen(false);
                     handleSignOut();
                   }}
-                  className="block w-full bg-red-400/25 border-2 border-red-300/60 rounded-xl p-4 text-white hover:bg-red-400/35 transition-all text-left font-semibold"
+                  className="block w-full bg-red-400/25 border border-red-300/60 rounded-lg p-3 text-white hover:bg-red-400/35 transition-all text-left font-semibold text-sm"
                 >
                   🚪 {isAdminPage ? "Sign Out" : t.nav.signOut}
                 </button>
@@ -270,11 +290,11 @@ export default function Navigation() {
           )}
 
           {!isLoading && !isAuthenticated && (
-            <div className="mt-8">
+            <div className="mt-4 pt-4 border-t border-white/30">
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
-                className="block bg-white/20 border-2 border-white/40 rounded-xl p-4 text-white hover:bg-white/30 transition-all text-center font-semibold"
+                className="block bg-white/20 border border-white/40 rounded-lg p-3 text-white hover:bg-white/30 transition-all text-center font-semibold text-sm"
               >
                 {isAdminPage ? "Login" : t.nav.login}
               </Link>
@@ -282,9 +302,9 @@ export default function Navigation() {
           )}
 
           {/* Decorative Elements */}
-          <div className="absolute bottom-8 left-8 right-8">
-            <div className="border-t border-white/30 pt-6">
-              <p className="text-yellow-100 text-sm text-center font-semibold">
+          <div className="mt-6">
+            <div className="border-t border-white/30 pt-4">
+              <p className="text-yellow-100 text-xs text-center font-semibold">
                 Greek Dance Festival 2026
               </p>
             </div>
