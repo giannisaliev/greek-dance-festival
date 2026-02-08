@@ -115,7 +115,7 @@ export default function HotelPage() {
       }
     }));
     setShowBookingForm(hotel.id);
-    setHotelTab(hotel.id, "booking");
+    // Don't call setHotelTab here - it's already called by the caller
     setBookingSuccessHotels(prev => ({ ...prev, [hotel.id]: false }));
     setBookingError("");
   };
@@ -466,7 +466,10 @@ export default function HotelPage() {
                                 </span>
                               </p>
                               <button
-                                onClick={() => openBookingForm(hotel, roomType)}
+                                onClick={() => {
+                                  openBookingForm(hotel, roomType);
+                                  setHotelTab(hotel.id, "booking");
+                                }}
                                 className="mt-2 w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all text-sm"
                               >
                                 Book This Room
