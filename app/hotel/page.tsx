@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navigation from "../components/Navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -298,8 +298,8 @@ export default function HotelPage() {
         {/* Hotel Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {hotels.map((hotel) => {
-            // Compute booking form once per hotel to avoid infinite re-renders
-            const currentBookingForm = getBookingForm(hotel.id);
+            // Only get booking form if it exists to avoid creating new objects
+            const currentBookingForm = bookingForms[hotel.id];
             const isSubmitting = submittingHotels[hotel.id] || false;
             const isSuccess = bookingSuccessHotels[hotel.id] || false;
             
@@ -518,7 +518,7 @@ export default function HotelPage() {
                           Close
                         </button>
                       </div>
-                    ) : (
+                    ) : currentBookingForm ? (
                       <form onSubmit={(e) => handleBookingSubmit(e, hotel.id)} className="space-y-4">
                         <h3 className="text-lg font-bold text-white mb-4">📅 Book Your Stay</h3>
                         
@@ -745,6 +745,10 @@ export default function HotelPage() {
                           )}
                         </button>
                       </form>
+                    ) : (
+                      <div className="text-center text-white p-4">
+                        <p>Loading booking form...</p>
+                      </div>
                     )}
                   </div>
                 )}
