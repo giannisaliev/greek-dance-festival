@@ -67,6 +67,20 @@ export async function POST(request: NextRequest) {
       !checkIn ||
       !checkOut
     ) {
+      console.error("Validation failed:", {
+        hotelId: !!hotelId,
+        hotelName: !!hotelName,
+        roomType: !!roomType,
+        guestNames: guestNames,
+        hasGuestNames: !!guestNames,
+        isArray: Array.isArray(guestNames),
+        length: guestNames?.length,
+        emptyGuests: guestNames?.filter((n: string) => !n || n.trim() === ""),
+        email: !!email,
+        phone: !!phone,
+        checkIn: !!checkIn,
+        checkOut: !!checkOut
+      });
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }

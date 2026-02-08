@@ -40,8 +40,8 @@ export default function HotelPage() {
   const [activeTab, setActiveTab] = useState<Record<string, string>>({});
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showBookingForm, setShowBookingForm] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [submittingHotels, setSubmittingHotels] = useState<Record<string, boolean>>({});
+  const [bookingSuccessHotels, setBookingSuccessHotels] = useState<Record<string, boolean>>({});
   const [bookingError, setBookingError] = useState("");
   
   const [bookingForms, setBookingForms] = useState<Record<string, BookingFormData>>({});
@@ -110,7 +110,7 @@ export default function HotelPage() {
     }));
     setShowBookingForm(hotel.id);
     setHotelTab(hotel.id, "booking");
-    setBookingSuccess(false);
+    setBookingSuccessHotels(prev => ({ ...prev, [hotel.id]: false }));
     setBookingError("");
   };
 
@@ -164,17 +164,22 @@ export default function HotelPage() {
 
   const handleBookingSubmit = async (e: React.FormEvent, hotelId: string) => {
     e.preventDefault();
-    setSubmitting(true);
+    setSubmittingHotels(prev => ({ ...prev, [hotelId]: true }));
     setBookingError("");
 
     const bookingForm = bookingForms[hotelId];
-    if (!bookingForm) return;
+    if (!bookingForm) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      return;
+    }
 
     try {
       // Combine country code with phone number
       const fullPhone = bookingForm.countryCode + bookingForm.phone;
       const submitData = { ...bookingForm, phone: fullPhone };
       delete (submitData as any).countryCode;
+      
+      console.log("Submitting booking data:", JSON.stringify(submitData, null, 2));
       
       const response = await fetch("/api/hotel-bookings", {
         method: "POST",
@@ -189,15 +194,15 @@ export default function HotelPage() {
         throw new Error(data.error || "Failed to submit booking");
       }
 
-      console.log("Setting bookingSuccess to true");
-      setBookingSuccess(true);
+      console.log("Setting bookingSuccess to true for hotel:", hotelId);
+      setBookingSuccessHotels(prev => ({ ...prev, [hotelId]: true }));
       console.log("Booking success set, showBookingForm:", showBookingForm);
       // Don't reset the form here - keep it so the success message can reference the hotel
     } catch (error: any) {
       console.error("Booking submission error:", error);
       setBookingError(error.message || "Failed to submit booking");
     } finally {
-      setSubmitting(false);
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
       console.log("=== BOOKING FORM SUBMIT END ===");
     }
   };
@@ -445,7 +450,7 @@ export default function HotelPage() {
                 {/* Booking Tab */}
                 {activeTab[hotel.id] === "booking" && (
                   <div>
-                    {bookingSuccess && showBookingForm === hotel.id ? (
+                    {bookingSuccessHotels[hotel.id] && showBookingForm === hotel.id ? (
                       <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-6 text-center">
                         <div className="text-5xl mb-4">✅</div>
                         <h3 className="text-xl font-bold text-white mb-2">Booking Request Sent!</h3>
@@ -454,7 +459,7 @@ export default function HotelPage() {
                         </p>
                         <button
                           onClick={() => {
-                            setBookingSuccess(false);
+                            setBookingSuccessHotels(prev => ({ ...prev, [hotel.id]: false }));
                             setShowBookingForm(null);
                             setHotelTab(hotel.id, "gallery");
                             // Reset form when closing success message
@@ -682,10 +687,10 @@ export default function HotelPage() {
 
                         <button
                           type="submit"
-                          disabled={submitting}
+                          disabled={submittingHotels[hotel.id]}
                           className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-bold hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                          {submitting ? (
+                          {submittingHotels[hotel.id] ? (
                             <>
                               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                               Submitting...
