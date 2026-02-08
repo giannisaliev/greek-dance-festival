@@ -44,18 +44,7 @@ export default function HotelPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState("");
   
-  const [bookingForm, setBookingForm] = useState<BookingFormData>({
-    hotelId: "",
-    hotelName: "",
-    roomType: "",
-    guestNames: [""],
-    email: "",
-    countryCode: "+30",
-    phone: "",
-    checkIn: "",
-    checkOut: "",
-    specialRequests: "",
-  });
+  const [bookingForms, setBookingForms] = useState<Record<string, BookingFormData>>({});
 
   useEffect(() => {
     fetchHotels();
@@ -104,18 +93,21 @@ export default function HotelPage() {
     const selectedRoomType = roomType || "";
     const guestCount = selectedRoomType ? getGuestCount(selectedRoomType) : 1;
     
-    setBookingForm({
-      hotelId: hotel.id,
-      hotelName: hotel.name,
-      roomType: selectedRoomType,
-      guestNames: Array(guestCount).fill(""),
-      email: "",
-      countryCode: "+30",
-      phone: "",
-      checkIn: "",
-      checkOut: "",
-      specialRequests: "",
-    });
+    setBookingForms(prev => ({
+      ...prev,
+      [hotel.id]: {
+        hotelId: hotel.id,
+        hotelName: hotel.name,
+        roomType: selectedRoomType,
+        guestNames: Array(guestCount).fill(""),
+        email: "",
+        countryCode: "+30",
+        phone: "",
+        checkIn: "",
+        checkOut: "",
+        specialRequests: "",
+      }
+    }));
     setShowBookingForm(hotel.id);
     setHotelTab(hotel.id, "booking");
     setBookingSuccess(false);
@@ -131,10 +123,52 @@ export default function HotelPage() {
     return 1; // default
   };
 
-  const handleBookingSubmit = async (e: React.FormEvent) => {
+  const getBookingForm = (hotelId: string): BookingFormData => {
+    return bookingForms[hotelId] || {
+      hotelId: "",
+      hotelName: "",
+      roomType: "",
+      guestNames: [""],
+      email: "",
+      countryCode: "+30",
+      phone: "",
+      checkIn: "",
+      checkOut: "",
+      specialRequests: "",
+    };
+  };
+
+  const updateBookingForm = (hotelId: string, updates: Partial<BookingFormData>) => {
+    setBookingForms(prev => ({
+      ...prev,
+      [hotelId]: { ...getBookingForm(hotelId), ...updates }
+    }));
+  };
+
+  const calculatePrice = (hotel: Hotel, bookingForm: BookingFormData) => {
+    if (!bookingForm.roomType || !bookingForm.checkIn || !bookingForm.checkOut) {
+      return { nights: 0, roomPrice: 0, totalRoomCost: 0, cityTax: 0, grandTotal: 0 };
+    }
+
+    const checkIn = new Date(bookingForm.checkIn);
+    const checkOut = new Date(bookingForm.checkOut);
+    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    
+    const roomPrice = hotel.prices[bookingForm.roomType]?.price || 0;
+    const totalRoomCost = roomPrice * nights;
+    const cityTax = (hotel.cityTax || 0) * nights;
+    const grandTotal = totalRoomCost + cityTax;
+
+    return { nights, roomPrice, totalRoomCost, cityTax, grandTotal };
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent, hotelId: string) => {
     e.preventDefault();
     setSubmitting(true);
     setBookingError("");
+
+    const bookingForm = bookingForms[hotelId];
+    if (!bookingForm) return;
 
     try {
       // Combine country code with phone number
@@ -424,17 +458,10 @@ export default function HotelPage() {
                             setShowBookingForm(null);
                             setHotelTab(hotel.id, "gallery");
                             // Reset form when closing success message
-                            setBookingForm({
-                              hotelId: "",
-                              hotelName: "",
-                              roomType: "",
-                              guestNames: [""],
-                              email: "",
-                              countryCode: "+30",
-                              phone: "",
-                              checkIn: "",
-                              checkOut: "",
-                              specialRequests: "",
+                            setBookingForms(prev => {
+                              const newForms = { ...prev };
+                              delete newForms[hotel.id];
+                              return newForms;
                             });
                           }}
                           className="bg-white text-blue-900 px-6 py-2 rounded-full font-semibold hover:bg-blue-50 transition-all"
@@ -443,7 +470,11 @@ export default function HotelPage() {
                         </button>
                       </div>
                     ) : (
-                      <form onSubmit={handleBookingSubmit} className="space-y-4">
+                      <form onSubmit={(e) => handleBookingSubmit(e, hotel.id)} className="space-y-4">
+                        {(() => {
+                          const bookingForm = getBookingForm(hotel.id);
+                          return (
+                            <>
                         <h3 className="text-lg font-bold text-white mb-4">📅 Book Your Stay</h3>
                         
                         {bookingError && (
@@ -460,8 +491,7 @@ export default function HotelPage() {
                             onChange={(e) => {
                               const newRoomType = e.target.value;
                               const guestCount = getGuestCount(newRoomType);
-                              setBookingForm({ 
-                                ...bookingForm, 
+                              updateBookingForm(hotel.id, {
                                 roomType: newRoomType,
                                 guestNames: Array(guestCount).fill("").map((_, i) => bookingForm.guestNames[i] || "")
                               });
@@ -492,7 +522,7 @@ export default function HotelPage() {
                               onChange={(e) => {
                                 const newNames = [...bookingForm.guestNames];
                                 newNames[index] = e.target.value;
-                                setBookingForm({ ...bookingForm, guestNames: newNames });
+                                updateBookingForm(hotel.id, { guestNames: newNames });
                               }}
                               placeholder="Enter full name"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -506,7 +536,7 @@ export default function HotelPage() {
                           <input
                             type="email"
                             value={bookingForm.email}
-                            onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                            onChange={(e) => updateBookingForm(hotel.id, { email: e.target.value })}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                           />
@@ -517,7 +547,7 @@ export default function HotelPage() {
                           <div className="flex gap-2">
                             <select
                               value={bookingForm.countryCode}
-                              onChange={(e) => setBookingForm({ ...bookingForm, countryCode: e.target.value })}
+                              onChange={(e) => updateBookingForm(hotel.id, { countryCode: e.target.value })}
                               className="bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 w-24"
                               required
                             >
@@ -537,7 +567,7 @@ export default function HotelPage() {
                               value={bookingForm.phone}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
-                                setBookingForm({ ...bookingForm, phone: value });
+                                updateBookingForm(hotel.id, { phone: value });
                               }}
                               placeholder="6912345678"
                               className="flex-1 bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -553,7 +583,7 @@ export default function HotelPage() {
                             <input
                               type="date"
                               value={bookingForm.checkIn}
-                              onChange={(e) => setBookingForm({ ...bookingForm, checkIn: e.target.value })}
+                              onChange={(e) => updateBookingForm(hotel.id, { checkIn: e.target.value })}
                               onFocus={(e) => {
                                 try {
                                   e.target.showPicker?.();
@@ -579,7 +609,7 @@ export default function HotelPage() {
                             <input
                               type="date"
                               value={bookingForm.checkOut}
-                              onChange={(e) => setBookingForm({ ...bookingForm, checkOut: e.target.value })}
+                              onChange={(e) => updateBookingForm(hotel.id, { checkOut: e.target.value })}
                               onFocus={(e) => {
                                 try {
                                   e.target.showPicker?.();
@@ -606,12 +636,49 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Special Requests (Optional)</label>
                           <textarea
                             value={bookingForm.specialRequests}
-                            onChange={(e) => setBookingForm({ ...bookingForm, specialRequests: e.target.value })}
+                            onChange={(e) => updateBookingForm(hotel.id, { specialRequests: e.target.value })}
                             rows={3}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                             placeholder="Any special requirements or preferences..."
                           />
                         </div>
+
+                        {/* Price Calculation */}
+                        {(() => {
+                          const pricing = calculatePrice(hotel, bookingForm);
+                          if (pricing.nights > 0) {
+                            return (
+                              <div className="bg-white/10 border border-white/30 rounded-lg p-4 space-y-2">
+                                <h4 className="text-white font-semibold mb-3">💰 Price Summary</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between text-blue-100">
+                                    <span>{bookingForm.roomType}</span>
+                                    <span>€{pricing.roomPrice}/night</span>
+                                  </div>
+                                  <div className="flex justify-between text-blue-100">
+                                    <span>Number of nights</span>
+                                    <span>{pricing.nights}</span>
+                                  </div>
+                                  <div className="flex justify-between text-blue-100 pt-2 border-t border-white/20">
+                                    <span>Room Total</span>
+                                    <span className="font-semibold">€{pricing.totalRoomCost}</span>
+                                  </div>
+                                  {pricing.cityTax > 0 && (
+                                    <div className="flex justify-between text-blue-100">
+                                      <span>City Tax</span>
+                                      <span>€{pricing.cityTax.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex justify-between text-white font-bold text-lg pt-2 border-t border-white/20">
+                                    <span>Grand Total</span>
+                                    <span className="text-yellow-300">€{pricing.grandTotal.toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
 
                         <button
                           type="submit"
@@ -632,6 +699,9 @@ export default function HotelPage() {
                             </>
                           )}
                         </button>
+                            </>
+                          );
+                        })()}
                       </form>
                     )}
                   </div>
