@@ -134,7 +134,10 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email to guest
     try {
-      await sendHotelBookingConfirmation({
+      console.log("Attempting to send booking confirmation email to:", email);
+      console.log("EMAIL_USER configured:", process.env.EMAIL_USER ? "Yes" : "No");
+      console.log("EMAIL_HOST configured:", process.env.EMAIL_HOST ? "Yes" : "No");
+      const result = await sendHotelBookingConfirmation({
         hotelName,
         roomType,
         guestNames,
@@ -144,14 +147,17 @@ export async function POST(request: NextRequest) {
         checkOut: checkOutDate,
         specialRequests,
       });
+      console.log("Booking confirmation email result:", result);
     } catch (emailError) {
       console.error("Failed to send booking confirmation email:", emailError);
+      console.error("Email error details:", emailError instanceof Error ? emailError.message : String(emailError));
       // Don't fail the booking if email fails
     }
 
     // Send admin notification email
     try {
-      await sendHotelBookingAdminConfirmation({
+      console.log("Attempting to send admin notification email to:", process.env.ADMIN_EMAIL);
+      const adminResult = await sendHotelBookingAdminConfirmation({
         hotelName,
         roomType,
         guestNames,
@@ -162,8 +168,10 @@ export async function POST(request: NextRequest) {
         specialRequests,
         bookingId: booking.id,
       });
+      console.log("Admin notification email result:", adminResult);
     } catch (emailError) {
       console.error("Failed to send admin notification email:", emailError);
+      console.error("Admin email error details:", emailError instanceof Error ? emailError.message : String(emailError));
       // Don't fail the booking if email fails
     }
 

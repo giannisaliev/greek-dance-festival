@@ -411,11 +411,21 @@ export async function sendHotelBookingConfirmation(data: HotelBookingEmailData) 
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Hotel booking confirmation email sent to:', data.email);
+    console.log("Sending hotel booking confirmation email...");
+    console.log("From:", process.env.EMAIL_USER);
+    console.log("To:", data.email);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Hotel booking confirmation email sent successfully:', info.messageId);
+    console.log('Accepted recipients:', info.accepted);
     return { success: true };
   } catch (error) {
     console.error('Hotel booking email sending failed:', error);
+    console.error('SMTP Config:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER ? 'configured' : 'MISSING',
+      pass: process.env.EMAIL_PASSWORD ? 'configured' : 'MISSING'
+    });
     return { success: false, error };
   }
 }
@@ -552,11 +562,16 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Hotel booking admin notification email sent to:', process.env.ADMIN_EMAIL);
+    console.log("Sending hotel booking admin notification email...");
+    console.log("From:", process.env.EMAIL_USER);
+    console.log("To:", process.env.ADMIN_EMAIL);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Hotel booking admin notification email sent successfully:', info.messageId);
+    console.log('Accepted recipients:', info.accepted);
     return { success: true };
   } catch (error) {
     console.error('Hotel booking admin notification email sending failed:', error);
+    console.error('Admin email:', process.env.ADMIN_EMAIL ? 'configured' : 'MISSING');
     return { success: false, error };
   }
 }
