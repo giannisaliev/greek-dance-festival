@@ -514,10 +514,6 @@ export default function HotelPage() {
                       </div>
                     ) : (
                       <form onSubmit={(e) => handleBookingSubmit(e, hotel.id)} className="space-y-4">
-                        {(() => {
-                          const bookingForm = getBookingForm(hotel.id);
-                          return (
-                            <>
                         <h3 className="text-lg font-bold text-white mb-4">📅 Book Your Stay</h3>
                         
                         {bookingError && (
@@ -530,13 +526,14 @@ export default function HotelPage() {
                         <div>
                           <label className="block text-white font-semibold mb-2 text-sm">Room Type</label>
                           <select
-                            value={bookingForm.roomType}
+                            value={getBookingForm(hotel.id).roomType}
                             onChange={(e) => {
                               const newRoomType = e.target.value;
                               const guestCount = getGuestCount(newRoomType);
+                              const currentForm = getBookingForm(hotel.id);
                               updateBookingForm(hotel.id, {
                                 roomType: newRoomType,
-                                guestNames: Array(guestCount).fill("").map((_, i) => bookingForm.guestNames[i] || "")
+                                guestNames: Array(guestCount).fill("").map((_, i) => currentForm.guestNames[i] || "")
                               });
                             }}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -554,7 +551,7 @@ export default function HotelPage() {
                         </div>
 
                         {/* Guest Names - Dynamic based on room type */}
-                        {bookingForm.guestNames.map((name, index) => (
+                        {getBookingForm(hotel.id).guestNames.map((name, index) => (
                           <div key={index}>
                             <label className="block text-white font-semibold mb-2 text-sm">
                               Guest {index + 1} Full Name
@@ -563,7 +560,8 @@ export default function HotelPage() {
                               type="text"
                               value={name}
                               onChange={(e) => {
-                                const newNames = [...bookingForm.guestNames];
+                                const currentForm = getBookingForm(hotel.id);
+                                const newNames = [...currentForm.guestNames];
                                 newNames[index] = e.target.value;
                                 updateBookingForm(hotel.id, { guestNames: newNames });
                               }}
@@ -578,7 +576,7 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Email</label>
                           <input
                             type="email"
-                            value={bookingForm.email}
+                            value={getBookingForm(hotel.id).email}
                             onChange={(e) => updateBookingForm(hotel.id, { email: e.target.value })}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
@@ -589,7 +587,7 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Phone Number</label>
                           <div className="flex gap-2">
                             <select
-                              value={bookingForm.countryCode}
+                              value={getBookingForm(hotel.id).countryCode}
                               onChange={(e) => updateBookingForm(hotel.id, { countryCode: e.target.value })}
                               className="bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 w-24"
                               required
@@ -607,7 +605,7 @@ export default function HotelPage() {
                             </select>
                             <input
                               type="tel"
-                              value={bookingForm.phone}
+                              value={getBookingForm(hotel.id).phone}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
                                 updateBookingForm(hotel.id, { phone: value });
@@ -625,7 +623,7 @@ export default function HotelPage() {
                             <label className="block text-white font-semibold mb-2 text-sm">Check-in</label>
                             <input
                               type="date"
-                              value={bookingForm.checkIn}
+                              value={getBookingForm(hotel.id).checkIn}
                               onChange={(e) => updateBookingForm(hotel.id, { checkIn: e.target.value })}
                               onFocus={(e) => {
                                 try {
@@ -651,7 +649,7 @@ export default function HotelPage() {
                             <label className="block text-white font-semibold mb-2 text-sm">Check-out</label>
                             <input
                               type="date"
-                              value={bookingForm.checkOut}
+                              value={getBookingForm(hotel.id).checkOut}
                               onChange={(e) => updateBookingForm(hotel.id, { checkOut: e.target.value })}
                               onFocus={(e) => {
                                 try {
@@ -667,7 +665,7 @@ export default function HotelPage() {
                                   // Ignore if showPicker is not supported
                                 }
                               }}
-                              min={bookingForm.checkIn || "2026-06-10"}
+                              min={getBookingForm(hotel.id).checkIn || "2026-06-10"}
                               max="2026-06-17"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
                               required
@@ -678,7 +676,7 @@ export default function HotelPage() {
                         <div>
                           <label className="block text-white font-semibold mb-2 text-sm">Special Requests (Optional)</label>
                           <textarea
-                            value={bookingForm.specialRequests}
+                            value={getBookingForm(hotel.id).specialRequests}
                             onChange={(e) => updateBookingForm(hotel.id, { specialRequests: e.target.value })}
                             rows={3}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
@@ -688,14 +686,14 @@ export default function HotelPage() {
 
                         {/* Price Calculation */}
                         {(() => {
-                          const pricing = calculatePrice(hotel, bookingForm);
+                          const pricing = calculatePrice(hotel, getBookingForm(hotel.id));
                           if (pricing.nights > 0) {
                             return (
                               <div className="bg-white/10 border border-white/30 rounded-lg p-4 space-y-2">
                                 <h4 className="text-white font-semibold mb-3">💰 Price Summary</h4>
                                 <div className="space-y-2 text-sm">
                                   <div className="flex justify-between text-blue-100">
-                                    <span>{bookingForm.roomType}</span>
+                                    <span>{getBookingForm(hotel.id).roomType}</span>
                                     <span>€{pricing.roomPrice}/night</span>
                                   </div>
                                   <div className="flex justify-between text-blue-100">
@@ -742,9 +740,6 @@ export default function HotelPage() {
                             </>
                           )}
                         </button>
-                            </>
-                          );
-                        })()}
                       </form>
                     )}
                   </div>

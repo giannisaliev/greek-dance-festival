@@ -149,6 +149,42 @@ export async function POST(request: NextRequest) {
       // Don't fail the booking if email fails
     }
 
+    // Send admin notification email
+    try {
+      await sendHotelBookingAdminConfirmation({
+        hotelName,
+        roomType,
+        guestNames,
+        email,
+        phone,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        specialRequests,
+        bookingId: booking.id,
+      });
+    } catch (emailError) {
+      console.error("Failed to send admin notification email:", emailError);
+      // Don't fail the booking if email fails
+    }
+
+    // Send admin notification email
+    try {
+      await sendHotelBookingAdminConfirmation({
+        hotelName,
+        roomType,
+        guestNames,
+        email,
+        phone,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        specialRequests,
+        bookingId: booking.id,
+      });
+    } catch (emailError) {
+      console.error("Failed to send admin notification email:", emailError);
+      // Don't fail the booking if email fails
+    }
+
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {
     console.error("Error creating hotel booking:", error);
