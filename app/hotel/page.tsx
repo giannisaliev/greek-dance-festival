@@ -135,16 +135,12 @@ export default function HotelPage() {
     e.preventDefault();
     setSubmitting(true);
     setBookingError("");
-    console.log("=== BOOKING FORM SUBMIT START ===");
-    console.log("Form data:", bookingForm);
 
     try {
       // Combine country code with phone number
       const fullPhone = bookingForm.countryCode + bookingForm.phone;
       const submitData = { ...bookingForm, phone: fullPhone };
       delete (submitData as any).countryCode;
-      
-      console.log("Submitting data:", submitData);
       
       const response = await fetch("/api/hotel-bookings", {
         method: "POST",
@@ -415,28 +411,6 @@ export default function HotelPage() {
                 {/* Booking Tab */}
                 {activeTab[hotel.id] === "booking" && (
                   <div>
-                    {(() => {
-                      // Ensure form has hotel info when tab is accessed
-                      if (!bookingForm.hotelId || bookingForm.hotelId !== hotel.id) {
-                        console.log("Setting form hotel info:", hotel.id, hotel.name);
-                        setBookingForm(prev => ({
-                          ...prev,
-                          hotelId: hotel.id,
-                          hotelName: hotel.name,
-                          roomType: prev.roomType || Object.keys(hotel.prices)[0] || ""
-                        }));
-                      }
-                      // Also ensure showBookingForm is set for this hotel
-                      if (showBookingForm !== hotel.id) {
-                        console.log("Setting showBookingForm to:", hotel.id);
-                        setShowBookingForm(hotel.id);
-                      }
-                      return null;
-                    })()}
-                    {(() => {
-                      console.log("Render check - bookingSuccess:", bookingSuccess, "showBookingForm:", showBookingForm, "hotel.id:", hotel.id);
-                      return null;
-                    })()}
                     {bookingSuccess && showBookingForm === hotel.id ? (
                       <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-6 text-center">
                         <div className="text-5xl mb-4">✅</div>
@@ -446,7 +420,6 @@ export default function HotelPage() {
                         </p>
                         <button
                           onClick={() => {
-                            console.log("Closing success message");
                             setBookingSuccess(false);
                             setShowBookingForm(null);
                             setHotelTab(hotel.id, "gallery");

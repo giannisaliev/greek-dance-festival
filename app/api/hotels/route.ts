@@ -198,7 +198,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, logo, stars, location, description, images, prices, amenities, breakfastIncluded, cityTax, order } = body;
+    const { id, name, logo, stars, location, description, images, prices, roomOrder, amenities, breakfastIncluded, cityTax, order } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -216,7 +216,8 @@ export async function PUT(request: Request) {
         ...(location && { location }),
         ...(description !== undefined && { description }),
         ...(images && { images }),
-        ...(prices && { prices, roomOrder: Object.keys(prices) }),
+        ...(prices && { prices }),
+        ...(roomOrder && { roomOrder }),
         ...(amenities && { amenities }),
         ...(breakfastIncluded !== undefined && { breakfastIncluded }),
         ...(cityTax !== undefined && { cityTax }),
