@@ -56,6 +56,7 @@ export default function AdminHotelsPage() {
     description: "",
     images: [] as string[],
     prices: {} as Record<string, { price: number; additionalInfo?: string }>,
+    roomOrder: [] as string[],
     amenities: [] as string[],
     breakfastIncluded: false,
     cityTax: undefined as number | undefined,
@@ -184,6 +185,7 @@ export default function AdminHotelsPage() {
       description: "",
       images: [],
       prices: {},
+      roomOrder: [],
       amenities: [],
       breakfastIncluded: false,
       cityTax: undefined,
@@ -208,6 +210,7 @@ export default function AdminHotelsPage() {
       description: hotel.description || "",
       images: hotel.images,
       prices: hotel.prices,
+      roomOrder: hotel.roomOrder || Object.keys(hotel.prices),
       amenities: hotel.amenities,
       breakfastIncluded: hotel.breakfastIncluded || false,
       cityTax: hotel.cityTax,
@@ -387,15 +390,21 @@ export default function AdminHotelsPage() {
 
   const addRoomPrice = () => {
     if (roomType.trim() && roomPrice) {
+      const newRoomType = roomType.trim();
+      const newRoomOrder = formData.roomOrder.includes(newRoomType) 
+        ? formData.roomOrder 
+        : [...formData.roomOrder, newRoomType];
+      
       setFormData({
         ...formData,
         prices: { 
           ...formData.prices, 
-          [roomType.trim()]: { 
+          [newRoomType]: { 
             price: parseFloat(roomPrice),
             additionalInfo: roomAdditionalInfo.trim() || undefined
           }
         },
+        roomOrder: newRoomOrder,
       });
       setRoomType("");
       setRoomPrice("");
@@ -406,7 +415,24 @@ export default function AdminHotelsPage() {
   const removeRoomPrice = (key: string) => {
     const newPrices = { ...formData.prices };
     delete newPrices[key];
-    setFormData({ ...formData, prices: newPrices });
+    const newRoomOrder = formData.roomOrder.filter(type => type !== key);
+    setFormData({ ...formData, prices: newPrices, roomOrder: newRoomOrder });
+  };
+
+  const moveRoomUp = (index: number) => {
+    if (index > 0) {
+      const newOrder = [...formData.roomOrder];
+      [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+      setFormData({ ...formData, roomOrder: newOrder });
+    }
+  };
+
+  const moveRoomDown = (index: number) => {
+    if (index < formData.roomOrder.length - 1) {
+      const newOrder = [...formData.roomOrder];
+      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+      setFormData({ ...formData, roomOrder: newOrder });
+    }
   };
 
   if (status === "loading" || loading) {
@@ -698,29 +724,56 @@ export default function AdminHotelsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  {Object.entries(formData.prices).map(([type, priceData]) => (
-                    <div
-                      key={type}
-                      className="flex items-center justify-between bg-white/10 p-3 rounded-lg"
-                    >
-                      <div>
-                        <span className="text-white font-medium">{type}</span>
-                        {priceData.additionalInfo && (
-                          <p className="text-blue-200 text-sm">{priceData.additionalInfo}</p>
-                        )}
+                  {formData.roomOrder.map((type, index) => {
+                    const priceData = formData.prices[type];
+                    if (!priceData) return null;
+                    
+                    return (
+                      <div
+                        key={type}
+                        className="flex items-center justify-between bg-white/10 p-3 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col gap-1">
+                            <button
+                              type="button"
+                              onClick={() => moveRoomUp(index)}
+                              disabled={index === 0}
+                              className="text-white hover:text-blue-300 disabled:text-gray-500 disabled:cursor-not-allowed text-xs"
+                              title="Move up"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveRoomDown(index)}
+                              disabled={index === formData.roomOrder.length - 1}
+                              className="text-white hover:text-blue-300 disabled:text-gray-500 disabled:cursor-not-allowed text-xs"
+                              title="Move down"
+                            >
+                              ▼
+                            </button>
+                          </div>
+                          <div>
+                            <span className="text-white font-medium">{type}</span>
+                            {priceData.additionalInfo && (
+                              <p className="text-blue-200 text-sm">{priceData.additionalInfo}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-yellow-300 font-bold">€{priceData.price}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeRoomPrice(type)}
+                            className="text-red-300 hover:text-red-100"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-yellow-300 font-bold">€{priceData.price}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeRoomPrice(type)}
-                          className="text-red-300 hover:text-red-100"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

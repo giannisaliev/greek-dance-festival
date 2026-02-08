@@ -101,8 +101,8 @@ export default function HotelPage() {
 
   const openBookingForm = (hotel: Hotel, roomType?: string) => {
     const roomTypes = hotel.roomOrder && hotel.roomOrder.length > 0 ? hotel.roomOrder : Object.keys(hotel.prices);
-    const selectedRoomType = roomType || roomTypes[0] || "";
-    const guestCount = getGuestCount(selectedRoomType);
+    const selectedRoomType = roomType || "";
+    const guestCount = selectedRoomType ? getGuestCount(selectedRoomType) : 1;
     
     setBookingForm({
       hotelId: hotel.id,
@@ -127,6 +127,7 @@ export default function HotelPage() {
     if (type.includes("single")) return 1;
     if (type.includes("double")) return 2;
     if (type.includes("triple")) return 3;
+    if (type.includes("quadruple")) return 4;
     return 1; // default
   };
 

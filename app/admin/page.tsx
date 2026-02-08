@@ -775,6 +775,7 @@ export default function AdminPage() {
                               <th className="text-left text-white font-semibold py-4 px-4">Package</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Add-ons</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Price</th>
+                              <th className="text-left text-white font-semibold py-4 px-4">Date Registered</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Status</th>
                               <th className="text-left text-white font-semibold py-4 px-4">Actions</th>
                             </tr>
@@ -818,6 +819,15 @@ export default function AdminPage() {
                                   </div>
                                 </td>
                                 <td className="py-2 px-3 text-blue-100 text-sm">€{participant.totalPrice}</td>
+                                <td className="py-2 px-3 text-blue-100 text-xs">
+                                  {new Date(participant.createdAt).toLocaleString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </td>
                                 <td className="py-2 px-3">
                                   <span className={`text-xs ${participant.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
                                     {participant.checkedIn ? "✓" : "•"}
@@ -988,6 +998,7 @@ export default function AdminPage() {
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Package</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Add-ons</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Price</th>
+                                            <th className="text-left text-white font-semibold py-2 px-2 text-sm">Date Registered</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Status</th>
                                             <th className="text-left text-white font-semibold py-2 px-2 text-sm">Actions</th>
                                           </tr>
@@ -1013,6 +1024,15 @@ export default function AdminPage() {
                                                 {!student.guinnessRecordAttempt && !student.greekNight && "—"}
                                               </td>
                                               <td className="py-2 px-2 text-blue-100 text-xs">€{student.totalPrice}</td>
+                                              <td className="py-2 px-2 text-blue-100 text-xs">
+                                                {new Date(student.createdAt).toLocaleString('en-US', {
+                                                  month: 'short',
+                                                  day: 'numeric',
+                                                  year: 'numeric',
+                                                  hour: '2-digit',
+                                                  minute: '2-digit'
+                                                })}
+                                              </td>
                                               <td className="py-2 px-2">
                                                 <span className={`text-xs ${student.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
                                                   {student.checkedIn ? "✓" : "•"}
