@@ -297,7 +297,13 @@ export default function HotelPage() {
 
         {/* Hotel Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {hotels.map((hotel) => (
+          {hotels.map((hotel) => {
+            // Compute booking form once per hotel to avoid infinite re-renders
+            const currentBookingForm = getBookingForm(hotel.id);
+            const isSubmitting = submittingHotels[hotel.id] || false;
+            const isSuccess = bookingSuccessHotels[hotel.id] || false;
+            
+            return (
             <div
               key={hotel.id}
               className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
@@ -488,7 +494,7 @@ export default function HotelPage() {
                 {/* Booking Tab */}
                 {activeTab[hotel.id] === "booking" && (
                   <div>
-                    {bookingSuccessHotels[hotel.id] && showBookingForm === hotel.id ? (
+                    {isSuccess && showBookingForm === hotel.id ? (
                       <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-6 text-center">
                         <div className="text-5xl mb-4">✅</div>
                         <h3 className="text-xl font-bold text-white mb-2">Booking Request Sent!</h3>
@@ -526,14 +532,13 @@ export default function HotelPage() {
                         <div>
                           <label className="block text-white font-semibold mb-2 text-sm">Room Type</label>
                           <select
-                            value={getBookingForm(hotel.id).roomType}
+                            value={currentBookingForm.roomType}
                             onChange={(e) => {
                               const newRoomType = e.target.value;
                               const guestCount = getGuestCount(newRoomType);
-                              const currentForm = getBookingForm(hotel.id);
                               updateBookingForm(hotel.id, {
                                 roomType: newRoomType,
-                                guestNames: Array(guestCount).fill("").map((_, i) => currentForm.guestNames[i] || "")
+                                guestNames: Array(guestCount).fill("").map((_, i) => currentBookingForm.guestNames[i] || "")
                               });
                             }}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -551,7 +556,7 @@ export default function HotelPage() {
                         </div>
 
                         {/* Guest Names - Dynamic based on room type */}
-                        {getBookingForm(hotel.id).guestNames.map((name, index) => (
+                        {currentBookingForm.guestNames.map((name, index) => (
                           <div key={index}>
                             <label className="block text-white font-semibold mb-2 text-sm">
                               Guest {index + 1} Full Name
@@ -560,8 +565,7 @@ export default function HotelPage() {
                               type="text"
                               value={name}
                               onChange={(e) => {
-                                const currentForm = getBookingForm(hotel.id);
-                                const newNames = [...currentForm.guestNames];
+                                const newNames = [...currentBookingForm.guestNames];
                                 newNames[index] = e.target.value;
                                 updateBookingForm(hotel.id, { guestNames: newNames });
                               }}
@@ -576,7 +580,7 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Email</label>
                           <input
                             type="email"
-                            value={getBookingForm(hotel.id).email}
+                            value={currentBookingForm.email}
                             onChange={(e) => updateBookingForm(hotel.id, { email: e.target.value })}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
@@ -587,7 +591,7 @@ export default function HotelPage() {
                           <label className="block text-white font-semibold mb-2 text-sm">Phone Number</label>
                           <div className="flex gap-2">
                             <select
-                              value={getBookingForm(hotel.id).countryCode}
+                              value={currentBookingForm.countryCode}
                               onChange={(e) => updateBookingForm(hotel.id, { countryCode: e.target.value })}
                               className="bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 w-24"
                               required
@@ -605,7 +609,7 @@ export default function HotelPage() {
                             </select>
                             <input
                               type="tel"
-                              value={getBookingForm(hotel.id).phone}
+                              value={currentBookingForm.phone}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
                                 updateBookingForm(hotel.id, { phone: value });
@@ -623,7 +627,7 @@ export default function HotelPage() {
                             <label className="block text-white font-semibold mb-2 text-sm">Check-in</label>
                             <input
                               type="date"
-                              value={getBookingForm(hotel.id).checkIn}
+                              value={currentBookingForm.checkIn}
                               onChange={(e) => updateBookingForm(hotel.id, { checkIn: e.target.value })}
                               onFocus={(e) => {
                                 try {
@@ -649,7 +653,7 @@ export default function HotelPage() {
                             <label className="block text-white font-semibold mb-2 text-sm">Check-out</label>
                             <input
                               type="date"
-                              value={getBookingForm(hotel.id).checkOut}
+                              value={currentBookingForm.checkOut}
                               onChange={(e) => updateBookingForm(hotel.id, { checkOut: e.target.value })}
                               onFocus={(e) => {
                                 try {
@@ -665,7 +669,7 @@ export default function HotelPage() {
                                   // Ignore if showPicker is not supported
                                 }
                               }}
-                              min={getBookingForm(hotel.id).checkIn || "2026-06-10"}
+                              min={currentBookingForm.checkIn || "2026-06-10"}
                               max="2026-06-17"
                               className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
                               required
@@ -676,7 +680,7 @@ export default function HotelPage() {
                         <div>
                           <label className="block text-white font-semibold mb-2 text-sm">Special Requests (Optional)</label>
                           <textarea
-                            value={getBookingForm(hotel.id).specialRequests}
+                            value={currentBookingForm.specialRequests}
                             onChange={(e) => updateBookingForm(hotel.id, { specialRequests: e.target.value })}
                             rows={3}
                             className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
@@ -686,14 +690,14 @@ export default function HotelPage() {
 
                         {/* Price Calculation */}
                         {(() => {
-                          const pricing = calculatePrice(hotel, getBookingForm(hotel.id));
+                          const pricing = calculatePrice(hotel, currentBookingForm);
                           if (pricing.nights > 0) {
                             return (
                               <div className="bg-white/10 border border-white/30 rounded-lg p-4 space-y-2">
                                 <h4 className="text-white font-semibold mb-3">💰 Price Summary</h4>
                                 <div className="space-y-2 text-sm">
                                   <div className="flex justify-between text-blue-100">
-                                    <span>{getBookingForm(hotel.id).roomType}</span>
+                                    <span>{currentBookingForm.roomType}</span>
                                     <span>€{pricing.roomPrice}/night</span>
                                   </div>
                                   <div className="flex justify-between text-blue-100">
@@ -723,10 +727,10 @@ export default function HotelPage() {
 
                         <button
                           type="submit"
-                          disabled={submittingHotels[hotel.id]}
+                          disabled={isSubmitting}
                           className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-bold hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                          {submittingHotels[hotel.id] ? (
+                          {isSubmitting ? (
                             <>
                               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                               Submitting...
@@ -747,7 +751,8 @@ export default function HotelPage() {
               </div>
 
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Image Modal */}
