@@ -427,8 +427,9 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: data.email,
-    subject: `Hotel Booking Confirmed - ${data.hotelName}`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `New Hotel Booking Request - ${data.hotelName}`,
+    replyTo: data.email,
     html: `
       <!DOCTYPE html>
       <html>
@@ -444,9 +445,9 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
                   
                   <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); padding: 40px 30px; text-align: center;">
+                    <td style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); padding: 40px 30px; text-align: center;">
                       <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
-                        ✅ Hotel Booking Confirmed!
+                        🔔 New Hotel Booking Request
                       </h1>
                     </td>
                   </tr>
@@ -455,7 +456,7 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
                   <tr>
                     <td style="padding: 40px 30px;">
                       <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 16px; line-height: 1.6;">
-                        Great news! Your hotel booking has been confirmed.
+                        A new hotel booking request has been received and requires your attention.
                       </p>
 
                       <div style="background-color: #f1f5f9; border-radius: 12px; padding: 24px; margin: 24px 0;">
@@ -492,18 +493,36 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
                             <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Guest${data.guestNames.length > 1 ? 's' : ''}:</td>
                             <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.guestNames.join(', ')}</td>
                           </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Email:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;"><a href="mailto:${data.email}" style="color: #3b82f6; text-decoration: none;">${data.email}</a></td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Phone:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.phone}</td>
+                          </tr>
+                          ${data.specialRequests ? `
+                          <tr>
+                            <td colspan="2" style="padding: 12px 0 0 0;">
+                              <div style="background-color: #ffffff; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
+                                <p style="margin: 0; color: #64748b; font-size: 12px; font-weight: 600;">SPECIAL REQUESTS:</p>
+                                <p style="margin: 8px 0 0 0; color: #1e293b; font-size: 14px;">${data.specialRequests}</p>
+                              </div>
+                            </td>
+                          </tr>
+                          ` : ''}
                         </table>
                       </div>
 
-                      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin: 24px 0;">
-                        <p style="margin: 0; color: #047857; font-size: 14px; line-height: 1.6;">
-                          ✓ <strong>Your Booking is Confirmed</strong><br/>
-                          We look forward to welcoming you! If you have any questions or need to make changes, please contact us.
+                      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 24px 0;">
+                        <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                          ⚠️ <strong>Action Required</strong><br/>
+                          Please review this booking request and contact the guest to confirm availability and provide payment instructions.
                         </p>
                       </div>
 
                       <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.6;">
-                        See you soon!
+                        You can manage this booking from the admin dashboard.
                       </p>
                     </td>
                   </tr>
@@ -518,7 +537,7 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
                         Greek Dance Festival ${new Date().getFullYear()} | All Rights Reserved
                       </p>
                       <p style="margin: 10px 0 0 0; color: #cbd5e1; font-size: 12px;">
-                        Booking confirmed on ${new Date().toLocaleString()}
+                        Request received on ${new Date().toLocaleString()}
                       </p>
                     </td>
                   </tr>
@@ -534,10 +553,10 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Hotel booking admin confirmation email sent to:', data.email);
+    console.log('Hotel booking admin notification email sent to:', process.env.ADMIN_EMAIL);
     return { success: true };
   } catch (error) {
-    console.error('Hotel booking admin confirmation email sending failed:', error);
+    console.error('Hotel booking admin notification email sending failed:', error);
     return { success: false, error };
   }
 }
