@@ -75,8 +75,14 @@ export default function HotelPage() {
   };
 
   const setHotelTab = (hotelId: string, tab: string) => {
-    setActiveTab((prev) => ({ ...prev, [hotelId]: tab }));
-  };
+    setActiveTab((prev) => ({ ...prev, [hotelId]: tab }));    
+    // If switching to booking tab and form doesn't exist, initialize it
+    if (tab === "booking" && !bookingForms[hotelId]) {
+      const hotel = hotels.find(h => h.id === hotelId);
+      if (hotel) {
+        openBookingForm(hotel);
+      }
+    }  };
 
   const getAvailableTabs = (hotel: Hotel) => {
     const tabs = ["gallery", "info"];
@@ -170,6 +176,38 @@ export default function HotelPage() {
     const bookingForm = bookingForms[hotelId];
     if (!bookingForm) {
       setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Booking form not found");
+      return;
+    }
+
+    // Client-side validation
+    if (!bookingForm.roomType) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Please select a room type");
+      return;
+    }
+
+    if (!bookingForm.guestNames || bookingForm.guestNames.length === 0 || bookingForm.guestNames.some(name => !name || name.trim() === "")) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Please fill in all guest names");
+      return;
+    }
+
+    if (!bookingForm.email) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Please enter your email");
+      return;
+    }
+
+    if (!bookingForm.phone) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Please enter your phone number");
+      return;
+    }
+
+    if (!bookingForm.checkIn || !bookingForm.checkOut) {
+      setSubmittingHotels(prev => ({ ...prev, [hotelId]: false }));
+      setBookingError("Please select check-in and check-out dates");
       return;
     }
 
