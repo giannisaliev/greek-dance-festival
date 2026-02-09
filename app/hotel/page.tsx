@@ -504,6 +504,13 @@ export default function HotelPage() {
                         <p className="text-green-100 mb-4">
                           Booking request sent to your email. We will contact you soon with confirmation details.
                         </p>
+                        <div className="bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-yellow-500/20 border-2 border-yellow-400/70 rounded-lg p-4 mb-4 shadow-lg animate-pulse">
+                          <p className="text-yellow-200 font-bold text-lg flex items-center justify-center gap-2">
+                            <span className="text-2xl">📧</span>
+                            Please check your email inbox or spam folder
+                            <span className="text-2xl">⚠️</span>
+                          </p>
+                        </div>
                         <button
                           onClick={() => {
                             setBookingSuccessHotels(prev => ({ ...prev, [hotel.id]: false }));
