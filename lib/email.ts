@@ -20,7 +20,7 @@ export interface RegistrationEmailData {
 
 export async function sendRegistrationEmail(data: RegistrationEmailData) {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `New Registration - ${data.firstName} ${data.lastName}`,
     html: `
@@ -90,7 +90,7 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
   `).join('');
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: data.teacherEmail,
     subject: `Greek Dance Festival - Registration Confirmation${data.studioName ? ` - ${data.studioName}` : ''}`,
     html: `
@@ -298,7 +298,7 @@ export async function sendHotelBookingConfirmation(data: HotelBookingEmailData) 
   );
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: data.email,
     subject: `Hotel Booking Request Received - ${data.hotelName}`,
     html: `
@@ -436,7 +436,7 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
   );
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `New Hotel Booking Request - ${data.hotelName}`,
     replyTo: data.email,
