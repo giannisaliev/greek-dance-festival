@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
-import { sendHotelBookingAdminConfirmation } from "@/lib/email";
+import { sendHotelBookingConfirmedEmail } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -41,8 +41,8 @@ export async function POST(
       data: { status: "confirmed" },
     });
 
-    // Send confirmation email
-    await sendHotelBookingAdminConfirmation({
+    // Send confirmation email to guest
+    await sendHotelBookingConfirmedEmail({
       bookingId: booking.id,
       hotelName: booking.hotelName,
       roomType: booking.roomType,

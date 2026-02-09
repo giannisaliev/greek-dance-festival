@@ -576,3 +576,173 @@ export async function sendHotelBookingAdminConfirmation(data: HotelBookingEmailD
   }
 }
 
+export async function sendHotelBookingConfirmedEmail(data: HotelBookingEmailData & { bookingId: string }) {
+  const nights = Math.ceil(
+    (data.checkOut.getTime() - data.checkIn.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const mailOptions = {
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
+    to: data.email,
+    subject: `Booking Confirmed! - ${data.hotelName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f8fafc; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center;">
+                      <div style="font-size: 60px; margin-bottom: 16px;">✅</div>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700;">
+                        Booking Confirmed!
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: #d1fae5; font-size: 16px;">
+                        Your hotel reservation is now confirmed
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <div style="background-color: #d1fae5; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                        <p style="margin: 0; color: #065f46; font-size: 16px; font-weight: 600;">
+                          🎉 Great news! Your hotel booking has been confirmed by our team.
+                        </p>
+                      </div>
+
+                      <p style="margin: 0 0 24px 0; color: #1e293b; font-size: 16px; line-height: 1.6;">
+                        Dear ${data.guestNames[0] || 'Guest'},
+                      </p>
+
+                      <p style="margin: 0 0 24px 0; color: #1e293b; font-size: 16px; line-height: 1.6;">
+                        We are pleased to confirm your hotel reservation for the Greek Dance Festival. Below are your booking details:
+                      </p>
+
+                      <div style="background-color: #f1f5f9; border-radius: 12px; padding: 24px; margin: 24px 0;">
+                        <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 600;">
+                          📋 Booking Details
+                        </h2>
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Booking ID:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; font-family: monospace; text-align: right;">#${data.bookingId.substring(0, 8).toUpperCase()}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Hotel:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.hotelName}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Room Type:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.roomType}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Check-in:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.checkIn.toLocaleDateString()}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Check-out:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.checkOut.toLocaleDateString()}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Nights:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${nights}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Guest${data.guestNames.length > 1 ? 's' : ''}:</td>
+                            <td style="padding: 8px 0; color: #1e293b; font-weight: 600; text-align: right;">${data.guestNames.join(', ')}</td>
+                          </tr>
+                          ${data.specialRequests ? `
+                          <tr>
+                            <td colspan="2" style="padding: 12px 0 0 0;">
+                              <div style="background-color: #ffffff; border-left: 4px solid #10b981; padding: 12px; border-radius: 4px;">
+                                <p style="margin: 0; color: #64748b; font-size: 12px; font-weight: 600;">SPECIAL REQUESTS:</p>
+                                <p style="margin: 8px 0 0 0; color: #1e293b; font-size: 14px;">${data.specialRequests}</p>
+                              </div>
+                            </td>
+                          </tr>
+                          ` : ''}
+                        </table>
+                      </div>
+
+                      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 24px 0;">
+                        <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; font-weight: 600;">
+                          📝 Important Information
+                        </h3>
+                        <ul style="margin: 0; padding-left: 20px; color: #78350f; font-size: 14px; line-height: 1.8;">
+                          <li>Please present this confirmation email upon check-in</li>
+                          <li>Check-in time: 3:00 PM | Check-out time: 11:00 AM</li>
+                          <li>Payment and cancellation policies apply as per hotel terms</li>
+                          <li>For any changes, please contact us as soon as possible</li>
+                        </ul>
+                      </div>
+
+                      <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin: 24px 0;">
+                        <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+                          💡 <strong>Next Steps:</strong><br/>
+                          We will contact you separately with payment details and any additional information about your stay.
+                        </p>
+                      </div>
+
+                      <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.6;">
+                        We look forward to welcoming you and hope you have a wonderful stay during the Greek Dance Festival!
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0 0 10px 0; color: #64748b; font-size: 14px;">
+                        Questions? Contact us at <a href="mailto:${process.env.EMAIL_USER}" style="color: #3b82f6; text-decoration: none;">${process.env.EMAIL_USER}</a>
+                      </p>
+                      <p style="margin: 0 0 10px 0; color: #64748b; font-size: 14px;">
+                        Phone: <a href="tel:${data.phone}" style="color: #3b82f6; text-decoration: none;">${data.phone}</a>
+                      </p>
+                      <p style="margin: 0; color: #94a3b8; font-size: 12px;">
+                        Greek Dance Festival ${new Date().getFullYear()} | All Rights Reserved
+                      </p>
+                      <p style="margin: 10px 0 0 0; color: #cbd5e1; font-size: 12px;">
+                        Booking confirmed on ${new Date().toLocaleString()}
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `,
+  };
+
+  try {
+    console.log("Sending hotel booking confirmed email...");
+    console.log("From:", process.env.EMAIL_USER);
+    console.log("To:", data.email);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Hotel booking confirmed email sent successfully:', info.messageId);
+    console.log('Accepted recipients:', info.accepted);
+    return { success: true };
+  } catch (error) {
+    console.error('Hotel booking confirmed email sending failed:', error);
+    console.error('SMTP Config:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER ? 'configured' : 'MISSING',
+      pass: process.env.EMAIL_PASSWORD ? 'configured' : 'MISSING'
+    });
+    return { success: false, error };
+  }
+}
