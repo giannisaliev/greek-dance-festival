@@ -8,6 +8,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  // Improve deliverability
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 export interface RegistrationEmailData {
@@ -92,7 +96,13 @@ export async function sendBulkRegistrationConfirmation(data: BulkRegistrationEma
   const mailOptions = {
     from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: data.teacherEmail,
+    replyTo: process.env.EMAIL_USER,
     subject: `Greek Dance Festival - Registration Confirmation${data.studioName ? ` - ${data.studioName}` : ''}`,
+    headers: {
+      'X-Priority': '1',
+      'X-MSMail-Priority': 'High',
+      'Importance': 'high',
+    },
     html: `
       <!DOCTYPE html>
       <html>
@@ -300,7 +310,13 @@ export async function sendHotelBookingConfirmation(data: HotelBookingEmailData) 
   const mailOptions = {
     from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: data.email,
+    replyTo: process.env.EMAIL_USER,
     subject: `Hotel Booking Request Received - ${data.hotelName}`,
+    headers: {
+      'X-Priority': '1',
+      'X-MSMail-Priority': 'High',
+      'Importance': 'high',
+    },
     html: `
       <!DOCTYPE html>
       <html>
@@ -584,7 +600,13 @@ export async function sendHotelBookingConfirmedEmail(data: HotelBookingEmailData
   const mailOptions = {
     from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
     to: data.email,
+    replyTo: process.env.EMAIL_USER,
     subject: `Booking Confirmed! - ${data.hotelName}`,
+    headers: {
+      'X-Priority': '1',
+      'X-MSMail-Priority': 'High',
+      'Importance': 'high',
+    },
     html: `
       <!DOCTYPE html>
       <html>
