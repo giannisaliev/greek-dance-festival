@@ -95,7 +95,6 @@ export default function Home() {
       {studios.length > 0 && (() => {
         // Duplicate entries so the marquee loops seamlessly
         const items = studios.length < 6 ? [...studios, ...studios, ...studios, ...studios] : [...studios, ...studios];
-        const getFlagEmoji = (code: string) => String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0)));
         return (
           <div className="w-full bg-white/5 backdrop-blur-sm border-b border-white/10 py-4 overflow-hidden relative">
             {/* Fade edges */}
@@ -129,9 +128,14 @@ export default function Home() {
                       {studio.name}
                     </p>
                     {/* Country flag + name */}
-                    <p className="text-blue-200 text-xs mt-0.5 text-center">
-                      {getFlagEmoji(studio.countryCode)} {studio.country}
-                    </p>
+                    <div className="flex items-center gap-1 mt-0.5 justify-center">
+                      <img
+                        src={`https://flagcdn.com/w20/${studio.countryCode.toLowerCase()}.png`}
+                        alt={studio.country}
+                        className="w-4 h-auto rounded-sm"
+                      />
+                      <p className="text-blue-200 text-xs">{studio.country}</p>
+                    </div>
                   </div>
                 ))}
               </div>

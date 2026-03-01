@@ -391,9 +391,14 @@ export default function AdminDanceStudiosPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-white font-semibold text-sm leading-tight">{studio.name}</p>
-                    <p className="text-blue-200 text-xs mt-1">
-                      {getFlagEmoji(studio.countryCode)} {studio.country}
-                    </p>
+                    <div className="flex items-center gap-1 mt-1 justify-center">
+                      <img
+                        src={`https://flagcdn.com/w20/${studio.countryCode.toLowerCase()}.png`}
+                        alt={studio.country}
+                        className="w-4 h-auto rounded-sm"
+                      />
+                      <p className="text-blue-200 text-xs">{studio.country}</p>
+                    </div>
                     <p className="text-blue-300 text-xs">Order: {studio.order}</p>
                   </div>
                   <div className="flex gap-2 w-full">
