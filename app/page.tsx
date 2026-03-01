@@ -93,6 +93,12 @@ export default function Home() {
 
       {/* Dance Studios Slider */}
       {studios.length > 0 && (() => {
+        // Repeat studios until each group has enough items to fill any screen width.
+        // Each card is ~164px wide (100px + 2×32px margin). 16 items ≈ 2600px covers 4K+.
+        const minPerGroup = Math.max(16, studios.length);
+        const repeats = Math.ceil(minPerGroup / studios.length);
+        const groupItems = Array.from({ length: repeats }, () => studios).flat();
+
         const studioCard = (studio: typeof studios[0], idx: number, prefix: string) => (
           <div
             key={`${prefix}-${idx}`}
@@ -138,11 +144,11 @@ export default function Home() {
               <div className="marquee-track">
                 {/* Group 1 */}
                 <div className="marquee-group">
-                  {studios.map((studio, idx) => studioCard(studio, idx, 'a'))}
+                  {groupItems.map((studio, idx) => studioCard(studio, idx, 'a'))}
                 </div>
                 {/* Group 2 - identical, for seamless loop */}
                 <div className="marquee-group" aria-hidden="true">
-                  {studios.map((studio, idx) => studioCard(studio, idx, 'b'))}
+                  {groupItems.map((studio, idx) => studioCard(studio, idx, 'b'))}
                 </div>
               </div>
             </div>
