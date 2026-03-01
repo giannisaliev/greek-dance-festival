@@ -31,12 +31,17 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-.animate-marquee {
+.marquee-track {
   display: flex;
-  animation: marquee 30s linear infinite;
   width: max-content;
+  animation: marquee 35s linear infinite;
 }
 
-.animate-marquee:hover {
+.marquee-track:hover {
   animation-play-state: paused;
+}
+
+.marquee-group {
+  display: flex;
+  flex-shrink: 0;
 }

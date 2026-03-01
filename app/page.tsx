@@ -93,51 +93,57 @@ export default function Home() {
 
       {/* Dance Studios Slider */}
       {studios.length > 0 && (() => {
-        // Duplicate entries so the marquee loops seamlessly
-        const items = studios.length < 6 ? [...studios, ...studios, ...studios, ...studios] : [...studios, ...studios];
+        const studioCard = (studio: typeof studios[0], idx: number, prefix: string) => (
+          <div
+            key={`${prefix}-${idx}`}
+            className="flex flex-col items-center mx-8 group flex-shrink-0"
+            style={{ width: '100px' }}
+          >
+            {/* Logo - shown as-is, constrained to fixed height */}
+            <div className="h-14 w-full flex items-center justify-center">
+              <img
+                src={studio.logo}
+                alt={studio.name}
+                className="max-h-14 max-w-full w-auto object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-lg"
+              />
+            </div>
+            {/* Studio name */}
+            <p className="text-white text-xs font-semibold mt-2 text-center leading-tight w-full truncate">
+              {studio.name}
+            </p>
+            {/* Country flag + name */}
+            <div className="flex items-center gap-1 mt-0.5 justify-center">
+              <img
+                src={`https://flagcdn.com/w20/${studio.countryCode.toLowerCase()}.png`}
+                alt={studio.country}
+                className="w-4 h-auto rounded-sm flex-shrink-0"
+              />
+              <p className="text-blue-200 text-xs truncate">{studio.country}</p>
+            </div>
+          </div>
+        );
         return (
-          <div className="w-full bg-white/5 backdrop-blur-sm border-b border-white/10 py-4 overflow-hidden relative">
+          <div className="w-full bg-white/5 backdrop-blur-sm border-b border-white/10 py-5 overflow-hidden relative">
             {/* Fade edges */}
-            <div className="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-blue-900 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-blue-900 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-blue-900 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-blue-900 to-transparent z-10 pointer-events-none" />
 
             {/* Title */}
-            <p className="text-center text-yellow-300 font-bold text-xs tracking-widest uppercase mb-3 opacity-90">
+            <p className="text-center text-yellow-300 font-bold text-xs tracking-widest uppercase mb-4 opacity-90">
               🏆 Guinness Record Dance Studios
             </p>
 
-            {/* Scrolling track */}
+            {/* Scrolling track: two identical groups = seamless loop at -50% */}
             <div className="overflow-hidden">
-              <div className="animate-marquee">
-                {items.map((studio, idx) => (
-                  <div
-                    key={`${studio.id}-${idx}`}
-                    className="flex flex-col items-center mx-6 group flex-shrink-0"
-                    style={{ minWidth: '90px' }}
-                  >
-                    {/* Logo circle */}
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-lg border-2 border-white/30 group-hover:border-yellow-400 transition-all group-hover:scale-110 duration-300">
-                      <img
-                        src={studio.logo}
-                        alt={studio.name}
-                        className="w-full h-full object-contain p-1.5"
-                      />
-                    </div>
-                    {/* Studio name */}
-                    <p className="text-white text-xs font-semibold mt-2 text-center leading-tight max-w-[90px] truncate">
-                      {studio.name}
-                    </p>
-                    {/* Country flag + name */}
-                    <div className="flex items-center gap-1 mt-0.5 justify-center">
-                      <img
-                        src={`https://flagcdn.com/w20/${studio.countryCode.toLowerCase()}.png`}
-                        alt={studio.country}
-                        className="w-4 h-auto rounded-sm"
-                      />
-                      <p className="text-blue-200 text-xs">{studio.country}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="marquee-track">
+                {/* Group 1 */}
+                <div className="marquee-group">
+                  {studios.map((studio, idx) => studioCard(studio, idx, 'a'))}
+                </div>
+                {/* Group 2 - identical, for seamless loop */}
+                <div className="marquee-group" aria-hidden="true">
+                  {studios.map((studio, idx) => studioCard(studio, idx, 'b'))}
+                </div>
               </div>
             </div>
           </div>
