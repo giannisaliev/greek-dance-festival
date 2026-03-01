@@ -105,13 +105,21 @@ export default function Home() {
             className="flex flex-col items-center mx-8 group flex-shrink-0"
             style={{ width: '100px' }}
           >
-            {/* Logo - shown as-is, constrained to fixed height */}
+            {/* Logo or initials fallback */}
             <div className="h-14 w-full flex items-center justify-center">
-              <img
-                src={studio.logo}
-                alt={studio.name}
-                className="max-h-14 max-w-full w-auto object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-lg"
-              />
+              {studio.logo ? (
+                <img
+                  src={studio.logo}
+                  alt={studio.name}
+                  className="max-h-14 max-w-full w-auto object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-lg"
+                />
+              ) : (
+                <div className="h-14 w-14 rounded-full bg-white/20 border border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <span className="text-white font-bold text-lg leading-none">
+                    {studio.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 3)}
+                  </span>
+                </div>
+              )}
             </div>
             {/* Studio name */}
             <p className="text-white text-xs font-semibold mt-2 text-center leading-tight w-full truncate">

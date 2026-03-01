@@ -142,10 +142,6 @@ export default function AdminDanceStudiosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.logo) {
-      alert("Please upload a studio logo.");
-      return;
-    }
     setIsSubmitting(true);
     try {
       const method = editingStudio ? "PUT" : "POST";
@@ -293,7 +289,7 @@ export default function AdminDanceStudiosPage() {
               {/* Logo Upload */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">
-                  Studio Logo *
+                  Studio Logo <span className="text-blue-300 font-normal">(optional — initials shown if not uploaded)</span>
                 </label>
                 <div className="flex gap-4 items-start">
                   <div className="flex-1">
@@ -317,15 +313,16 @@ export default function AdminDanceStudiosPage() {
                       <p className="text-green-300 text-xs mt-1">✓ Logo uploaded</p>
                     )}
                   </div>
-                  {formData.logo && (
-                    <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/20">
-                      <img
-                        src={formData.logo}
-                        alt="Preview"
-                        className="w-full h-full object-contain p-1"
-                      />
-                    </div>
+                {/* Preview: logo or initials */}
+                <div className="w-20 h-20 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/20 bg-white/10">
+                  {formData.logo ? (
+                    <img src={formData.logo} alt="Preview" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <span className="text-white font-bold text-lg leading-tight text-center px-1">
+                      {formData.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 3) || '?'}
+                    </span>
                   )}
+                </div>
                 </div>
               </div>
 
@@ -382,12 +379,14 @@ export default function AdminDanceStudiosPage() {
                   key={studio.id}
                   className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 flex flex-col items-center gap-3"
                 >
-                  <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center overflow-hidden">
-                    <img
-                      src={studio.logo}
-                      alt={studio.name}
-                      className="w-full h-full object-contain p-1"
-                    />
+                  <div className="w-20 h-20 rounded-xl flex items-center justify-center overflow-hidden bg-white/10 border border-white/20">
+                    {studio.logo ? (
+                      <img src={studio.logo} alt={studio.name} className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <span className="text-white font-bold text-lg leading-tight text-center px-1">
+                        {studio.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 3)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-center">
                     <p className="text-white font-semibold text-sm leading-tight">{studio.name}</p>

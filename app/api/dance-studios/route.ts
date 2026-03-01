@@ -37,15 +37,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, logo, country, countryCode, order } = body;
 
-    if (!name || !logo || !country || !countryCode) {
+    if (!name || !country || !countryCode) {
       return NextResponse.json(
-        { error: "Missing required fields: name, logo, country, countryCode" },
+        { error: "Missing required fields: name, country, countryCode" },
         { status: 400 }
       );
     }
 
     const studio = await prisma.danceStudio.create({
-      data: { name, logo, country, countryCode, order: order ?? 0 },
+      data: { name, logo: logo || "", country, countryCode, order: order ?? 0 },
     });
 
     return NextResponse.json({ studio }, { status: 201 });

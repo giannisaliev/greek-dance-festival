@@ -261,33 +261,19 @@ export default function InformationPage() {
                   </svg>
                   {t.information.locationLabel}
                 </h3>
-                <p className="text-blue-100 font-semibold">{t.information.ymcaThessaloniki}</p>
-                <p className="text-blue-200 text-sm">{t.information.thessaloniki}</p>
+                <p className="text-blue-100 font-bold text-2xl tracking-widest">TBA</p>
+                <p className="text-blue-300 text-sm mt-1">To Be Announced</p>
               </div>
             </div>
-            
-            {/* Google Maps Embed */}
-            <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 hover:border-blue-400/50 transition-colors duration-300">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d565.6499229414236!2d22.95216373764882!3d40.62661132017817!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a839026870857f%3A0x7ac841aaf16c594d!2sYMCA%20-%20Young%20Men&#39;s%20Christian%20Association!5e0!3m2!1sen!2sgr!4v1768407001042!5m2!1sen!2sgr"
-                width="100%"
-                height="400"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full"
-              ></iframe>
+
+            {/* TBA placeholder */}
+            <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 flex items-center justify-center bg-white/5" style={{height: '400px'}}>
+              <div className="text-center">
+                <div className="text-6xl mb-4">📍</div>
+                <p className="text-white font-bold text-3xl tracking-widest mb-2">TBA</p>
+                <p className="text-blue-200 text-sm">Workshop location will be announced soon</p>
+              </div>
             </div>
-            
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=40.6266113,22.9521637"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 block w-full bg-gradient-to-r from-blue-400 to-purple-500 text-white text-center py-4 rounded-full font-bold text-lg hover:from-blue-500 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-            >
-              {t.information.openInMaps}
-            </a>
           </div>
         </div>
 
