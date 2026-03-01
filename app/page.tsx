@@ -10,6 +10,7 @@ export default function Home() {
   const { t, language } = useLanguage();
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [studios, setStudios] = useState<{ id: string; name: string; logo: string; country: string; countryCode: string }[]>([]);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -37,7 +38,20 @@ export default function Home() {
       }
     }
     
+    async function fetchStudios() {
+      try {
+        const res = await fetch('/api/dance-studios', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setStudios(data.studios || []);
+        }
+      } catch (error) {
+        console.error('Error fetching dance studios:', error);
+      }
+    }
+    
     fetchSchedule();
+    fetchStudios();
   }, []);
 
   // Countdown timer
@@ -76,6 +90,55 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
+
+      {/* Dance Studios Slider */}
+      {studios.length > 0 && (() => {
+        // Duplicate entries so the marquee loops seamlessly
+        const items = studios.length < 6 ? [...studios, ...studios, ...studios, ...studios] : [...studios, ...studios];
+        const getFlagEmoji = (code: string) => String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0)));
+        return (
+          <div className="w-full bg-white/5 backdrop-blur-sm border-b border-white/10 py-4 overflow-hidden relative">
+            {/* Fade edges */}
+            <div className="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-blue-900 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-blue-900 to-transparent z-10 pointer-events-none" />
+
+            {/* Title */}
+            <p className="text-center text-yellow-300 font-bold text-xs tracking-widest uppercase mb-3 opacity-90">
+              🏆 Guinness Record Dance Studios
+            </p>
+
+            {/* Scrolling track */}
+            <div className="overflow-hidden">
+              <div className="animate-marquee">
+                {items.map((studio, idx) => (
+                  <div
+                    key={`${studio.id}-${idx}`}
+                    className="flex flex-col items-center mx-6 group flex-shrink-0"
+                    style={{ minWidth: '90px' }}
+                  >
+                    {/* Logo circle */}
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-lg border-2 border-white/30 group-hover:border-yellow-400 transition-all group-hover:scale-110 duration-300">
+                      <img
+                        src={studio.logo}
+                        alt={studio.name}
+                        className="w-full h-full object-contain p-1.5"
+                      />
+                    </div>
+                    {/* Studio name */}
+                    <p className="text-white text-xs font-semibold mt-2 text-center leading-tight max-w-[90px] truncate">
+                      {studio.name}
+                    </p>
+                    {/* Country flag + name */}
+                    <p className="text-blue-200 text-xs mt-0.5 text-center">
+                      {getFlagEmoji(studio.countryCode)} {studio.country}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

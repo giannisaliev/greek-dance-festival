@@ -174,6 +174,17 @@ model Analytics {
   @@index([isAdmin])
 }
 
+model DanceStudio {
+  id          String   @id @default(cuid())
+  name        String
+  logo        String   // URL to studio logo image (Vercel Blob)
+  country     String   // Country name
+  countryCode String   // ISO 3166-1 alpha-2 country code for flag
+  order       Int      @default(0) // For sorting studios
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model HotelBooking {
   id          String   @id @default(cuid())
   hotelId     String   // ID of the hotel being booked
