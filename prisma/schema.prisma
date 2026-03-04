@@ -180,6 +180,7 @@ model DanceStudio {
   logo          String   // URL to studio logo image (Vercel Blob)
   country       String   // Country name
   countryCode   String   // ISO 3166-1 alpha-2 country code for flag
+  city          String?  // City where the studio is located (optional)
   website       String?  // Studio website URL (optional)
   googleMapsUrl String?  // Google Maps location URL (optional)
   order         Int      @default(0) // For sorting studios

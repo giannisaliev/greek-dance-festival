@@ -13,6 +13,7 @@ interface DanceStudio {
   logo: string;
   country: string;
   countryCode: string;
+  city?: string;
   website?: string;
   googleMapsUrl?: string;
   order: number;
@@ -85,6 +86,7 @@ export default function AdminDanceStudiosPage() {
     logo: "",
     country: "Greece",
     countryCode: "GR",
+    city: "",
     website: "",
     googleMapsUrl: "",
     order: 0,
@@ -182,6 +184,7 @@ export default function AdminDanceStudiosPage() {
       logo: studio.logo,
       country: studio.country,
       countryCode: studio.countryCode,
+      city: studio.city || "",
       website: studio.website || "",
       googleMapsUrl: studio.googleMapsUrl || "",
       order: studio.order,
@@ -205,7 +208,7 @@ export default function AdminDanceStudiosPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", logo: "", country: "Greece", countryCode: "GR", website: "", googleMapsUrl: "", order: 0 });
+    setFormData({ name: "", logo: "", country: "Greece", countryCode: "GR", city: "", website: "", googleMapsUrl: "", order: 0 });
     setEditingStudio(null);
     setShowForm(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -335,6 +338,22 @@ export default function AdminDanceStudiosPage() {
               {/* Website */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">
+                  City <span className="text-blue-300 font-normal">(optional — used for city filter on public page)</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, city: e.target.value }))
+                  }
+                  placeholder="e.g. Athens"
+                  className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2.5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              {/* Website */}
+              <div>
+                <label className="block text-white font-semibold mb-2 text-sm">
                   Website <span className="text-blue-300 font-normal">(optional)</span>
                 </label>
                 <input
@@ -438,6 +457,9 @@ export default function AdminDanceStudiosPage() {
                       <p className="text-blue-200 text-xs">{studio.country}</p>
                     </div>
                     <p className="text-blue-300 text-xs">Order: {studio.order}</p>
+                    {studio.city && (
+                      <p className="text-blue-200 text-xs">📍 {studio.city}</p>
+                    )}
                     <div className="flex gap-2 justify-center mt-1">
                       {studio.website && (
                         <a href={studio.website} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white text-xs underline truncate max-w-[80px]" title={studio.website}>

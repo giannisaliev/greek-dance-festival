@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navigation from "../components/Navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -10,23 +10,17 @@ interface DanceStudio {
   logo: string;
   country: string;
   countryCode: string;
+  city?: string;
   website?: string;
   googleMapsUrl?: string;
   order: number;
 }
 
-const getFlagEmoji = (countryCode: string) => {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split("")
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
-
 export default function DanceStudiosPage() {
   const { t } = useLanguage();
   const [studios, setStudios] = useState<DanceStudio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCity, setSelectedCity] = useState<string>("all");
 
   useEffect(() => {
     async function fetchStudios() {
@@ -45,20 +39,66 @@ export default function DanceStudiosPage() {
     fetchStudios();
   }, []);
 
+  // Collect unique cities from studios that have a city set
+  const cities = useMemo(() => {
+    const set = new Set<string>();
+    studios.forEach((s) => {
+      if (s.city?.trim()) set.add(s.city.trim());
+    });
+    return Array.from(set).sort();
+  }, [studios]);
+
+  // Filter studios by selected city
+  const filteredStudios = useMemo(() => {
+    if (selectedCity === "all") return studios;
+    return studios.filter((s) => s.city?.trim() === selectedCity);
+  }, [studios, selectedCity]);
+
+  const hasCityFilter = cities.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Navigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             🏛️ {t.nav.danceStudios}
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto">
-            Meet the dance studios participating in the Greek Dance Festival 2026
+            Find a dance studio in your city to learn the choreography for the Guinness Record.
           </p>
         </div>
+
+        {/* City Filter */}
+        {!isLoading && hasCityFilter && (
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            <button
+              onClick={() => setSelectedCity("all")}
+              className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                selectedCity === "all"
+                  ? "bg-white text-blue-900 shadow-lg"
+                  : "bg-white/15 text-white hover:bg-white/25 border border-white/30"
+              }`}
+            >
+              🌍 All Cities
+            </button>
+            {cities.map((city) => (
+              <button
+                key={city}
+                onClick={() => setSelectedCity(city)}
+                className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                  selectedCity === city
+                    ? "bg-white text-blue-900 shadow-lg"
+                    : "bg-white/15 text-white hover:bg-white/25 border border-white/30"
+                }`}
+              >
+                📍 {city}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Loading */}
         {isLoading && (
@@ -68,7 +108,7 @@ export default function DanceStudiosPage() {
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty state - no studios at all */}
         {!isLoading && studios.length === 0 && (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🏛️</div>
@@ -77,10 +117,24 @@ export default function DanceStudiosPage() {
           </div>
         )}
 
+        {/* Empty state - city has no studios */}
+        {!isLoading && studios.length > 0 && filteredStudios.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4">📍</div>
+            <p className="text-white text-lg font-semibold">No studios found in {selectedCity}</p>
+            <button
+              onClick={() => setSelectedCity("all")}
+              className="mt-4 text-blue-300 hover:text-white underline text-sm transition-colors"
+            >
+              Show all cities
+            </button>
+          </div>
+        )}
+
         {/* Studios Grid */}
-        {!isLoading && studios.length > 0 && (
+        {!isLoading && filteredStudios.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {studios.map((studio) => (
+            {filteredStudios.map((studio) => (
               <div
                 key={studio.id}
                 className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-6 flex flex-col items-center gap-4 hover:bg-white/15 transition-all duration-300"
@@ -105,7 +159,7 @@ export default function DanceStudiosPage() {
                   )}
                 </div>
 
-                {/* Name & Country */}
+                {/* Name, Country & City */}
                 <div className="text-center w-full">
                   <h2 className="text-white font-bold text-base leading-snug mb-1">
                     {studio.name}
@@ -118,6 +172,9 @@ export default function DanceStudiosPage() {
                     />
                     <span className="text-blue-200 text-sm">{studio.country}</span>
                   </div>
+                  {studio.city && (
+                    <p className="text-blue-300 text-xs mt-1">📍 {studio.city}</p>
+                  )}
                 </div>
 
                 {/* Links */}
@@ -155,6 +212,13 @@ export default function DanceStudiosPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Footer note */}
+        {!isLoading && (
+          <p className="text-center text-blue-300 text-sm mt-12 italic">
+            ✨ More studios in more cities will be added soon
+          </p>
         )}
       </div>
     </div>
