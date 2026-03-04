@@ -24,6 +24,7 @@ export default function Navigation() {
     { href: "/information", label: isAdminPage ? "Information" : t.nav.information },
     { href: "/teachers", label: isAdminPage ? "Teachers" : t.nav.teachers },
     { href: "/hotel", label: isAdminPage ? "Hotel" : t.nav.hotel },
+    { href: "/dance-studios", label: isAdminPage ? "Dance Studios" : t.nav.danceStudios },
     { href: "/register", label: isAdminPage ? "Register" : t.nav.register },
   ];
 

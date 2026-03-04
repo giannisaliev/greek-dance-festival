@@ -13,6 +13,8 @@ interface DanceStudio {
   logo: string;
   country: string;
   countryCode: string;
+  website?: string;
+  googleMapsUrl?: string;
   order: number;
 }
 
@@ -83,6 +85,8 @@ export default function AdminDanceStudiosPage() {
     logo: "",
     country: "Greece",
     countryCode: "GR",
+    website: "",
+    googleMapsUrl: "",
     order: 0,
   });
 
@@ -178,6 +182,8 @@ export default function AdminDanceStudiosPage() {
       logo: studio.logo,
       country: studio.country,
       countryCode: studio.countryCode,
+      website: studio.website || "",
+      googleMapsUrl: studio.googleMapsUrl || "",
       order: studio.order,
     });
     setShowForm(true);
@@ -199,7 +205,7 @@ export default function AdminDanceStudiosPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", logo: "", country: "Greece", countryCode: "GR", order: 0 });
+    setFormData({ name: "", logo: "", country: "Greece", countryCode: "GR", website: "", googleMapsUrl: "", order: 0 });
     setEditingStudio(null);
     setShowForm(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -326,6 +332,39 @@ export default function AdminDanceStudiosPage() {
                 </div>
               </div>
 
+              {/* Website */}
+              <div>
+                <label className="block text-white font-semibold mb-2 text-sm">
+                  Website <span className="text-blue-300 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, website: e.target.value }))
+                  }
+                  placeholder="https://www.example.com"
+                  className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2.5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              {/* Google Maps URL */}
+              <div>
+                <label className="block text-white font-semibold mb-2 text-sm">
+                  Google Maps Location <span className="text-blue-300 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.googleMapsUrl}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, googleMapsUrl: e.target.value }))
+                  }
+                  placeholder="https://maps.google.com/..."
+                  className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2.5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <p className="text-blue-300 text-xs mt-1">Paste the Google Maps link to the studio's location</p>
+              </div>
+
               {/* Display Order */}
               <div>
                 <label className="block text-white font-semibold mb-2 text-sm">
@@ -399,6 +438,18 @@ export default function AdminDanceStudiosPage() {
                       <p className="text-blue-200 text-xs">{studio.country}</p>
                     </div>
                     <p className="text-blue-300 text-xs">Order: {studio.order}</p>
+                    <div className="flex gap-2 justify-center mt-1">
+                      {studio.website && (
+                        <a href={studio.website} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white text-xs underline truncate max-w-[80px]" title={studio.website}>
+                          🌐 Website
+                        </a>
+                      )}
+                      {studio.googleMapsUrl && (
+                        <a href={studio.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white text-xs underline" title="Google Maps">
+                          📍 Maps
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2 w-full">
                     <button

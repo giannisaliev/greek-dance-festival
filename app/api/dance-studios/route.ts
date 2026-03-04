@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, logo, country, countryCode, order } = body;
+    const { name, logo, country, countryCode, order, website, googleMapsUrl } = body;
 
     if (!name || !country || !countryCode) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const studio = await prisma.danceStudio.create({
-      data: { name, logo: logo || "", country, countryCode, order: order ?? 0 },
+      data: { name, logo: logo || "", country, countryCode, order: order ?? 0, website: website || null, googleMapsUrl: googleMapsUrl || null },
     });
 
     return NextResponse.json({ studio }, { status: 201 });
@@ -74,7 +74,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, logo, country, countryCode, order } = body;
+    const { id, name, logo, country, countryCode, order, website, googleMapsUrl } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Missing studio id" }, { status: 400 });
@@ -82,7 +82,7 @@ export async function PUT(request: NextRequest) {
 
     const studio = await prisma.danceStudio.update({
       where: { id },
-      data: { name, logo, country, countryCode, order: order ?? 0 },
+      data: { name, logo, country, countryCode, order: order ?? 0, website: website || null, googleMapsUrl: googleMapsUrl || null },
     });
 
     return NextResponse.json({ studio });
