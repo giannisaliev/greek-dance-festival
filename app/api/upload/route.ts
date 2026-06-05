@@ -42,7 +42,9 @@ export async function POST(request: Request) {
         // Create unique filename
         const timestamp = Date.now();
         const random = Math.floor(Math.random() * 1000);
-        const filename = `hotels/${timestamp}-${random}-${file.name.replace(/\s+/g, "-")}`;
+        const url = new URL(request.url);
+        const folder = url.searchParams.get("folder") || "hotels";
+        const filename = `${folder}/${timestamp}-${random}-${file.name.replace(/\s+/g, "-")}`;
         
         // Upload to Vercel Blob
         const blob = await put(filename, file, {

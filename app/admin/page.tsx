@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -154,9 +154,25 @@ export default function AdminPage() {
     fridayHall2MapUrl: "",
     saturdayHall1MapUrl: "",
     saturdayHall2MapUrl: "",
+    fridayHall1Name: "",
+    fridayHall2Name: "",
+    saturdayHall1Name: "",
+    saturdayHall2Name: "",
+    fridayHall1Image: "",
+    fridayHall2Image: "",
+    saturdayHall1Image: "",
+    saturdayHall2Image: "",
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [hallImageUploading, setHallImageUploading] = useState<{[key: string]: boolean}>({});
+
+  // File input refs for hall location images
+  const hallImgRef0 = useRef<HTMLInputElement>(null);
+  const hallImgRef1 = useRef<HTMLInputElement>(null);
+  const hallImgRef2 = useRef<HTMLInputElement>(null);
+  const hallImgRef3 = useRef<HTMLInputElement>(null);
+  const hallImgRefs = [hallImgRef0, hallImgRef1, hallImgRef2, hallImgRef3];
 
   // Users state
   const [users, setUsers] = useState<User[]>([]);
@@ -224,6 +240,14 @@ export default function AdminPage() {
         fridayHall2MapUrl: data.fridayHall2MapUrl || "",
         saturdayHall1MapUrl: data.saturdayHall1MapUrl || "",
         saturdayHall2MapUrl: data.saturdayHall2MapUrl || "",
+        fridayHall1Name: data.fridayHall1Name || "",
+        fridayHall2Name: data.fridayHall2Name || "",
+        saturdayHall1Name: data.saturdayHall1Name || "",
+        saturdayHall2Name: data.saturdayHall2Name || "",
+        fridayHall1Image: data.fridayHall1Image || "",
+        fridayHall2Image: data.fridayHall2Image || "",
+        saturdayHall1Image: data.saturdayHall1Image || "",
+        saturdayHall2Image: data.saturdayHall2Image || "",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -510,6 +534,26 @@ export default function AdminPage() {
   };
 
   const duplicateCount = getDuplicateEmails().size;
+
+  // Upload a hall location image to Vercel Blob
+  const uploadHallImage = async (imageKey: string, file: File) => {
+    setHallImageUploading(prev => ({ ...prev, [imageKey]: true }));
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+      const response = await fetch("/api/upload?folder=halls", { method: "POST", body: formData });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.urls?.[0]) {
+          setSettings(prev => ({ ...prev, [imageKey]: data.urls[0] }));
+        }
+      }
+    } catch (error) {
+      console.error("Error uploading hall image:", error);
+    } finally {
+      setHallImageUploading(prev => ({ ...prev, [imageKey]: false }));
+    }
+  };
 
   // Schedule handlers
   const handleScheduleSubmit = async (e: React.FormEvent) => {
@@ -1468,28 +1512,83 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* Hall Locations (Google Maps) */}
+                {/* Hall Locations (Google Maps + Name + Image) */}
                 <div className="bg-white/5 rounded-xl p-8 border border-white/10">
                   <h3 className="text-2xl font-bold text-white mb-2">Hall Locations</h3>
                   <p className="text-blue-100 mb-6 text-sm">
-                    Paste a Google Maps embed URL for each hall. To get an embed URL: open Google Maps → find the location → Share → Embed a map → copy the <code className="bg-white/10 px-1 rounded">src</code> URL.
+                    For each hall set a display name, paste its Google Maps URL (any Google Maps link works — share link, full URL, or embed URL), and optionally upload a photo.
                   </p>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {[
-                      { label: "Friday — Hall 1", key: "fridayHall1MapUrl" },
-                      { label: "Friday — Hall 2", key: "fridayHall2MapUrl" },
-                      { label: "Saturday — Hall 1", key: "saturdayHall1MapUrl" },
-                      { label: "Saturday — Hall 2", key: "saturdayHall2MapUrl" },
-                    ].map(({ label, key }) => (
-                      <div key={key}>
-                        <label className="block text-white font-semibold mb-2">{label}</label>
-                        <input
-                          type="url"
-                          value={(settings as any)[key]}
-                          onChange={(e) => setSettings({ ...settings, [key]: e.target.value })}
-                          placeholder="https://www.google.com/maps/embed?pb=..."
-                          className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
-                        />
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {([
+                      { label: "Friday — Hall 1", nameKey: "fridayHall1Name", mapKey: "fridayHall1MapUrl", imageKey: "fridayHall1Image", idx: 0 },
+                      { label: "Friday — Hall 2", nameKey: "fridayHall2Name", mapKey: "fridayHall2MapUrl", imageKey: "fridayHall2Image", idx: 1 },
+                      { label: "Saturday — Hall 1", nameKey: "saturdayHall1Name", mapKey: "saturdayHall1MapUrl", imageKey: "saturdayHall1Image", idx: 2 },
+                      { label: "Saturday — Hall 2", nameKey: "saturdayHall2Name", mapKey: "saturdayHall2MapUrl", imageKey: "saturdayHall2Image", idx: 3 },
+                    ] as const).map(({ label, nameKey, mapKey, imageKey, idx }) => (
+                      <div key={nameKey} className="bg-white/5 rounded-xl p-5 border border-white/10 space-y-4">
+                        <h4 className="text-white font-bold text-lg border-b border-white/10 pb-2">{label}</h4>
+
+                        {/* Location Name */}
+                        <div>
+                          <label className="block text-blue-200 text-sm font-semibold mb-1">Location Name</label>
+                          <input
+                            type="text"
+                            value={(settings as any)[nameKey]}
+                            onChange={(e) => setSettings({ ...settings, [nameKey]: e.target.value })}
+                            placeholder="e.g. Sports Hall Thessaloniki"
+                            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                          />
+                        </div>
+
+                        {/* Google Maps URL */}
+                        <div>
+                          <label className="block text-blue-200 text-sm font-semibold mb-1">Google Maps URL</label>
+                          <input
+                            type="url"
+                            value={(settings as any)[mapKey]}
+                            onChange={(e) => setSettings({ ...settings, [mapKey]: e.target.value })}
+                            placeholder="https://maps.app.goo.gl/... or embed URL"
+                            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                          />
+                        </div>
+
+                        {/* Image Upload */}
+                        <div>
+                          <label className="block text-blue-200 text-sm font-semibold mb-2">Location Photo</label>
+                          {(settings as any)[imageKey] && (
+                            <div className="mb-2 relative group inline-block">
+                              <img
+                                src={(settings as any)[imageKey]}
+                                alt="Hall location"
+                                className="h-24 w-auto rounded-lg object-cover border border-white/20"
+                              />
+                              <button
+                                onClick={() => setSettings({ ...settings, [imageKey]: "" })}
+                                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          )}
+                          <input
+                            ref={hallImgRefs[idx]}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) await uploadHallImage(imageKey, file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <button
+                            onClick={() => hallImgRefs[idx].current?.click()}
+                            disabled={hallImageUploading[imageKey]}
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-semibold transition-colors border border-white/20 disabled:opacity-50"
+                          >
+                            {hallImageUploading[imageKey] ? "Uploading..." : (settings as any)[imageKey] ? "Replace Photo" : "Upload Photo"}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

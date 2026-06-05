@@ -118,8 +118,12 @@ export default function Home() {
     Saturday: "Hall 1",
     Sunday: "Hall 1",
   });
-  const [hallMapUrls, setHallMapUrls] = useState<{[key: string]: string}>({});
-  const [activeMapModal, setActiveMapModal] = useState<{day: string; hall: string; url: string} | null>(null);
+  const [hallLocations, setHallLocations] = useState<{[key: string]: {url?: string; name?: string; image?: string}}>({});
+  const [activeMapModal, setActiveMapModal] = useState<{
+    day: string; hall: string;
+    url?: string; name?: string; image?: string;
+    activeTab: 'map' | 'photo';
+  } | null>(null);
 
   useEffect(() => {
     async function fetchSchedule() {
@@ -153,11 +157,11 @@ export default function Home() {
         const res = await fetch('/api/settings', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          setHallMapUrls({
-            "Friday-Hall 1": data.fridayHall1MapUrl || "",
-            "Friday-Hall 2": data.fridayHall2MapUrl || "",
-            "Saturday-Hall 1": data.saturdayHall1MapUrl || "",
-            "Saturday-Hall 2": data.saturdayHall2MapUrl || "",
+          setHallLocations({
+            "Friday-Hall 1":   { url: data.fridayHall1MapUrl || "",   name: data.fridayHall1Name || "",   image: data.fridayHall1Image || "" },
+            "Friday-Hall 2":   { url: data.fridayHall2MapUrl || "",   name: data.fridayHall2Name || "",   image: data.fridayHall2Image || "" },
+            "Saturday-Hall 1": { url: data.saturdayHall1MapUrl || "", name: data.saturdayHall1Name || "", image: data.saturdayHall1Image || "" },
+            "Saturday-Hall 2": { url: data.saturdayHall2MapUrl || "", name: data.saturdayHall2Name || "", image: data.saturdayHall2Image || "" },
           });
         }
       } catch (error) {
@@ -196,10 +200,23 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
   
-  const getHallMapUrl = (day: string, hall: string): string | undefined => {
-    const url = hallMapUrls[`${day}-${hall}`];
-    return url || undefined;
-  };
+  const getHallLoc = (day: string, hall: string) => hallLocations[`${day}-${hall}`] || {};
+  const getHallMapUrl = (day: string, hall: string) => getHallLoc(day, hall).url || undefined;
+  const getHallName  = (day: string, hall: string) => getHallLoc(day, hall).name || undefined;
+  const getHallImage = (day: string, hall: string) => getHallLoc(day, hall).image || undefined;
+  const hasHallLocation = (day: string, hall: string) =>
+    !!(getHallMapUrl(day, hall) || getHallImage(day, hall));
+
+  function getGoogleMapsEmbedUrl(url: string): string {
+    if (!url) return '';
+    if (url.includes('/maps/embed') || url.includes('output=embed')) return url;
+    const coordFull = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z/);
+    if (coordFull) return `https://www.google.com/maps/@${coordFull[1]},${coordFull[2]},${coordFull[3]}z?output=embed`;
+    const coordShort = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (coordShort) return `https://www.google.com/maps/@${coordShort[1]},${coordShort[2]},15z?output=embed`;
+    if (url.includes('google.com/maps')) return url + (url.includes('?') ? '&' : '?') + 'output=embed';
+    return url;
+  }
 
   // Group schedule by day
   const scheduleByDay = {
@@ -419,16 +436,22 @@ export default function Home() {
                 <div key={day} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-8 border border-white/20">
                   <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
                     <h4 className="text-2xl font-bold text-white">{dayName}, {dateMap[day]}</h4>
-                    {/* Location pills for halls that have a map URL */}
-                    {usedHalls.some(hall => getHallMapUrl(day, hall)) && (
+                    {/* Location pills for halls that have a map URL or image */}
+                    {usedHalls.some(hall => hasHallLocation(day, hall)) && (
                       <div className="flex flex-wrap gap-2">
-                        {usedHalls.filter(hall => getHallMapUrl(day, hall)).map(hall => (
+                        {usedHalls.filter(hall => hasHallLocation(day, hall)).map(hall => (
                           <button
                             key={hall}
-                            onClick={() => setActiveMapModal({ day, hall, url: getHallMapUrl(day, hall)! })}
-                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-white/20"
+                            onClick={() => setActiveMapModal({
+                              day, hall,
+                              url: getHallMapUrl(day, hall),
+                              name: getHallName(day, hall),
+                              image: getHallImage(day, hall),
+                              activeTab: 'map',
+                            })}
+                            className="flex items-center gap-2 bg-white/25 hover:bg-white/40 text-white px-5 py-2.5 rounded-full text-base font-bold transition-all border-2 border-white/40 shadow-lg hover:shadow-xl hover:scale-105"
                           >
-                            📍 {hall} Location
+                            📍 {getHallName(day, hall) || `${hall} Location`}
                           </button>
                         ))}
                       </div>
@@ -541,10 +564,16 @@ export default function Home() {
                               {hall}
                             </button>
                           ))}
-                          {getHallMapUrl(day, activeHall) && (
+                          {hasHallLocation(day, activeHall) && (
                             <button
-                              onClick={() => setActiveMapModal({ day, hall: activeHall, url: getHallMapUrl(day, activeHall)! })}
-                              className="px-4 py-2 rounded-lg font-semibold bg-white/10 text-white hover:bg-white/20 transition-all whitespace-nowrap text-sm border border-white/20"
+                              onClick={() => setActiveMapModal({
+                                day, hall: activeHall,
+                                url: getHallMapUrl(day, activeHall),
+                                name: getHallName(day, activeHall),
+                                image: getHallImage(day, activeHall),
+                                activeTab: 'map',
+                              })}
+                              className="px-5 py-2.5 rounded-lg font-bold bg-white/25 text-white hover:bg-white/40 transition-all whitespace-nowrap text-base border-2 border-white/40 shadow-lg"
                             >
                               📍 Location
                             </button>
@@ -703,50 +732,104 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Google Maps Modal */}
-      {activeMapModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setActiveMapModal(null)}
-        >
+      {/* Location Modal */}
+      {activeMapModal && (() => {
+        const hasMap   = !!activeMapModal.url;
+        const hasPhoto = !!activeMapModal.image;
+        const showTabs = hasMap && hasPhoto;
+        const tab      = activeMapModal.activeTab;
+        const embedUrl = hasMap ? getGoogleMapsEmbedUrl(activeMapModal.url!) : '';
+
+        return (
           <div
-            className="bg-white rounded-2xl overflow-hidden w-full max-w-2xl shadow-2xl"
-            onClick={e => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setActiveMapModal(null)}
           >
-            <div className="flex items-center justify-between px-6 py-4 bg-blue-900">
-              <h3 className="text-white font-bold text-lg">
-                {activeMapModal.day} — {activeMapModal.hall}
-              </h3>
-              <button
-                onClick={() => setActiveMapModal(null)}
-                className="text-white hover:text-blue-200 text-3xl leading-none font-light"
-              >
-                ×
-              </button>
-            </div>
-            <div className="relative h-80 sm:h-96">
-              <iframe
-                src={activeMapModal.url}
-                className="w-full h-full border-0"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`${activeMapModal.day} ${activeMapModal.hall} Location`}
-              />
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-              <a
-                href={activeMapModal.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors text-sm"
-              >
-                Open in Google Maps ↗
-              </a>
+            <div
+              className="bg-white rounded-2xl overflow-hidden w-full max-w-2xl shadow-2xl flex flex-col"
+              style={{ maxHeight: '90vh' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 bg-blue-900 flex-shrink-0">
+                <div>
+                  <div className="text-blue-200 text-xs font-semibold uppercase tracking-wider">
+                    {activeMapModal.day} — {activeMapModal.hall}
+                  </div>
+                  {activeMapModal.name && (
+                    <div className="text-white font-bold text-xl leading-tight mt-0.5">
+                      {activeMapModal.name}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setActiveMapModal(null)}
+                  className="text-white hover:text-blue-200 text-3xl leading-none font-light ml-4"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Tabs — only shown when both map and photo exist */}
+              {showTabs && (
+                <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                  {(['map', 'photo'] as const).map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setActiveMapModal({ ...activeMapModal, activeTab: t })}
+                      className={`flex-1 py-3 text-sm font-bold transition-colors ${
+                        tab === t
+                          ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {t === 'map' ? '📍 Map' : '🖼️ Photo'}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="relative flex-1 min-h-0" style={{ height: '400px' }}>
+                {/* Map tab */}
+                {(!showTabs || tab === 'map') && hasMap && (
+                  <iframe
+                    key={embedUrl}
+                    src={embedUrl}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`${activeMapModal.day} ${activeMapModal.hall} Location`}
+                  />
+                )}
+                {/* Photo tab */}
+                {(!showTabs || tab === 'photo') && hasPhoto && (
+                  <img
+                    src={activeMapModal.image}
+                    alt={activeMapModal.name || `${activeMapModal.hall} location`}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-end flex-shrink-0">
+                {hasMap && (
+                  <a
+                    href={activeMapModal.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors text-sm"
+                  >
+                    Open in Google Maps ↗
+                  </a>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

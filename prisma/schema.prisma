@@ -110,6 +110,14 @@ model Settings {
   fridayHall2MapUrl    String?
   saturdayHall1MapUrl  String?
   saturdayHall2MapUrl  String?
+  fridayHall1Name      String?
+  fridayHall2Name      String?
+  saturdayHall1Name    String?
+  saturdayHall2Name    String?
+  fridayHall1Image     String?
+  fridayHall2Image     String?
+  saturdayHall1Image   String?
+  saturdayHall2Image   String?
   updatedAt            DateTime @updatedAt
 }
 
