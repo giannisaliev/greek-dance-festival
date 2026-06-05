@@ -37,6 +37,10 @@ export async function GET() {
       registrationMessage: setting.registrationMessage || "Registration opens on March 1st, 2026",
       showTbaTeachers: setting.showTbaTeachers ?? false,
       tbaTeachersCount: setting.tbaTeachersCount ?? 3,
+      fridayHall1MapUrl: setting.fridayHall1MapUrl ?? null,
+      fridayHall2MapUrl: setting.fridayHall2MapUrl ?? null,
+      saturdayHall1MapUrl: setting.saturdayHall1MapUrl ?? null,
+      saturdayHall2MapUrl: setting.saturdayHall2MapUrl ?? null,
       updatedAt: setting.updatedAt,
     });
   } catch (error: any) {
@@ -48,6 +52,10 @@ export async function GET() {
       registrationMessage: "Registration opens on March 1st, 2026",
       showTbaTeachers: false,
       tbaTeachersCount: 3,
+      fridayHall1MapUrl: null,
+      fridayHall2MapUrl: null,
+      saturdayHall1MapUrl: null,
+      saturdayHall2MapUrl: null,
     });
   }
 }
@@ -64,19 +72,45 @@ async function checkTbaColumnsExist(): Promise<boolean> {
   }
 }
 
+// Helper to check if hall map URL columns exist
+async function checkHallMapColumnsExist(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`
+      SELECT "fridayHall1MapUrl" FROM "Settings" LIMIT 1
+    `;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // PUT update settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { registrationOpen, registrationMessage, showTbaTeachers, tbaTeachersCount } = body;
+    const { registrationOpen, registrationMessage, showTbaTeachers, tbaTeachersCount,
+            fridayHall1MapUrl, fridayHall2MapUrl, saturdayHall1MapUrl, saturdayHall2MapUrl } = body;
 
-    // Check if TBA columns exist
-    const hasNewColumns = await checkTbaColumnsExist();
+    const hasTbaColumns = await checkTbaColumnsExist();
+    const hasHallMapColumns = await checkHallMapColumnsExist();
 
-    if (hasNewColumns) {
-      // Update with all fields
+    if (hasTbaColumns && hasHallMapColumns) {
       await prisma.$executeRaw`
-        UPDATE "Settings" 
+        UPDATE "Settings"
+        SET "registrationOpen" = ${registrationOpen ?? false},
+            "registrationMessage" = ${registrationMessage ?? "Registration opens on March 1st, 2026"},
+            "showTbaTeachers" = ${showTbaTeachers ?? false},
+            "tbaTeachersCount" = ${tbaTeachersCount ?? 3},
+            "fridayHall1MapUrl" = ${fridayHall1MapUrl ?? null},
+            "fridayHall2MapUrl" = ${fridayHall2MapUrl ?? null},
+            "saturdayHall1MapUrl" = ${saturdayHall1MapUrl ?? null},
+            "saturdayHall2MapUrl" = ${saturdayHall2MapUrl ?? null},
+            "updatedAt" = NOW()
+        WHERE id = 'settings'
+      `;
+    } else if (hasTbaColumns) {
+      await prisma.$executeRaw`
+        UPDATE "Settings"
         SET "registrationOpen" = ${registrationOpen ?? false},
             "registrationMessage" = ${registrationMessage ?? "Registration opens on March 1st, 2026"},
             "showTbaTeachers" = ${showTbaTeachers ?? false},
@@ -85,9 +119,8 @@ export async function PUT(request: NextRequest) {
         WHERE id = 'settings'
       `;
     } else {
-      // Update only basic fields
       await prisma.$executeRaw`
-        UPDATE "Settings" 
+        UPDATE "Settings"
         SET "registrationOpen" = ${registrationOpen ?? false},
             "registrationMessage" = ${registrationMessage ?? "Registration opens on March 1st, 2026"},
             "updatedAt" = NOW()
@@ -101,13 +134,17 @@ export async function PUT(request: NextRequest) {
     `;
 
     const setting = settings[0];
-    
+
     return NextResponse.json({
       id: setting.id,
       registrationOpen: setting.registrationOpen || false,
       registrationMessage: setting.registrationMessage || "Registration opens on March 1st, 2026",
       showTbaTeachers: setting.showTbaTeachers ?? showTbaTeachers ?? false,
       tbaTeachersCount: setting.tbaTeachersCount ?? tbaTeachersCount ?? 3,
+      fridayHall1MapUrl: setting.fridayHall1MapUrl ?? fridayHall1MapUrl ?? null,
+      fridayHall2MapUrl: setting.fridayHall2MapUrl ?? fridayHall2MapUrl ?? null,
+      saturdayHall1MapUrl: setting.saturdayHall1MapUrl ?? saturdayHall1MapUrl ?? null,
+      saturdayHall2MapUrl: setting.saturdayHall2MapUrl ?? saturdayHall2MapUrl ?? null,
       updatedAt: setting.updatedAt,
     });
   } catch (error: any) {

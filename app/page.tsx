@@ -6,6 +6,102 @@ import Image from "next/image";
 import Navigation from "./components/Navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
+/* ─── Firework helpers ─── */
+const FW_COLORS = [
+  "#FFD700", "#FF6B6B", "#4FC3F7", "#81C784",
+  "#FF8A65", "#CE93D8", "#F06292", "#80DEEA",
+];
+
+function FireworkBurst({ delaySec = 0, cycleSec = 3.5, colors = FW_COLORS }: {
+  delaySec?: number;
+  cycleSec?: number;
+  colors?: string[];
+}) {
+  const numParticles = 12;
+  const angles = Array.from({ length: numParticles }, (_, i) => (360 / numParticles) * i);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "10px",
+        height: "10px",
+        animation: `fw-burst-cycle ${cycleSec}s ${delaySec}s infinite ease-out`,
+      }}
+    >
+      {/* Particles */}
+      {angles.map((angle, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            width: i % 4 === 0 ? "6px" : "4px",
+            height: i % 4 === 0 ? "6px" : "4px",
+            marginTop: "-3px",
+            marginLeft: "-3px",
+            borderRadius: "50%",
+            backgroundColor: colors[i % colors.length],
+            boxShadow: `0 0 5px 1px ${colors[i % colors.length]}`,
+            "--fw-angle": `${angle}deg`,
+            animation: `fw-particle ${cycleSec * 0.33}s ${delaySec}s infinite ease-out`,
+          } as React.CSSProperties}
+        />
+      ))}
+
+      {/* Center flash */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "10px",
+          height: "10px",
+          borderRadius: "50%",
+          backgroundColor: "white",
+          boxShadow: "0 0 10px 4px rgba(255,255,255,0.95)",
+          animation: `fw-center-flash ${cycleSec * 0.33}s ${delaySec}s infinite ease-out`,
+        }}
+      />
+    </div>
+  );
+}
+
+function FireworkColumn({ side }: { side: "left" | "right" }) {
+  const bursts: { top: string; delay: number; cycle: number; colors: string[] }[] = [
+    { top: "5%",  delay: 0,    cycle: 3.5, colors: ["#FFD700","#FFF176","#FF8F00","#FFCA28"] },
+    { top: "22%", delay: 0.9,  cycle: 4,   colors: ["#EF5350","#F48FB1","#EC407A","#FFCDD2"] },
+    { top: "40%", delay: 1.7,  cycle: 3.8, colors: ["#26C6DA","#80DEEA","#4FC3F7","#B3E5FC"] },
+    { top: "57%", delay: 2.5,  cycle: 3.2, colors: ["#66BB6A","#A5D6A7","#C6FF00","#DCEDC8"] },
+    { top: "74%", delay: 0.4,  cycle: 4.2, colors: ["#AB47BC","#CE93D8","#E040FB","#E1BEE7"] },
+    { top: "88%", delay: 1.3,  cycle: 3.6, colors: ["#FF7043","#FFAB91","#FFD54F","#FFCCBC"] },
+  ];
+
+  return (
+    <div
+      className="hidden md:flex"
+      style={{
+        position: "absolute",
+        top: 0,
+        [side]: "-90px",
+        height: "100%",
+        width: "80px",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-between",
+        pointerEvents: "none",
+      }}
+    >
+      {bursts.map((b, i) => (
+        <div key={i} style={{ position: "absolute", top: b.top, left: "50%", transform: "translateX(-50%)" }}>
+          <FireworkBurst delaySec={b.delay} cycleSec={b.cycle} colors={b.colors} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
   const { t, language } = useLanguage();
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
@@ -22,6 +118,8 @@ export default function Home() {
     Saturday: "Hall 1",
     Sunday: "Hall 1",
   });
+  const [hallMapUrls, setHallMapUrls] = useState<{[key: string]: string}>({});
+  const [activeMapModal, setActiveMapModal] = useState<{day: string; hall: string; url: string} | null>(null);
 
   useEffect(() => {
     async function fetchSchedule() {
@@ -50,8 +148,26 @@ export default function Home() {
       }
     }
     
+    async function fetchSettings() {
+      try {
+        const res = await fetch('/api/settings', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setHallMapUrls({
+            "Friday-Hall 1": data.fridayHall1MapUrl || "",
+            "Friday-Hall 2": data.fridayHall2MapUrl || "",
+            "Saturday-Hall 1": data.saturdayHall1MapUrl || "",
+            "Saturday-Hall 2": data.saturdayHall2MapUrl || "",
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    }
+
     fetchSchedule();
     fetchStudios();
+    fetchSettings();
   }, []);
 
   // Countdown timer
@@ -80,6 +196,11 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
   
+  const getHallMapUrl = (day: string, hall: string): string | undefined => {
+    const url = hallMapUrls[`${day}-${hall}`];
+    return url || undefined;
+  };
+
   // Group schedule by day
   const scheduleByDay = {
     Friday: scheduleItems.filter((item: any) => item.day === "Friday"),
@@ -167,11 +288,16 @@ export default function Home() {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Festival Flyer */}
-        <div className="max-w-2xl mx-auto mb-8">
+        <div className="relative max-w-2xl mx-auto mb-8">
+          {/* Fireworks — left side */}
+          <FireworkColumn side="left" />
+          {/* Fireworks — right side */}
+          <FireworkColumn side="right" />
+
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 shadow-2xl">
             <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden">
               <Image
-                src="/flyer.jpg"
+                src="/Guiness flyer.png"
                 alt="Greek Dance Festival Flyer"
                 fill
                 className="object-contain"
@@ -275,11 +401,39 @@ export default function Home() {
                 itemsByTime[item.time].push(item);
               });
               
-              const activeHall = activeHalls[day];
-              
+              // Only show halls that have at least one lesson on this day
+              const usedHalls = Array.from(
+                new Set(dayItems.filter((i: any) => i.hall).map((i: any) => i.hall))
+              ).sort() as string[];
+
+              const activeHall = usedHalls.includes(activeHalls[day])
+                ? activeHalls[day]
+                : usedHalls[0] || "Hall 1";
+
+              const gridColsClass =
+                usedHalls.length === 1 ? "grid-cols-1" :
+                usedHalls.length === 2 ? "grid-cols-1 md:grid-cols-2" :
+                "grid-cols-1 md:grid-cols-3";
+
               return (
                 <div key={day} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-8 border border-white/20">
-                  <h4 className="text-2xl font-bold text-white mb-6">{dayName}, {dateMap[day]}</h4>
+                  <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+                    <h4 className="text-2xl font-bold text-white">{dayName}, {dateMap[day]}</h4>
+                    {/* Location pills for halls that have a map URL */}
+                    {usedHalls.some(hall => getHallMapUrl(day, hall)) && (
+                      <div className="flex flex-wrap gap-2">
+                        {usedHalls.filter(hall => getHallMapUrl(day, hall)).map(hall => (
+                          <button
+                            key={hall}
+                            onClick={() => setActiveMapModal({ day, hall, url: getHallMapUrl(day, hall)! })}
+                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-white/20"
+                          >
+                            📍 {hall} Location
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   
                   {dayItems.length > 0 ? (
                     <>
@@ -327,8 +481,8 @@ export default function Home() {
                               <div className="text-white font-semibold mb-3 text-center text-lg bg-white/5 rounded-lg py-2">
                                 {time}
                               </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {["Hall 1", "Hall 2", "Hall 3"].map((hall) => {
+                              <div className={`grid ${gridColsClass} gap-4`}>
+                                {usedHalls.map((hall) => {
                                   const hallItem = items.find((item: any) => item.hall === hall);
                                   
                                   if (!hallItem) {
@@ -373,8 +527,8 @@ export default function Home() {
                       {/* Mobile View - Tabbed table format */}
                       <div className="md:hidden space-y-6">
                         {/* Hall Tabs */}
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                          {["Hall 1", "Hall 2", "Hall 3"].map((hall) => (
+                        <div className="flex flex-wrap gap-2 pb-2">
+                          {usedHalls.map((hall) => (
                             <button
                               key={hall}
                               onClick={() => setActiveHalls({...activeHalls, [day]: hall})}
@@ -387,6 +541,14 @@ export default function Home() {
                               {hall}
                             </button>
                           ))}
+                          {getHallMapUrl(day, activeHall) && (
+                            <button
+                              onClick={() => setActiveMapModal({ day, hall: activeHall, url: getHallMapUrl(day, activeHall)! })}
+                              className="px-4 py-2 rounded-lg font-semibold bg-white/10 text-white hover:bg-white/20 transition-all whitespace-nowrap text-sm border border-white/20"
+                            >
+                              📍 Location
+                            </button>
+                          )}
                         </div>
                         
                         {/* Schedule Table with breaks inline */}
@@ -540,6 +702,51 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Google Maps Modal */}
+      {activeMapModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setActiveMapModal(null)}
+        >
+          <div
+            className="bg-white rounded-2xl overflow-hidden w-full max-w-2xl shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 bg-blue-900">
+              <h3 className="text-white font-bold text-lg">
+                {activeMapModal.day} — {activeMapModal.hall}
+              </h3>
+              <button
+                onClick={() => setActiveMapModal(null)}
+                className="text-white hover:text-blue-200 text-3xl leading-none font-light"
+              >
+                ×
+              </button>
+            </div>
+            <div className="relative h-80 sm:h-96">
+              <iframe
+                src={activeMapModal.url}
+                className="w-full h-full border-0"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={`${activeMapModal.day} ${activeMapModal.hall} Location`}
+              />
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <a
+                href={activeMapModal.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors text-sm"
+              >
+                Open in Google Maps ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

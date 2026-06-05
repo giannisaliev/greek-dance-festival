@@ -106,6 +106,10 @@ model Settings {
   registrationMessage  String   @default("Registration opens on March 1st, 2026")
   showTbaTeachers      Boolean  @default(false)
   tbaTeachersCount     Int      @default(3)
+  fridayHall1MapUrl    String?
+  fridayHall2MapUrl    String?
+  saturdayHall1MapUrl  String?
+  saturdayHall2MapUrl  String?
   updatedAt            DateTime @updatedAt
 }
 

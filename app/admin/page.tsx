@@ -150,6 +150,10 @@ export default function AdminPage() {
     registrationMessage: "Registration opens on March 1st, 2026",
     showTbaTeachers: false,
     tbaTeachersCount: 3,
+    fridayHall1MapUrl: "",
+    fridayHall2MapUrl: "",
+    saturdayHall1MapUrl: "",
+    saturdayHall2MapUrl: "",
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -216,6 +220,10 @@ export default function AdminPage() {
         registrationMessage: data.registrationMessage || "Registration opens on March 1st, 2026",
         showTbaTeachers: data.showTbaTeachers || false,
         tbaTeachersCount: data.tbaTeachersCount || 3,
+        fridayHall1MapUrl: data.fridayHall1MapUrl || "",
+        fridayHall2MapUrl: data.fridayHall2MapUrl || "",
+        saturdayHall1MapUrl: data.saturdayHall1MapUrl || "",
+        saturdayHall2MapUrl: data.saturdayHall2MapUrl || "",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1457,6 +1465,50 @@ export default function AdminPage() {
                       <div className="text-red-400 font-bold text-lg mb-1">Close Registration</div>
                       <div className="text-red-200 text-sm">Stop accepting new registrations</div>
                     </button>
+                  </div>
+                </div>
+
+                {/* Hall Locations (Google Maps) */}
+                <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-2">Hall Locations</h3>
+                  <p className="text-blue-100 mb-6 text-sm">
+                    Paste a Google Maps embed URL for each hall. To get an embed URL: open Google Maps → find the location → Share → Embed a map → copy the <code className="bg-white/10 px-1 rounded">src</code> URL.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {[
+                      { label: "Friday — Hall 1", key: "fridayHall1MapUrl" },
+                      { label: "Friday — Hall 2", key: "fridayHall2MapUrl" },
+                      { label: "Saturday — Hall 1", key: "saturdayHall1MapUrl" },
+                      { label: "Saturday — Hall 2", key: "saturdayHall2MapUrl" },
+                    ].map(({ label, key }) => (
+                      <div key={key}>
+                        <label className="block text-white font-semibold mb-2">{label}</label>
+                        <input
+                          type="url"
+                          value={(settings as any)[key]}
+                          onChange={(e) => setSettings({ ...settings, [key]: e.target.value })}
+                          placeholder="https://www.google.com/maps/embed?pb=..."
+                          className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex items-center gap-4">
+                    <button
+                      onClick={saveSettings}
+                      disabled={settingsLoading}
+                      className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    >
+                      {settingsLoading ? "Saving..." : "Save Locations"}
+                    </button>
+                    {settingsSaved && (
+                      <span className="text-green-400 font-semibold flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Saved!
+                      </span>
+                    )}
                   </div>
                 </div>
 
