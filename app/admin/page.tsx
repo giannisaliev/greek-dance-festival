@@ -164,6 +164,7 @@ export default function AdminPage() {
     saturdayHall1Image: "",
     saturdayHall2Image: "",
     greekNightMapUrl: "",
+    greekNightBannerEnabled: true,
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -251,6 +252,7 @@ export default function AdminPage() {
         saturdayHall1Image: data.saturdayHall1Image || "",
         saturdayHall2Image: data.saturdayHall2Image || "",
         greekNightMapUrl: data.greekNightMapUrl || "",
+        greekNightBannerEnabled: data.greekNightBannerEnabled ?? true,
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1650,7 +1652,7 @@ export default function AdminPage() {
                 <div className="bg-white/5 rounded-xl p-8 border border-white/10">
                   <h3 className="text-2xl font-bold text-white mb-2">🍷 Greek Night Location</h3>
                   <p className="text-blue-100 mb-6 text-sm">
-                    Paste the Google Maps URL for the Greek Night venue (any Google Maps link works — share link or full URL). A 📍 Location button appears under Greek Night in the schedule. Leave empty to hide it.
+                    Paste the Google Maps URL for the Greek Night venue (any Google Maps link works — share link or full URL). A 📍 Location button appears under Greek Night in the schedule, and a Greek Night box can be shown at the top of the homepage. Leave the URL empty to hide the location button.
                   </p>
                   <div>
                     <label className="block text-blue-200 text-sm font-semibold mb-1">Google Maps URL</label>
@@ -1661,6 +1663,27 @@ export default function AdminPage() {
                       placeholder="https://maps.app.goo.gl/..."
                       className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
                     />
+                  </div>
+
+                  {/* Homepage banner box show/hide */}
+                  <div className="mt-5 flex items-center justify-between rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                    <div>
+                      <div className="text-white font-semibold">Show Greek Night box on homepage</div>
+                      <div className="text-blue-200 text-sm">Displays a Greek Night box with the location button at the top of the homepage banner.</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSettings({ ...settings, greekNightBannerEnabled: !settings.greekNightBannerEnabled })}
+                      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0 ${
+                        settings.greekNightBannerEnabled ? 'bg-green-500' : 'bg-gray-500'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                          settings.greekNightBannerEnabled ? 'translate-x-9' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
                   </div>
                   <div className="mt-6 flex items-center gap-4">
                     <button

@@ -65,6 +65,7 @@ export const translations = {
       noSession: "No session",
       noClass: "No class scheduled",
       locationLabel: "Location",
+      greekNightBannerText: "Join us for an unforgettable night of music, food and dance!",
     },
     
     // Pricing Page
@@ -437,6 +438,7 @@ export const translations = {
       noSession: "Καμία συνεδρία",
       noClass: "Δεν έχει προγραμματιστεί μάθημα",
       locationLabel: "Τοποθεσία",
+      greekNightBannerText: "Ελάτε για μια αξέχαστη βραδιά με μουσική, φαγητό και χορό!",
     },
     
     // Pricing Page

@@ -120,6 +120,7 @@ export default function Home() {
   });
   const [hallLocations, setHallLocations] = useState<{[key: string]: {url?: string; name?: string; image?: string}}>({});
   const [greekNightMapUrl, setGreekNightMapUrl] = useState<string>("");
+  const [greekNightBannerEnabled, setGreekNightBannerEnabled] = useState<boolean>(false);
   const [activeMapModal, setActiveMapModal] = useState<{
     day: string; hall: string;
     url?: string; name?: string; image?: string;
@@ -165,6 +166,7 @@ export default function Home() {
             "Saturday-Hall 2": { url: data.saturdayHall2MapUrl || "", name: data.saturdayHall2Name || "", image: data.saturdayHall2Image || "" },
           });
           setGreekNightMapUrl(data.greekNightMapUrl || "");
+          setGreekNightBannerEnabled(data.greekNightBannerEnabled ?? false);
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -208,6 +210,8 @@ export default function Home() {
   const getHallImage = (day: string, hall: string) => getHallLoc(day, hall).image || undefined;
   const hasHallLocation = (day: string, hall: string) =>
     !!(getHallMapUrl(day, hall) || getHallImage(day, hall));
+  // Match the Greek Night row regardless of case/emoji (e.g. "🎉 GREEK NIGHT 🎉")
+  const isGreekNight = (s: string) => /greek\s*night/i.test(s || "");
 
   function getGoogleMapsEmbedUrl(url: string): string {
     if (!url) return '';
@@ -306,6 +310,28 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Greek Night banner box (toggle in admin) */}
+        {greekNightBannerEnabled && (
+          <div className="mb-8 bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 backdrop-blur-md rounded-2xl p-6 sm:p-8 border-2 border-yellow-400/60 shadow-2xl text-center">
+            <h3 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 mb-2">
+              🍷 {t.home.greekNight}
+            </h3>
+            <p className="text-white text-base sm:text-lg mb-5">
+              {t.home.greekNightBannerText}
+            </p>
+            {greekNightMapUrl && (
+              <a
+                href={greekNightMapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/25 hover:bg-white/40 text-white px-6 py-3 rounded-full text-base font-bold transition-all border-2 border-white/40 shadow-lg hover:shadow-xl hover:scale-105"
+              >
+                📍 {t.home.locationLabel || 'Location'}
+              </a>
+            )}
+          </div>
+        )}
+
         {/* Festival Flyer */}
         <div className="relative max-w-2xl mx-auto mb-8">
           {/* Fireworks — left side */}
@@ -471,7 +497,7 @@ export default function Home() {
                           if (!hasHalls) {
                             // Special events (breaks, Greek Night, Guinness)
                             const item = items[0];
-                            const isHighlight = item.danceStyle.includes('Greek Night') || item.danceStyle.includes('Guinness');
+                            const isHighlight = isGreekNight(item.danceStyle) || item.danceStyle.includes('Guinness');
                             
                             return (
                               <div
@@ -496,7 +522,7 @@ export default function Home() {
                                 }`}>
                                   {item.danceStyle}
                                 </div>
-                                {item.danceStyle.includes('Greek Night') && greekNightMapUrl && (
+                                {isGreekNight(item.danceStyle) && greekNightMapUrl && (
                                   <a
                                     href={greekNightMapUrl}
                                     target="_blank"
@@ -614,7 +640,7 @@ export default function Home() {
                                   if (!hasHalls) {
                                     // Special event row (break, Greek Night, Guinness)
                                     const item = items[0];
-                                    const isHighlight = item.danceStyle.includes('Greek Night') || item.danceStyle.includes('Guinness');
+                                    const isHighlight = isGreekNight(item.danceStyle) || item.danceStyle.includes('Guinness');
                                     
                                     return (
                                       <tr key={time}>
@@ -638,7 +664,7 @@ export default function Home() {
                                             }`}>
                                               {item.danceStyle}
                                             </div>
-                                            {item.danceStyle.includes('Greek Night') && greekNightMapUrl && (
+                                            {isGreekNight(item.danceStyle) && greekNightMapUrl && (
                                               <a
                                                 href={greekNightMapUrl}
                                                 target="_blank"

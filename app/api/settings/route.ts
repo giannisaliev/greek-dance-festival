@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
   saturdayHall1Image: null,
   saturdayHall2Image: null,
   greekNightMapUrl: null,
+  greekNightBannerEnabled: true,
 };
 
 function mapSetting(setting: any, overrides: Record<string, any> = {}) {
@@ -42,6 +43,7 @@ function mapSetting(setting: any, overrides: Record<string, any> = {}) {
     saturdayHall1Image: setting.saturdayHall1Image ?? overrides.saturdayHall1Image ?? null,
     saturdayHall2Image: setting.saturdayHall2Image ?? overrides.saturdayHall2Image ?? null,
     greekNightMapUrl: setting.greekNightMapUrl ?? overrides.greekNightMapUrl ?? null,
+    greekNightBannerEnabled: setting.greekNightBannerEnabled ?? overrides.greekNightBannerEnabled ?? true,
     updatedAt: setting.updatedAt,
   };
 }
@@ -101,6 +103,13 @@ async function checkGreekNightColumnExists(): Promise<boolean> {
   } catch { return false; }
 }
 
+async function checkGreekNightBannerColumnExists(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT "greekNightBannerEnabled" FROM "Settings" LIMIT 1`;
+    return true;
+  } catch { return false; }
+}
+
 // PUT update settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
@@ -110,14 +119,15 @@ export async function PUT(request: NextRequest) {
       fridayHall1MapUrl, fridayHall2MapUrl, saturdayHall1MapUrl, saturdayHall2MapUrl,
       fridayHall1Name, fridayHall2Name, saturdayHall1Name, saturdayHall2Name,
       fridayHall1Image, fridayHall2Image, saturdayHall1Image, saturdayHall2Image,
-      greekNightMapUrl,
+      greekNightMapUrl, greekNightBannerEnabled,
     } = body;
 
-    const [hasTba, hasHallMap, hasHallLocation, hasGreekNight] = await Promise.all([
+    const [hasTba, hasHallMap, hasHallLocation, hasGreekNight, hasGreekNightBanner] = await Promise.all([
       checkTbaColumnsExist(),
       checkHallMapColumnsExist(),
       checkHallLocationColumnsExist(),
       checkGreekNightColumnExists(),
+      checkGreekNightBannerColumnExists(),
     ]);
 
     if (hasTba && hasHallMap && hasHallLocation) {
@@ -180,6 +190,14 @@ export async function PUT(request: NextRequest) {
       await prisma.$executeRaw`
         UPDATE "Settings"
         SET "greekNightMapUrl" = ${greekNightMapUrl ?? null}
+        WHERE id = 'settings'
+      `;
+    }
+
+    if (hasGreekNightBanner) {
+      await prisma.$executeRaw`
+        UPDATE "Settings"
+        SET "greekNightBannerEnabled" = ${greekNightBannerEnabled ?? true}
         WHERE id = 'settings'
       `;
     }
