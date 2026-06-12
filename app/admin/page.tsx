@@ -163,6 +163,7 @@ export default function AdminPage() {
     fridayHall2Image: "",
     saturdayHall1Image: "",
     saturdayHall2Image: "",
+    greekNightMapUrl: "",
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -249,6 +250,7 @@ export default function AdminPage() {
         fridayHall2Image: data.fridayHall2Image || "",
         saturdayHall1Image: data.saturdayHall1Image || "",
         saturdayHall2Image: data.saturdayHall2Image || "",
+        greekNightMapUrl: data.greekNightMapUrl || "",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1632,6 +1634,41 @@ export default function AdminPage() {
                       className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
                     >
                       {settingsLoading ? "Saving..." : "Save Locations"}
+                    </button>
+                    {settingsSaved && (
+                      <span className="text-green-400 font-semibold flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Saved!
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Greek Night Location */}
+                <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-2">🍷 Greek Night Location</h3>
+                  <p className="text-blue-100 mb-6 text-sm">
+                    Paste the Google Maps URL for the Greek Night venue (any Google Maps link works — share link or full URL). A 📍 Location button appears under Greek Night in the schedule. Leave empty to hide it.
+                  </p>
+                  <div>
+                    <label className="block text-blue-200 text-sm font-semibold mb-1">Google Maps URL</label>
+                    <input
+                      type="url"
+                      value={settings.greekNightMapUrl}
+                      onChange={(e) => setSettings({ ...settings, greekNightMapUrl: e.target.value })}
+                      placeholder="https://maps.app.goo.gl/..."
+                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                    />
+                  </div>
+                  <div className="mt-6 flex items-center gap-4">
+                    <button
+                      onClick={saveSettings}
+                      disabled={settingsLoading}
+                      className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    >
+                      {settingsLoading ? "Saving..." : "Save Greek Night Location"}
                     </button>
                     {settingsSaved && (
                       <span className="text-green-400 font-semibold flex items-center gap-2">

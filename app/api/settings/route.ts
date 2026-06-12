@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   fridayHall2Image: null,
   saturdayHall1Image: null,
   saturdayHall2Image: null,
+  greekNightMapUrl: null,
 };
 
 function mapSetting(setting: any, overrides: Record<string, any> = {}) {
@@ -40,6 +41,7 @@ function mapSetting(setting: any, overrides: Record<string, any> = {}) {
     fridayHall2Image: setting.fridayHall2Image ?? overrides.fridayHall2Image ?? null,
     saturdayHall1Image: setting.saturdayHall1Image ?? overrides.saturdayHall1Image ?? null,
     saturdayHall2Image: setting.saturdayHall2Image ?? overrides.saturdayHall2Image ?? null,
+    greekNightMapUrl: setting.greekNightMapUrl ?? overrides.greekNightMapUrl ?? null,
     updatedAt: setting.updatedAt,
   };
 }
@@ -92,6 +94,13 @@ async function checkHallLocationColumnsExist(): Promise<boolean> {
   } catch { return false; }
 }
 
+async function checkGreekNightColumnExists(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT "greekNightMapUrl" FROM "Settings" LIMIT 1`;
+    return true;
+  } catch { return false; }
+}
+
 // PUT update settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
@@ -101,12 +110,14 @@ export async function PUT(request: NextRequest) {
       fridayHall1MapUrl, fridayHall2MapUrl, saturdayHall1MapUrl, saturdayHall2MapUrl,
       fridayHall1Name, fridayHall2Name, saturdayHall1Name, saturdayHall2Name,
       fridayHall1Image, fridayHall2Image, saturdayHall1Image, saturdayHall2Image,
+      greekNightMapUrl,
     } = body;
 
-    const [hasTba, hasHallMap, hasHallLocation] = await Promise.all([
+    const [hasTba, hasHallMap, hasHallLocation, hasGreekNight] = await Promise.all([
       checkTbaColumnsExist(),
       checkHallMapColumnsExist(),
       checkHallLocationColumnsExist(),
+      checkGreekNightColumnExists(),
     ]);
 
     if (hasTba && hasHallMap && hasHallLocation) {
@@ -161,6 +172,14 @@ export async function PUT(request: NextRequest) {
         SET "registrationOpen"    = ${registrationOpen ?? false},
             "registrationMessage" = ${registrationMessage ?? DEFAULT_SETTINGS.registrationMessage},
             "updatedAt"           = NOW()
+        WHERE id = 'settings'
+      `;
+    }
+
+    if (hasGreekNight) {
+      await prisma.$executeRaw`
+        UPDATE "Settings"
+        SET "greekNightMapUrl" = ${greekNightMapUrl ?? null}
         WHERE id = 'settings'
       `;
     }

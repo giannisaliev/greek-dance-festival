@@ -119,6 +119,7 @@ export default function Home() {
     Sunday: "Hall 1",
   });
   const [hallLocations, setHallLocations] = useState<{[key: string]: {url?: string; name?: string; image?: string}}>({});
+  const [greekNightMapUrl, setGreekNightMapUrl] = useState<string>("");
   const [activeMapModal, setActiveMapModal] = useState<{
     day: string; hall: string;
     url?: string; name?: string; image?: string;
@@ -163,6 +164,7 @@ export default function Home() {
             "Saturday-Hall 1": { url: data.saturdayHall1MapUrl || "", name: data.saturdayHall1Name || "", image: data.saturdayHall1Image || "" },
             "Saturday-Hall 2": { url: data.saturdayHall2MapUrl || "", name: data.saturdayHall2Name || "", image: data.saturdayHall2Image || "" },
           });
+          setGreekNightMapUrl(data.greekNightMapUrl || "");
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -494,10 +496,20 @@ export default function Home() {
                                 }`}>
                                   {item.danceStyle}
                                 </div>
+                                {item.danceStyle.includes('Greek Night') && greekNightMapUrl && (
+                                  <a
+                                    href={greekNightMapUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 mt-3 bg-white/25 hover:bg-white/40 text-white px-5 py-2.5 rounded-full text-base font-bold transition-all border-2 border-white/40 shadow-lg hover:shadow-xl hover:scale-105"
+                                  >
+                                    📍 {t.home.locationLabel || 'Location'}
+                                  </a>
+                                )}
                               </div>
                             );
                           }
-                          
+
                           // Regular sessions with halls
                           return (
                             <div key={time}>
@@ -626,12 +638,22 @@ export default function Home() {
                                             }`}>
                                               {item.danceStyle}
                                             </div>
+                                            {item.danceStyle.includes('Greek Night') && greekNightMapUrl && (
+                                              <a
+                                                href={greekNightMapUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 mt-3 bg-white/25 hover:bg-white/40 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 border-white/40 shadow-lg"
+                                              >
+                                                📍 {t.home.locationLabel || 'Location'}
+                                              </a>
+                                            )}
                                           </div>
                                         </td>
                                       </tr>
                                     );
                                   }
-                                  
+
                                   // Regular class row
                                   const hallItem = items.find((item: any) => item.hall === activeHall);
                                   

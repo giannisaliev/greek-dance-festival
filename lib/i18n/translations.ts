@@ -64,6 +64,7 @@ export const translations = {
       guinnessAttempt: "Zeimbekiko Guinness Record Attempt",
       noSession: "No session",
       noClass: "No class scheduled",
+      locationLabel: "Location",
     },
     
     // Pricing Page
@@ -434,7 +435,9 @@ export const translations = {
       greekNight: "ΕΛΛΗΝΙΚΗ ΒΡΑΔΙΑ",
       guinnessAttempt: "Απόπειρα Ρεκόρ Guinness Ζεϊμπέκικο",
       noSession: "Καμία συνεδρία",
-      noClass: "Δεν έχει προγραμματιστεί μάθημα",    },
+      noClass: "Δεν έχει προγραμματιστεί μάθημα",
+      locationLabel: "Τοποθεσία",
+    },
     
     // Pricing Page
     pricing: {

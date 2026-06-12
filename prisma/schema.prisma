@@ -141,6 +141,7 @@ model Settings {
   fridayHall2Image     String?
   saturdayHall1Image   String?
   saturdayHall2Image   String?
+  greekNightMapUrl     String?
   updatedAt            DateTime @updatedAt
 }
 
