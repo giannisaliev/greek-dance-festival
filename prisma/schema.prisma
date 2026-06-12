@@ -84,6 +84,8 @@ model Participant {
   deletedBy             String?   // ID of user who deleted this participant
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+
+  classCheckIns         ClassCheckIn[]
 }
 
 model Schedule {
@@ -98,6 +100,27 @@ model Schedule {
   color      String?  // Hex color code for display
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  classCheckIns ClassCheckIn[]
+}
+
+// Per-class attendance check-in. Each row marks one attendee present for one class (Schedule item).
+// A registered attendee has participantId set; a non-registered "walk-in" has participantId null
+// and their name/phone stored inline.
+model ClassCheckIn {
+  id            String       @id @default(cuid())
+  scheduleId    String
+  schedule      Schedule     @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  participantId String?      // Set for registered participants; null for walk-ins
+  participant   Participant? @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  firstName     String?      // Walk-in first name (when participantId is null)
+  lastName      String?      // Walk-in last name (when participantId is null)
+  phone         String?      // Walk-in phone (optional)
+  createdAt     DateTime     @default(now())
+
+  @@unique([scheduleId, participantId])
+  @@index([scheduleId])
+  @@index([participantId])
 }
 
 model Settings {

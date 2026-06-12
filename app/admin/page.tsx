@@ -19,6 +19,7 @@ interface Participant {
   guinnessRecordAttempt: boolean;
   greekNight: boolean;
   totalPrice: number;
+  classCheckInCount?: number;
   user: {
     id: string;
     firstName: string;
@@ -634,10 +635,22 @@ export default function AdminPage() {
             <h2 className="text-2xl sm:text-4xl font-bold text-white">Admin Dashboard</h2>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
+                href="/admin/check-in"
+                className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-emerald-600 hover:to-green-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                ✅ Class Check-in
+              </Link>
+              <Link
                 href="/admin/analytics"
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg text-sm sm:text-base text-center"
               >
                 📊 Analytics
+              </Link>
+              <Link
+                href="/admin/participants"
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                👥 Participants by Package
               </Link>
               <Link
                 href="/admin/hotels"
@@ -887,9 +900,19 @@ export default function AdminPage() {
                                   })}
                                 </td>
                                 <td className="py-2 px-3">
-                                  <span className={`text-xs ${participant.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
-                                    {participant.checkedIn ? "✓" : "•"}
-                                  </span>
+                                  <div className="flex flex-col gap-1">
+                                    <span className={`text-xs ${participant.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
+                                      {participant.checkedIn ? "✓" : "•"}
+                                    </span>
+                                    {(participant.classCheckInCount ?? 0) > 0 && (
+                                      <span
+                                        className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap"
+                                        title={`Checked in for ${participant.classCheckInCount} class${participant.classCheckInCount === 1 ? "" : "es"}`}
+                                      >
+                                        📚 {participant.classCheckInCount}
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="py-2 px-3">
                                   <div className="flex gap-1">
@@ -1092,9 +1115,19 @@ export default function AdminPage() {
                                                 })}
                                               </td>
                                               <td className="py-2 px-2">
-                                                <span className={`text-xs ${student.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
-                                                  {student.checkedIn ? "✓" : "•"}
-                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                  <span className={`text-xs ${student.checkedIn ? "text-green-400" : "text-yellow-400"}`}>
+                                                    {student.checkedIn ? "✓" : "•"}
+                                                  </span>
+                                                  {(student.classCheckInCount ?? 0) > 0 && (
+                                                    <span
+                                                      className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap"
+                                                      title={`Checked in for ${student.classCheckInCount} class${student.classCheckInCount === 1 ? "" : "es"}`}
+                                                    >
+                                                      📚 {student.classCheckInCount}
+                                                    </span>
+                                                  )}
+                                                </div>
                                               </td>
                                               <td className="py-2 px-2">
                                                 <div className="flex gap-1">

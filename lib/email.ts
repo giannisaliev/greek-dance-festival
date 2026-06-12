@@ -768,3 +768,85 @@ export async function sendHotelBookingConfirmedEmail(data: HotelBookingEmailData
     return { success: false, error };
   }
 }
+
+export async function sendPasswordResetEmail(email: string, resetToken: string) {
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+
+  const mailOptions = {
+    from: `Greek Dance Festival <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Password Reset Request – Greek Dance Festival',
+    html: `
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; background-color: #ebf4ff;">
+        <tr>
+          <td align="center" style="padding: 40px 16px;">
+            <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+
+              <!-- Header -->
+              <tr>
+                <td bgcolor="#1a365d" align="center" style="padding: 40px 30px; border-radius: 12px 12px 0 0;">
+                  <h1 style="color: #ffffff; margin: 0 0 6px; font-size: 26px; font-weight: bold; letter-spacing: 1px;">
+                    Greek Dance Festival
+                  </h1>
+                  <p style="color: #90cdf4; margin: 0; font-size: 15px;">Password Reset Request</p>
+                </td>
+              </tr>
+
+              <!-- Body -->
+              <tr>
+                <td bgcolor="#ffffff" style="padding: 40px 36px; border: 1px solid #bee3f8; border-top: none; border-radius: 0 0 12px 12px;">
+                  <p style="color: #2d3748; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">
+                    We received a request to reset the password for your account. Click the button below to choose a new password.
+                  </p>
+
+                  <!-- Button (table-based for email-client compatibility) -->
+                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 28px;">
+                    <tr>
+                      <td bgcolor="#1a365d" align="center" style="border-radius: 50px; padding: 0;">
+                        <a href="${resetUrl}"
+                           style="display: inline-block; background-color: #1a365d; color: #ffffff; font-size: 16px; font-weight: bold; text-decoration: none; padding: 15px 36px; border-radius: 50px; letter-spacing: 0.5px;">
+                          Reset My Password
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="color: #718096; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">
+                    This link expires in <strong style="color: #2b6cb0;">1 hour</strong>.
+                    If you did not request a password reset you can safely ignore this email — your password will not change.
+                  </p>
+
+                  <hr style="border: none; border-top: 1px solid #bee3f8; margin: 0 0 20px;" />
+
+                  <p style="color: #a0aec0; font-size: 12px; margin: 0; line-height: 1.6;">
+                    If the button above does not work, copy and paste this link into your browser:<br />
+                    <a href="${resetUrl}" style="color: #2b6cb0; word-break: break-all;">${resetUrl}</a>
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td align="center" style="padding: 20px 0 0;">
+                  <p style="color: #718096; font-size: 12px; margin: 0;">
+                    © ${new Date().getFullYear()} Greek Dance Festival · Athens, Greece
+                  </p>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    console.error('Password reset email sending failed:', error);
+    return { success: false, error };
+  }
+}

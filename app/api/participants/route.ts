@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Attach a `classCheckInCount` to each participant = number of classes they are checked in for.
+// Wrapped in try/catch so the participants list still loads if the ClassCheckIn table
+// has not been migrated yet.
+async function attachClassCheckInCounts<T extends { id: string }>(
+  participants: T[]
+): Promise<(T & { classCheckInCount: number })[]> {
+  const counts: Record<string, number> = {};
+  if (participants && participants.length > 0) {
+    try {
+      const grouped = await prisma.classCheckIn.groupBy({
+        by: ["participantId"],
+        where: { participantId: { in: participants.map((p) => p.id) } },
+        _count: { _all: true },
+      });
+      grouped.forEach((g) => {
+        if (g.participantId) counts[g.participantId] = g._count._all;
+      });
+    } catch (error) {
+      console.error("Error fetching class check-in counts (table may not exist yet):", error);
+    }
+  }
+  return (participants || []).map((p) => ({ ...p, classCheckInCount: counts[p.id] || 0 }));
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -66,8 +90,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({ 
-        participants: participants || [], 
+      return NextResponse.json({
+        participants: await attachClassCheckInCounts(participants),
         teachers: teachers || []
       });
     }
@@ -204,8 +228,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
-      participants: uniqueParticipants || [], 
+    return NextResponse.json({
+      participants: await attachClassCheckInCounts(uniqueParticipants),
       teachers: teachers || []
     });
   } catch (error) {

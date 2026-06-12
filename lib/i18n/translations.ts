@@ -309,6 +309,37 @@ export const translations = {
       signUp: "Sign up",
       orContinueWith: "Or continue with",
       googleSignIn: "Sign in with Google",
+      forgotPassword: "Forgot password?",
+    },
+
+    // Forgot Password Page
+    forgotPassword: {
+      title: "Forgot Password",
+      subtitle: "Enter your email and we'll send you a reset link",
+      email: "Email",
+      sendLink: "Send Reset Link",
+      sending: "Sending...",
+      backToLogin: "Back to login",
+      successTitle: "Check your email",
+      successMessage: "If an account with that email exists, we've sent a password reset link. Check your inbox.",
+      errorMessage: "Something went wrong. Please try again.",
+    },
+
+    // Reset Password Page
+    resetPassword: {
+      title: "Reset Password",
+      subtitle: "Enter your new password below",
+      newPassword: "New Password",
+      confirmPassword: "Confirm Password",
+      resetButton: "Reset Password",
+      resetting: "Resetting...",
+      backToLogin: "Back to login",
+      successTitle: "Password reset!",
+      successMessage: "Your password has been updated. You can now sign in with your new password.",
+      errorInvalidToken: "This reset link is invalid or has expired. Please request a new one.",
+      errorPasswordMismatch: "Passwords do not match.",
+      errorPasswordLength: "Password must be at least 6 characters.",
+      errorGeneral: "Something went wrong. Please try again.",
     },
     
     // Signup Page
@@ -648,6 +679,37 @@ export const translations = {
       signUp: "Εγγραφείτε",
       orContinueWith: "Ή συνεχίστε με",
       googleSignIn: "Σύνδεση με Google",
+      forgotPassword: "Ξεχάσατε τον κωδικό;",
+    },
+
+    // Forgot Password Page
+    forgotPassword: {
+      title: "Ξεχάσατε τον Κωδικό",
+      subtitle: "Εισάγετε το email σας και θα σας στείλουμε σύνδεσμο επαναφοράς",
+      email: "Email",
+      sendLink: "Αποστολή Συνδέσμου",
+      sending: "Αποστολή...",
+      backToLogin: "Επιστροφή στη σύνδεση",
+      successTitle: "Ελέγξτε το email σας",
+      successMessage: "Εάν υπάρχει λογαριασμός με αυτό το email, σας στείλαμε σύνδεσμο επαναφοράς. Ελέγξτε τα εισερχόμενά σας.",
+      errorMessage: "Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.",
+    },
+
+    // Reset Password Page
+    resetPassword: {
+      title: "Επαναφορά Κωδικού",
+      subtitle: "Εισάγετε τον νέο σας κωδικό παρακάτω",
+      newPassword: "Νέος Κωδικός",
+      confirmPassword: "Επιβεβαίωση Κωδικού",
+      resetButton: "Επαναφορά Κωδικού",
+      resetting: "Επαναφορά...",
+      backToLogin: "Επιστροφή στη σύνδεση",
+      successTitle: "Ο κωδικός επαναφέρθηκε!",
+      successMessage: "Ο κωδικός σας ενημερώθηκε. Μπορείτε τώρα να συνδεθείτε με τον νέο σας κωδικό.",
+      errorInvalidToken: "Αυτός ο σύνδεσμος είναι άκυρος ή έχει λήξει. Παρακαλώ ζητήστε νέο.",
+      errorPasswordMismatch: "Οι κωδικοί δεν ταιριάζουν.",
+      errorPasswordLength: "Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.",
+      errorGeneral: "Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.",
     },
     
     // Signup Page
