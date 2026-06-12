@@ -14,8 +14,21 @@ export const translations = {
       login: "Login",
       signOut: "Sign Out",
       adminPanel: "Admin Panel",
+      certificate: "Certificate",
     },
-    
+
+    certificate: {
+      title: "Guinness World Record Certificate",
+      subtitle: "Find your name and download your personal certificate of achievement.",
+      nameLabel: "Your name",
+      namePlaceholder: "Start typing your name…",
+      searchHint: "Search and select your name as you registered for the festival.",
+      downloadButton: "Download Certificate",
+      generating: "Generating…",
+      unavailableTitle: "Not available yet",
+      unavailableText: "Certificates are not available right now. Please check back later.",
+    },
+
     // Home Page
     home: {
       title: "Greek Dance Festival",
@@ -388,6 +401,19 @@ export const translations = {
       login: "Σύνδεση",
       signOut: "Αποσύνδεση",
       adminPanel: "Πίνακας Διαχείρισης",
+      certificate: "Πιστοποιητικό",
+    },
+
+    certificate: {
+      title: "Πιστοποιητικό Ρεκόρ Γκίνες",
+      subtitle: "Βρείτε το όνομά σας και κατεβάστε το προσωπικό σας πιστοποιητικό.",
+      nameLabel: "Το όνομά σας",
+      namePlaceholder: "Αρχίστε να πληκτρολογείτε το όνομά σας…",
+      searchHint: "Αναζητήστε και επιλέξτε το όνομά σας όπως δηλώσατε στο φεστιβάλ.",
+      downloadButton: "Λήψη Πιστοποιητικού",
+      generating: "Δημιουργία…",
+      unavailableTitle: "Μη διαθέσιμο ακόμη",
+      unavailableText: "Τα πιστοποιητικά δεν είναι διαθέσιμα αυτή τη στιγμή. Δοκιμάστε ξανά αργότερα.",
     },
     
     // Home Page

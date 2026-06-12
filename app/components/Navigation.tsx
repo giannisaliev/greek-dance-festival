@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -11,12 +11,21 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showDashboardMobile, setShowDashboardMobile] = useState(false);
+  const [certificateEnabled, setCertificateEnabled] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { t } = useLanguage();
 
   // Don't show translations on admin pages
   const isAdminPage = pathname?.startsWith('/admin');
+
+  // Check whether the certificate page has been enabled in admin settings
+  useEffect(() => {
+    fetch("/api/settings", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setCertificateEnabled(d.certificatePageEnabled ?? false))
+      .catch(() => setCertificateEnabled(false));
+  }, []);
 
   const menuItems = [
     { href: "/", label: isAdminPage ? "Home" : t.nav.home },
@@ -26,6 +35,9 @@ export default function Navigation() {
     { href: "/hotel", label: isAdminPage ? "Hotel" : t.nav.hotel },
     { href: "/dance-studios", label: isAdminPage ? "Dance Studios" : t.nav.danceStudios },
     { href: "/register", label: isAdminPage ? "Register" : t.nav.register },
+    ...(certificateEnabled
+      ? [{ href: "/certificate", label: isAdminPage ? "Certificate" : t.nav.certificate }]
+      : []),
   ];
 
   const handleSignOut = async () => {

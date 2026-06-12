@@ -143,6 +143,7 @@ model Settings {
   saturdayHall2Image   String?
   greekNightMapUrl     String?
   greekNightBannerEnabled Boolean @default(true)
+  certificatePageEnabled  Boolean @default(false)
   updatedAt            DateTime @updatedAt
 }
 

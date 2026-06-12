@@ -165,6 +165,7 @@ export default function AdminPage() {
     saturdayHall2Image: "",
     greekNightMapUrl: "",
     greekNightBannerEnabled: true,
+    certificatePageEnabled: false,
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -253,6 +254,7 @@ export default function AdminPage() {
         saturdayHall2Image: data.saturdayHall2Image || "",
         greekNightMapUrl: data.greekNightMapUrl || "",
         greekNightBannerEnabled: data.greekNightBannerEnabled ?? true,
+        certificatePageEnabled: data.certificatePageEnabled ?? false,
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1692,6 +1694,50 @@ export default function AdminPage() {
                       className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
                     >
                       {settingsLoading ? "Saving..." : "Save Greek Night Location"}
+                    </button>
+                    {settingsSaved && (
+                      <span className="text-green-400 font-semibold flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Saved!
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Guinness Record Certificate Page */}
+                <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-2">🏆 Guinness Record Certificate</h3>
+                  <p className="text-blue-100 mb-6 text-sm">
+                    When enabled, a <span className="font-semibold text-white">Certificate</span> menu item appears on the site where attendees can search their registered name and download a personal Guinness World Record certificate (14th June 2026, Thessaloniki, Greece). Hidden by default.
+                  </p>
+                  <div className="flex items-center justify-between rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                    <div>
+                      <div className="text-white font-semibold">Show Certificate page</div>
+                      <div className="text-blue-200 text-sm">Adds the “Certificate” menu item and enables certificate downloads.</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSettings({ ...settings, certificatePageEnabled: !settings.certificatePageEnabled })}
+                      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0 ${
+                        settings.certificatePageEnabled ? 'bg-green-500' : 'bg-gray-500'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                          settings.certificatePageEnabled ? 'translate-x-9' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <div className="mt-6 flex items-center gap-4">
+                    <button
+                      onClick={saveSettings}
+                      disabled={settingsLoading}
+                      className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    >
+                      {settingsLoading ? "Saving..." : "Save Certificate Setting"}
                     </button>
                     {settingsSaved && (
                       <span className="text-green-400 font-semibold flex items-center gap-2">
