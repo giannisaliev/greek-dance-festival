@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS = {
   greekNightMapUrl: null,
   greekNightBannerEnabled: true,
   certificatePageEnabled: false,
+  certificateTemplate: "classic",
 };
 
 function mapSetting(setting: any, overrides: Record<string, any> = {}) {
@@ -46,6 +47,7 @@ function mapSetting(setting: any, overrides: Record<string, any> = {}) {
     greekNightMapUrl: setting.greekNightMapUrl ?? overrides.greekNightMapUrl ?? null,
     greekNightBannerEnabled: setting.greekNightBannerEnabled ?? overrides.greekNightBannerEnabled ?? true,
     certificatePageEnabled: setting.certificatePageEnabled ?? overrides.certificatePageEnabled ?? false,
+    certificateTemplate: setting.certificateTemplate ?? overrides.certificateTemplate ?? "classic",
     updatedAt: setting.updatedAt,
   };
 }
@@ -119,6 +121,13 @@ async function checkCertificateColumnExists(): Promise<boolean> {
   } catch { return false; }
 }
 
+async function checkCertificateTemplateColumnExists(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT "certificateTemplate" FROM "Settings" LIMIT 1`;
+    return true;
+  } catch { return false; }
+}
+
 // PUT update settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
@@ -128,16 +137,17 @@ export async function PUT(request: NextRequest) {
       fridayHall1MapUrl, fridayHall2MapUrl, saturdayHall1MapUrl, saturdayHall2MapUrl,
       fridayHall1Name, fridayHall2Name, saturdayHall1Name, saturdayHall2Name,
       fridayHall1Image, fridayHall2Image, saturdayHall1Image, saturdayHall2Image,
-      greekNightMapUrl, greekNightBannerEnabled, certificatePageEnabled,
+      greekNightMapUrl, greekNightBannerEnabled, certificatePageEnabled, certificateTemplate,
     } = body;
 
-    const [hasTba, hasHallMap, hasHallLocation, hasGreekNight, hasGreekNightBanner, hasCertificate] = await Promise.all([
+    const [hasTba, hasHallMap, hasHallLocation, hasGreekNight, hasGreekNightBanner, hasCertificate, hasCertificateTemplate] = await Promise.all([
       checkTbaColumnsExist(),
       checkHallMapColumnsExist(),
       checkHallLocationColumnsExist(),
       checkGreekNightColumnExists(),
       checkGreekNightBannerColumnExists(),
       checkCertificateColumnExists(),
+      checkCertificateTemplateColumnExists(),
     ]);
 
     if (hasTba && hasHallMap && hasHallLocation) {
@@ -216,6 +226,14 @@ export async function PUT(request: NextRequest) {
       await prisma.$executeRaw`
         UPDATE "Settings"
         SET "certificatePageEnabled" = ${certificatePageEnabled ?? false}
+        WHERE id = 'settings'
+      `;
+    }
+
+    if (hasCertificateTemplate) {
+      await prisma.$executeRaw`
+        UPDATE "Settings"
+        SET "certificateTemplate" = ${certificateTemplate ?? "classic"}
         WHERE id = 'settings'
       `;
     }

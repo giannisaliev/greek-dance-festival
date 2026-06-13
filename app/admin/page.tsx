@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "../components/Navigation";
+import CertificateTemplatePicker from "../components/CertificateTemplatePicker";
+import { CertificateTemplateId } from "@/lib/certificate/templates";
 
 interface Participant {
   id: string;
@@ -166,6 +168,7 @@ export default function AdminPage() {
     greekNightMapUrl: "",
     greekNightBannerEnabled: true,
     certificatePageEnabled: false,
+    certificateTemplate: "classic",
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -255,6 +258,7 @@ export default function AdminPage() {
         greekNightMapUrl: data.greekNightMapUrl || "",
         greekNightBannerEnabled: data.greekNightBannerEnabled ?? true,
         certificatePageEnabled: data.certificatePageEnabled ?? false,
+        certificateTemplate: data.certificateTemplate ?? "classic",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1731,13 +1735,26 @@ export default function AdminPage() {
                       />
                     </button>
                   </div>
+
+                  {/* Template chooser + live preview */}
+                  <div className="mt-8">
+                    <h4 className="text-white font-bold text-lg mb-1">Certificate template</h4>
+                    <p className="text-blue-200 text-sm mb-4">
+                      Pick the design registrants will download. Click a preview to enlarge it.
+                    </p>
+                    <CertificateTemplatePicker
+                      value={settings.certificateTemplate as CertificateTemplateId}
+                      onChange={(id) => setSettings({ ...settings, certificateTemplate: id })}
+                    />
+                  </div>
+
                   <div className="mt-6 flex items-center gap-4">
                     <button
                       onClick={saveSettings}
                       disabled={settingsLoading}
                       className="px-8 py-3 bg-white text-blue-900 rounded-lg font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
                     >
-                      {settingsLoading ? "Saving..." : "Save Certificate Setting"}
+                      {settingsLoading ? "Saving..." : "Save Certificate Settings"}
                     </button>
                     {settingsSaved && (
                       <span className="text-green-400 font-semibold flex items-center gap-2">

@@ -144,6 +144,7 @@ model Settings {
   greekNightMapUrl     String?
   greekNightBannerEnabled Boolean @default(true)
   certificatePageEnabled  Boolean @default(false)
+  certificateTemplate     String  @default("classic")
   updatedAt            DateTime @updatedAt
 }
 
