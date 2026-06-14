@@ -741,6 +741,19 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
+            href="/dashboard/certificates"
+            className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 backdrop-blur-md rounded-2xl p-6 border border-yellow-400/30 hover:border-yellow-400/60 transition-all text-center group"
+          >
+            <div className="text-4xl mb-3">🏆</div>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-yellow-200 transition-colors">
+              Download Certificates
+            </h3>
+            <p className="text-blue-100 text-sm">
+              Download Guinness Record certificates for your eligible students
+            </p>
+          </Link>
+
+          <Link
             href="/register/bulk"
             className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all text-center group"
           >

@@ -70,6 +70,13 @@ export default function CertificatePage() {
       pdf.addImage(dataUrl, "JPEG", 0, 0, 210, 297);
       const safe = finalName.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
       pdf.save(`Guinness_Record_Certificate_${safe || "participant"}.pdf`);
+
+      // Record the download (best-effort, don't block the user on failure)
+      fetch("/api/certificate-downloads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantName: finalName, downloadedByRole: "self", templateId: template }),
+      }).catch(() => {});
     } catch (e) {
       console.error("Certificate generation failed:", e);
       alert("Sorry, the certificate could not be generated. Please try again.");

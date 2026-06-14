@@ -22,6 +22,7 @@ export const EVENT_LOCATION = "Thessaloniki, Greece";
 export const DANCE_NAME = "Zeibekiko";
 
 const FLYER_SRC = "/Guiness%20flyer.png";
+const CERTIFICATE_SRC = "/Certificate.jpg";
 const LOGO_SRC = "/GUINESS.png";
 
 // A4 portrait at ~300 DPI (logical drawing size)
@@ -227,21 +228,21 @@ async function drawClassic(ctx: CanvasRenderingContext2D, name: string) {
 
 async function drawFlyer(ctx: CanvasRenderingContext2D, name: string) {
   const cx = W / 2;
-  // Flyer fills the whole certificate
+  // Certificate.jpg fills the whole page
   ctx.fillStyle = "#0a142c";
   ctx.fillRect(0, 0, W, H);
   try {
-    const flyer = await loadImage(FLYER_SRC);
-    drawImageCover(ctx, flyer, 0, 0, W, H);
+    const cert = await loadImage(CERTIFICATE_SRC);
+    drawImageCover(ctx, cert, 0, 0, W, H);
   } catch {}
 
-  // Translucent panel over the busy artwork so white text stays legible
+  // Translucent panel over the artwork so white text stays legible
   const panelY = H * 0.5;
-  const panelH = H * 0.265;
+  const panelH = H * 0.31;
   const panelX = W * 0.08;
   const panelW = W * 0.84;
   ctx.save();
-  ctx.fillStyle = "rgba(8, 16, 36, 0.62)";
+  ctx.fillStyle = "rgba(8, 16, 36, 0.80)";
   roundRect(ctx, panelX, panelY, panelW, panelH, 50);
   ctx.fill();
   ctx.strokeStyle = "rgba(212,175,55,0.85)";
@@ -278,6 +279,11 @@ async function drawFlyer(ctx: CanvasRenderingContext2D, name: string) {
   ctx.fillStyle = "#ffffff";
   ctx.font = `40px ${SERIF}`;
   ctx.fillText(`${EVENT_DATE}  ·  ${EVENT_LOCATION}`, cx, y);
+
+  y += 90;
+  ctx.fillStyle = "#f5e3a3";
+  ctx.font = `italic 44px ${SERIF}`;
+  ctx.fillText("Number of participants: 830", cx, y);
   ctx.restore();
 }
 

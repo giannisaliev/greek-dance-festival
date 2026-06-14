@@ -227,6 +227,21 @@ model DanceStudio {
   updatedAt     DateTime @updatedAt
 }
 
+model CertificateDownload {
+  id               String   @id @default(cuid())
+  participantId    String
+  participantName  String
+  downloadedById   String
+  downloadedByName String
+  downloadedByRole String   // "self" | "teacher"
+  templateId       String   @default("flyer")
+  createdAt        DateTime @default(now())
+
+  @@index([participantId])
+  @@index([downloadedById])
+  @@index([createdAt])
+}
+
 model HotelBooking {
   id          String   @id @default(cuid())
   hotelId     String   // ID of the hotel being booked

@@ -686,6 +686,12 @@ export default function AdminPage() {
               >
                 🏛️ Dance Studios
               </Link>
+              <Link
+                href="/admin/certificate-downloads"
+                className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-amber-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                📜 Certificate Downloads
+              </Link>
             </div>
           </div>
 
