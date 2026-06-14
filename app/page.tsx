@@ -332,6 +332,22 @@ export default function Home() {
           </div>
         )}
 
+        {/* Certificate celebration banner */}
+        <Link
+          href="/certificate"
+          className="block max-w-2xl mx-auto mb-8 group"
+        >
+          <div className="bg-gradient-to-r from-yellow-400/30 via-orange-400/30 to-pink-400/30 backdrop-blur-md rounded-2xl p-6 sm:p-8 border-2 border-yellow-400/60 shadow-2xl text-center transition-all group-hover:scale-[1.02] group-hover:border-yellow-300">
+            <div className="text-4xl sm:text-5xl mb-3">🎉🏆🎉</div>
+            <p className="text-white text-lg sm:text-xl font-bold mb-2">
+              We did it! Congratulations, everyone for being part of this historical moment for Zeimpekiko!
+            </p>
+            <span className="inline-flex items-center gap-2 mt-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 px-6 py-3 rounded-full text-base sm:text-lg font-bold shadow-lg transition-all group-hover:from-yellow-300 group-hover:to-orange-300">
+              📜 Get your Guinness Record certificate here!
+            </span>
+          </div>
+        </Link>
+
         {/* Festival Flyer */}
         <div className="relative max-w-2xl mx-auto mb-8">
           {/* Fireworks — left side */}

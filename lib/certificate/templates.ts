@@ -238,7 +238,7 @@ async function drawFlyer(ctx: CanvasRenderingContext2D, name: string) {
 
   // Translucent panel over the artwork so white text stays legible
   const panelY = H * 0.5;
-  const panelH = H * 0.31;
+  const panelH = H * 0.25;
   const panelX = W * 0.08;
   const panelW = W * 0.84;
   ctx.save();
