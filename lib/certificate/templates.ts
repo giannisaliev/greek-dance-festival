@@ -22,7 +22,7 @@ export const EVENT_LOCATION = "Thessaloniki, Greece";
 export const DANCE_NAME = "Zeibekiko";
 
 const FLYER_SRC = "/Guiness%20flyer.png";
-const CERTIFICATE_SRC = "/Certificate.jpg";
+const CERTIFICATE_SRC = "/Certificate%20Record%20Holder.png";
 const LOGO_SRC = "/GUINESS.png";
 
 // A4 portrait at ~300 DPI (logical drawing size)
