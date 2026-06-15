@@ -269,11 +269,11 @@ async function drawFlyer(ctx: CanvasRenderingContext2D, name: string) {
   y += 150;
   ctx.fillStyle = "#ffffff";
   ctx.font = `48px ${SERIF}`;
-  ctx.fillText("broke the Guinness World Record in", cx, y);
+  ctx.fillText("Broke The World Official Guinness Record In", cx, y);
   y += 90;
   ctx.fillStyle = "#f5e3a3";
   ctx.font = `bold 70px ${SERIF}`;
-  ctx.fillText(DANCE_NAME, cx, y);
+  ctx.fillText("Largest Zeibekiko Dance", cx, y);
 
   y += 100;
   ctx.fillStyle = "#ffffff";
