@@ -92,6 +92,21 @@ function drawImageCover(
   ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
 }
 
+// Draw an image fully contained within a target rectangle.
+function drawImageContain(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+) {
+  const scale = Math.min(w / img.width, h / img.height);
+  const dw = img.width * scale;
+  const dh = img.height * scale;
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
 function roundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -488,5 +503,88 @@ export async function buildCertificateCanvas(
   ctx.scale(scale, scale);
   const draw = DRAWERS[templateId] || drawClassic;
   await draw(ctx, name);
+  return canvas;
+}
+
+type StudioLogoPlacement = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+function getStudioLogoPlacement(templateId: CertificateTemplateId): StudioLogoPlacement {
+  // All coordinates are in logical canvas units (W=2480, H=3508).
+  // The ctx already has ctx.scale(scale, scale) applied by buildCertificateCanvas,
+  // so these are used as-is (no further scale multiplication needed).
+  const boxW = 1100;
+  const bx = Math.round((W - boxW) / 2); // 690, centered
+
+  if (templateId === "flyer") {
+    const fw = 1060;
+    return { x: Math.round((W - fw) / 2), y: 1820, w: fw, h: 480 };
+  }
+  if (templateId === "elegant") {
+    return { x: bx, y: 1400, w: boxW, h: 480 };
+  }
+  if (templateId === "festive") {
+    return { x: bx, y: 960, w: boxW, h: 430 };
+  }
+  // classic
+  return { x: bx, y: 950, w: boxW, h: 450 };
+}
+
+export async function buildStudioCertificateCanvas(
+  templateId: CertificateTemplateId,
+  logoSrc: string,
+  displayName: string = "",
+  scale = 1
+): Promise<HTMLCanvasElement> {
+  const canvas = await buildCertificateCanvas(templateId, " ", scale);
+  const logo = await loadImage(logoSrc);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  // Use logical coordinates — ctx.scale(scale, scale) is already set by buildCertificateCanvas.
+  const { x, y, w, h } = getStudioLogoPlacement(templateId);
+  const radius = 20;
+  const pad = 32;
+  // Reserve bottom space inside the panel for the studio name text.
+  const nameReserve = displayName ? 130 : 0;
+
+  // White panel with shadow — no border/stroke.
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.24)";
+  ctx.shadowBlur = 36;
+  ctx.shadowOffsetY = 12;
+  ctx.fillStyle = "rgba(255,255,255,0.97)";
+  roundRect(ctx, x, y, w, h, radius);
+  ctx.fill();
+  ctx.restore();
+
+  // Logo drawn in the upper portion, no shadow.
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0)";
+  ctx.shadowBlur = 0;
+  drawImageContain(ctx, logo, x + pad, y + pad, w - pad * 2, h - pad - nameReserve);
+  ctx.restore();
+
+  // Studio name text at the bottom of the panel.
+  if (displayName) {
+    let fontSize = 68;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(0,0,0,0)";
+    ctx.shadowBlur = 0;
+    ctx.font = `bold ${fontSize}px ${SERIF}`;
+    while (ctx.measureText(displayName).width > w - pad * 2 && fontSize > 32) {
+      fontSize -= 4;
+      ctx.font = `bold ${fontSize}px ${SERIF}`;
+    }
+    ctx.fillStyle = "#1a2a44";
+    ctx.fillText(displayName, W / 2, y + h - 32);
+    ctx.restore();
+  }
+
   return canvas;
 }
