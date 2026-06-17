@@ -137,6 +137,7 @@ export const translations = {
       cancellationText: "Full refund available up to 30 days before the event. 50% refund up to 14 days before.",
       needHelp: "Need Help?",
       needHelpText: "Contact us at info@greekdancefestival.com or call +30 6974 793912 for assistance.",
+      under15Free: "Guinness Record free for under 15 years old",
     },
     
     // Register Page
@@ -523,6 +524,7 @@ export const translations = {
       cancellationText: "Πλήρης επιστροφή χρημάτων διαθέσιμη έως 30 ημέρες πριν την εκδήλωση. 50% επιστροφή έως 14 ημέρες πριν.",
       needHelp: "Χρειάζεστε Βοήθεια;",
       needHelpText: "Επικοινωνήστε μαζί μας στο info@greekdancefestival.com ή καλέστε +30 6974 793912 για βοήθεια.",
+      under15Free: "Το Ρεκόρ Γκίνες είναι δωρεάν για παιδιά κάτω των 15 ετών",
     },
     
     // Register Page

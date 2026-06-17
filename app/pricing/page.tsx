@@ -257,6 +257,9 @@ export default function PricingPage() {
           <h3 className="text-2xl font-bold text-white mb-6 text-center">
             {t.pricing.packageInfo}
           </h3>
+          <p className="text-center text-yellow-300 text-sm font-semibold mb-6">
+            🏆 {t.pricing.under15Free}
+          </p>
           <div className="grid md:grid-cols-2 gap-8 text-blue-100">
             <div>
               <h4 className="font-bold text-white mb-2">{t.pricing.cancellationPolicy}</h4>
