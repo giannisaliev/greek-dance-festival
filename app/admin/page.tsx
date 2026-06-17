@@ -692,6 +692,12 @@ export default function AdminPage() {
               >
                 📜 Certificate Downloads
               </Link>
+              <Link
+                href="/admin/studio-certificates"
+                className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg text-sm sm:text-base text-center"
+              >
+                🖼️ Studio Certificates
+              </Link>
             </div>
           </div>
 

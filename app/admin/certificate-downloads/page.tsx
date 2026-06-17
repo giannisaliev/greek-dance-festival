@@ -20,6 +20,7 @@ interface CertDownload {
 const ROLE_LABELS: Record<string, string> = {
   self: "Self",
   teacher: "Teacher / Studio",
+  admin: "Admin",
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -167,6 +168,8 @@ export default function CertificateDownloadsPage() {
                             className={`inline-block text-xs font-semibold px-3 py-1 rounded-full border ${
                               d.downloadedByRole === "teacher"
                                 ? "bg-violet-500/20 text-violet-200 border-violet-500/30"
+                                : d.downloadedByRole === "admin"
+                                ? "bg-cyan-500/20 text-cyan-200 border-cyan-500/30"
                                 : "bg-yellow-500/20 text-yellow-200 border-yellow-500/30"
                             }`}
                           >
