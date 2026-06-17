@@ -545,9 +545,9 @@ export async function buildStudioCertificateCanvas(
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
 
-  ctx.scale(scale, scale);
-
-  // Use logical coordinates — apply scale to all drawing commands.
+  // getContext returns the same context buildCertificateCanvas used, so the
+  // ctx.scale(scale, scale) transform it applied is still active here. Draw in
+  // logical coordinates (W=2480, H=3508) and let that transform handle scaling.
   const { x, y, w, h } = getStudioLogoPlacement(templateId);
   const radius = 20;
   const pad = 32;

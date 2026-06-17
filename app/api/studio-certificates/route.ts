@@ -2,27 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-config";
 import { prisma } from "@/lib/prisma";
-import { promises as fs } from "fs";
-import path from "path";
 
 type StudioLogo = {
   fileName: string;
   displayName: string;
   logoUrl: string;
 };
-
-const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"]);
-
-function toDisplayName(fileName: string): string {
-  const noExt = fileName.replace(/\.[^.]+$/, "");
-  const stripped = noExt.replace(/^\d+(?:-\d+)*-/, "");
-  const normalized = stripped.replace(/[_-]+/g, " ").trim();
-  return normalized || noExt;
-}
-
-function buildLogoUrl(fileName: string): string {
-  return `/Studios/${encodeURIComponent(fileName)}`;
-}
 
 export async function GET() {
   try {
@@ -40,19 +25,21 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const studiosDir = path.join(process.cwd(), "public", "Studios");
-    const entries = await fs.readdir(studiosDir, { withFileTypes: true });
+    // Studio logos live in the database (uploaded via the Dance Studios admin
+    // page to Vercel Blob), not on the local filesystem. Read them from there so
+    // the list works in production.
+    const danceStudios = await prisma.danceStudio.findMany({
+      orderBy: [{ order: "asc" }, { name: "asc" }],
+      select: { id: true, name: true, logo: true },
+    });
 
-    const studios: StudioLogo[] = entries
-      .filter((entry) => entry.isFile())
-      .map((entry) => entry.name)
-      .filter((fileName) => ALLOWED_EXTENSIONS.has(path.extname(fileName).toLowerCase()))
-      .map((fileName) => ({
-        fileName,
-        displayName: toDisplayName(fileName),
-        logoUrl: buildLogoUrl(fileName),
-      }))
-      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+    const studios: StudioLogo[] = danceStudios
+      .filter((studio) => studio.logo && studio.logo.trim().length > 0)
+      .map((studio) => ({
+        fileName: studio.id,
+        displayName: studio.name,
+        logoUrl: studio.logo,
+      }));
 
     return NextResponse.json({ studios });
   } catch (error) {
