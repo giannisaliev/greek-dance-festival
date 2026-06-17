@@ -517,21 +517,29 @@ function getStudioLogoPlacement(templateId: CertificateTemplateId): StudioLogoPl
   // All coordinates are in logical canvas units (W=2480, H=3508).
   // The ctx already has ctx.scale(scale, scale) applied by buildCertificateCanvas,
   // so these are used as-is (no further scale multiplication needed).
+  //
+  // The logo replaces the participant NAME, so the box is fitted into the blank
+  // name slot — between the lead-in line and the following description — so none
+  // of the surrounding certificate text is covered by the box or its shadow.
   const boxW = 1100;
   const bx = Math.round((W - boxW) / 2); // 690, centered
 
   if (templateId === "flyer") {
+    // Between "THIS CERTIFIES THAT" (y≈1884) and "Broke The World..." (y≈2234).
     const fw = 1060;
-    return { x: Math.round((W - fw) / 2), y: 1820, w: fw, h: 480 };
+    return { x: Math.round((W - fw) / 2), y: 1908, w: fw, h: 268 };
   }
   if (templateId === "elegant") {
-    return { x: bx, y: 1400, w: boxW, h: 480 };
+    // Between "Awarded to" (y≈1450) and "for taking part..." (y≈1920).
+    return { x: bx, y: 1492, w: boxW, h: 350 };
   }
   if (templateId === "festive") {
-    return { x: bx, y: 960, w: boxW, h: 430 };
+    // Between "This certifies that" (y≈990) and "broke the" (y≈1390).
+    return { x: bx, y: 1020, w: boxW, h: 308 };
   }
-  // classic
-  return { x: bx, y: 950, w: boxW, h: 450 };
+  // classic — between "This is proudly presented to" (y≈1050) and
+  // "for being part of the official" (y≈1470).
+  return { x: bx, y: 1086, w: boxW, h: 318 };
 }
 
 export async function buildStudioCertificateCanvas(
@@ -549,10 +557,10 @@ export async function buildStudioCertificateCanvas(
   // ctx.scale(scale, scale) transform it applied is still active here. Draw in
   // logical coordinates (W=2480, H=3508) and let that transform handle scaling.
   const { x, y, w, h } = getStudioLogoPlacement(templateId);
-  const radius = 20;
-  const pad = 32;
-  // Reserve bottom space inside the panel for the studio name text.
-  const nameReserve = displayName ? 130 : 0;
+  const radius = 18;
+  const pad = 26;
+  // Reserve bottom space inside the panel for the studio name caption.
+  const nameReserve = displayName ? 92 : 0;
 
   // White panel with shadow — no border/stroke.
   ctx.save();
@@ -571,20 +579,20 @@ export async function buildStudioCertificateCanvas(
   drawImageContain(ctx, logo, x + pad, y + pad, w - pad * 2, h - pad - nameReserve);
   ctx.restore();
 
-  // Studio name text at the bottom of the panel.
+  // Studio name caption at the bottom of the panel.
   if (displayName) {
-    let fontSize = 68;
+    let fontSize = 52;
     ctx.save();
     ctx.textAlign = "center";
     ctx.shadowColor = "rgba(0,0,0,0)";
     ctx.shadowBlur = 0;
     ctx.font = `bold ${fontSize}px ${SERIF}`;
-    while (ctx.measureText(displayName).width > w - pad * 2 && fontSize > 32) {
-      fontSize -= 4;
+    while (ctx.measureText(displayName).width > w - pad * 2 && fontSize > 28) {
+      fontSize -= 3;
       ctx.font = `bold ${fontSize}px ${SERIF}`;
     }
     ctx.fillStyle = "#1a2a44";
-    ctx.fillText(displayName, W / 2, y + h - 32);
+    ctx.fillText(displayName, W / 2, y + h - 24);
     ctx.restore();
   }
 
